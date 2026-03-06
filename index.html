@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제일학원 금호고1 과학 진도표</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0fdf4; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .gradient-text { background: linear-gradient(to right, #16a34a, #059669); -webkit-background-clip: text; color: transparent; }
+        .table-row-hover:hover { background-color: #f0fdf4; transition: all 0.2s; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // =========================================================================
+        // 👇 여기서부터 데이터를 수정하시면 됩니다 (하드코딩 업데이트용)
+        // =========================================================================
+        const curriculumData = {
+            title: "금호고 1학년 과학 중간고사 대비반",
+            subtitle: "선택과 집중! 1등급을 향한 완벽한 4회독 커리큘럼",
+            notices: [
+                "📌 [핵심 전략] 생명 2단원, 물리 2단원 개념 탄탄히 완성 후 기출픽/마더텅/EBS 문제풀이 딥다이브 진행",
+                "📝 [평가 안내] 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 첫 시험 전까지 제출 필수",
+                "📚 [학습 방법] 수업 중 '평가문제집' 병행 풀이 / 과제는 '오투 해당 단원 문제 풀이' 진행",
+                "🔄 [커리큘럼] 학교 진도 추가 파악 시, 즉시 해당 회차에 오투 개념 진도 유연하게 추가 배치"
+            ],
+            schedule: [
+                { id: 1, date: "3/3", day: "화", content: "[오투] 1주차 기본 개념 진행 완료 (평가문제집 병행)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 2, date: "3/5", day: "목", content: "[오투] 1주차 기본 개념 진행 완료 (평가문제집 병행)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 3, date: "3/10", day: "화", content: "[오투] 생명(1) 지각과 생명체 물질 (평가문제집 병행 / 최소수준성취평가 배부)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 4, date: "3/12", day: "목", content: "[오투] 생명(2) 생명 시스템 화학 반응 (평가문제집 병행)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 5, date: "3/17", day: "화", content: "[오투] 물리(1) 물질의 전기적 특성 (평가문제집 병행)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 6, date: "3/19", day: "목", content: "[오투] 물리(2) 중력의 작용 (평가문제집 병행)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                { id: 7, date: "3/24", day: "화", content: "🏆 [TEST] 비상문제모음 (확정 진도 누적 점검)", homework: "비상문제모음 전체 풀이 및 오답", type: "test" },
+                { id: 8, date: "3/26", day: "목", content: "[기출픽] 배운 범위 내신 빈출 유형 풀이 (1)", homework: "기출픽 해당 범위 복습", type: "practice" },
+                { id: 9, date: "3/28", day: "토", content: "[기출픽] 배운 범위 내신 빈출 유형 풀이 (2)", homework: "기출픽 해당 범위 복습", type: "practice" },
+                { id: 10, date: "3/31", day: "화", content: "[기출픽] 배운 범위 내신 빈출 유형 풀이 (3)", homework: "기출픽 해당 범위 복습", type: "practice" },
+                { id: 11, date: "4/2", day: "목", content: "🏆 [TEST] 미래엔문제모음 (기출픽 심화 점검)", homework: "미래엔문제모음 전체 풀이", type: "test" },
+                { id: 12, date: "4/4", day: "토", content: "[마더텅] 배운 범위 모의고사 고난도 기출 (1)", homework: "마더텅 해당 범위 복습", type: "deep" },
+                { id: 13, date: "4/7", day: "화", content: "[마더텅] 배운 범위 모의고사 고난도 기출 (2)", homework: "마더텅 해당 범위 복습", type: "deep" },
+                { id: 14, date: "4/9", day: "목", content: "[마더텅] 배운 범위 모의고사 고난도 기출 (3)", homework: "마더텅 해당 범위 복습", type: "deep" },
+                { id: 15, date: "4/11", day: "토", content: "🏆 [TEST] 천재문제모음 (마더텅 심화 누적 점검)", homework: "천재문제모음 전체 풀이", type: "test" },
+                { id: 16, date: "4/14", day: "화", content: "[EBS] 배운 범위 수능형 핵심 변형 문항 (1)", homework: "EBS 해당 범위 복습", type: "ebs" },
+                { id: 17, date: "4/16", day: "목", content: "[EBS] 배운 범위 수능형 핵심 변형 문항 (2)", homework: "EBS 해당 범위 복습", type: "ebs" },
+                { id: 18, date: "4/18", day: "토", content: "[EBS] 배운 범위 수능형 핵심 변형 문항 (3)", homework: "EBS 해당 범위 복습", type: "ebs" },
+                { id: 19, date: "4/21", day: "화", content: "[EBS] 배운 범위 수능형 변형 문항 마무리 & 약점보완", homework: "EBS 오답 정리 및 취약 체크", type: "ebs" },
+                { id: 20, date: "4/23", day: "목", content: "[최종] 평가문제집 부록 및 오투 시험대비 총정리", homework: "학교별 기출문제 풀이", type: "final" },
+                { id: 21, date: "4/25", day: "토", content: "🔥 [실전] 금호고 및 인근 학교 기출 실전 모의고사", homework: "시험 전 최종 암기 체크", type: "final" },
+                { id: 22, date: "직보", day: "-", content: "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", homework: "1학기 중간고사 1등급 달성!", type: "final" }
+            ]
+        };
+        // =========================================================================
+
+        function App() {
+            const data = curriculumData;
+
+            const getBadgeColor = (type) => {
+                switch(type) {
+                    case 'concept': return 'bg-green-100 text-green-800 border-green-200';
+                    case 'practice': return 'bg-blue-100 text-blue-800 border-blue-200';
+                    case 'deep': return 'bg-purple-100 text-purple-800 border-purple-200';
+                    case 'ebs': return 'bg-orange-100 text-orange-800 border-orange-200';
+                    case 'test': return 'bg-red-100 text-red-800 border-red-200';
+                    case 'final': return 'bg-gray-800 text-white border-gray-900';
+                    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+                }
+            };
+
+            return (
+                <div className="min-h-screen pb-20 relative text-gray-800">
+                    {/* Header */}
+                    <header className="bg-green-700 text-white pt-12 pb-16 px-6 text-center shadow-lg relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                        <div className="max-w-4xl mx-auto relative z-10">
+                            <h2 className="text-green-200 font-bold tracking-widest text-sm mb-3">JEIL ACADEMY</h2>
+                            <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">{data.title}</h1>
+                            <p className="text-lg md:text-xl font-light text-green-50">{data.subtitle}</p>
+                        </div>
+                    </header>
+
+                    <main className="max-w-5xl mx-auto px-4 -mt-8 relative z-20">
+                        {/* Notice Section */}
+                        <div className="glass-panel rounded-2xl shadow-xl p-6 md:p-8 mb-8 border border-gray-100 bg-white">
+                            <h3 className="text-xl font-bold mb-5 flex items-center text-gray-800">
+                                <span className="bg-green-600 w-2 h-6 rounded-full mr-3"></span>
+                                학습 안내 및 중요 공지
+                            </h3>
+                            <div className="space-y-3 bg-green-50/50 p-5 rounded-xl border border-green-100">
+                                {data.notices.map((notice, idx) => (
+                                    <p key={idx} className="text-sm md:text-base text-gray-700 leading-relaxed flex items-start">
+                                        <span className="mr-2 text-green-600 font-bold">•</span>
+                                        <span>{notice}</span>
+                                    </p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Schedule Table Section */}
+                        <div className="glass-panel rounded-2xl shadow-xl overflow-hidden border border-gray-100 bg-white">
+                            <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
+                                <h3 className="text-xl font-bold flex items-center text-gray-800">
+                                    <span className="bg-green-600 w-2 h-6 rounded-full mr-3"></span>
+                                    주차별 세부 진도 및 과제 계획
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="bg-gray-50 text-gray-600 text-sm border-y border-gray-200">
+                                            <th className="py-4 px-6 font-bold w-16 text-center">회차</th>
+                                            <th className="py-4 px-4 font-bold w-24">날짜</th>
+                                            <th className="py-4 px-6 font-bold">수업 내용 및 상세 진도</th>
+                                            <th className="py-4 px-6 font-bold w-1/3">과제 및 평가 (당일 완결)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {data.schedule.map((row) => (
+                                            <tr key={row.id} className="table-row-hover group">
+                                                <td className="py-4 px-6 text-center">
+                                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getBadgeColor(row.type)}`}>
+                                                        {row.id}회
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-4 font-medium text-gray-500">
+                                                    {row.date} <span className="text-xs">({row.day})</span>
+                                                </td>
+                                                <td className={`py-4 px-6 font-medium ${row.type === 'test' ? 'text-red-600 font-bold' : row.type === 'final' ? 'text-gray-900 font-bold' : 'text-gray-800'}`}>
+                                                    {row.content}
+                                                </td>
+                                                <td className="py-4 px-6 text-gray-600 text-sm font-medium">
+                                                    {row.homework}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-12 text-center text-gray-400 text-sm pb-8">
+                        <p>© Jeil Academy. 금호고 맞춤형 커리큘럼.</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
