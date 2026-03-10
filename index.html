@@ -38,8 +38,8 @@
             title: "금호고 1학년 과학 중간고사 대비반",
             subtitle: "선택과 집중! 1등급을 향한 완벽한 4회독 커리큘럼",
             notices: [
-                "📌 <strong>[수업 개편]</strong> 개념 진도와 대표유형 풀이를 섞어서 진행하지 않습니다. <strong>시험 범위 개념 1회독을 전면 완료한 후, 다시 처음(화학/지구)부터 대표유형 풀이를 시작</strong>합니다.",
-                "⏰ <strong>[시간표 및 관리]</strong> 1교시(개념수업) / 2교시(과제검사)로 명확히 분리합니다. 3/24(화)부터 1교시 단축 운영 시에도 단일 교시 내에 <strong>[수업 트랙]과 [과제 점검 트랙]을 투트랙으로 동시 진행</strong>합니다.",
+                "📌 <strong>[수업 개편]</strong> 시험 범위 개념 1회독을 전면 완료한 후, <strong>하루는 '대표유형 풀이(진도)', 하루는 '과제 검사(오답 클리닉)'를 번갈아가며 진행</strong>합니다.",
+                "⏰ <strong>[시간표 및 관리]</strong> 대표유형 풀이는 시험 범위의 가장 앞단원(I단원)부터 순차적으로 복습하며, 1교시 단축 운영 시 1일 1테마(진도 or 과제검사)로 확실하게 마무리합니다.",
                 "📝 <strong>[평가 안내]</strong> 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 첫 시험 전까지 제출 필수!",
                 "🔄 <strong>[커리큘럼]</strong> 학교 진도 추가 파악 시, 즉시 해당 회차에 오투 개념 진도 유연하게 추가 배치"
             ],
@@ -66,7 +66,7 @@
                 ]
             },
             
-            // 1. 진도표 데이터 (개념 1회독 완료 후 -> 처음부터 대표유형 시작)
+            // 1. 진도표 데이터 (1일 진도 / 1일 과제검사 교차 운영 및 순차적 단원 진행)
             schedule: [
                 { id: 1, date: "3/3", day: "화", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
                 { id: 2, date: "3/5", day: "목", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
@@ -74,21 +74,21 @@
                 { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 이어서 ~ 화학 반응 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
                 { id: 5, date: "3/17", day: "화", content: "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
                 { id: 6, date: "3/19", day: "목", content: "[1교시] 중력의 작용 (개념 진도) - ★시험범위 개념 1회독 완료!\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                { id: 7, date: "3/24", day: "화", content: "⚡ [1교시 운영] 화학/지구 파트 대표유형 풀이 (처음부터 복습)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "대표유형 오답 및 복습", type: "practice" },
-                { id: 8, date: "3/26", day: "목", content: "⚡ [1교시 운영] 생명/물리 파트 대표유형 풀이\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "대표유형 오답 및 복습", type: "practice" },
-                { id: 9, date: "3/28", day: "토", content: "⚡ [1교시 운영] 🏆 [TEST] 비상문제모음\n(개념 총점검 / 수업·과제점검 투트랙)", homework: "비상문제모음 오답정리", type: "test" },
-                { id: 10, date: "3/31", day: "화", content: "⚡ [1교시 운영] [기출픽] 빈출 유형 풀이 (1)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "기출픽 해당 범위 복습", type: "practice" },
-                { id: 11, date: "4/2", day: "목", content: "⚡ [1교시 운영] [기출픽] 빈출 유형 풀이 (2)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "기출픽 해당 범위 복습", type: "practice" },
-                { id: 12, date: "4/4", day: "토", content: "⚡ [1교시 운영] 🏆 [TEST] 미래엔문제모음\n(기출픽 심화 점검 / 투트랙 운영)", homework: "미래엔 오답정리", type: "test" },
-                { id: 13, date: "4/7", day: "화", content: "⚡ [1교시 운영] [마더텅] 고난도 기출 분석 (1)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "마더텅 해당 범위 복습", type: "deep" },
-                { id: 14, date: "4/9", day: "목", content: "⚡ [1교시 운영] [마더텅] 고난도 기출 분석 (2)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "마더텅 해당 범위 복습", type: "deep" },
-                { id: 15, date: "4/11", day: "토", content: "⚡ [1교시 운영] 🏆 [TEST] 천재문제모음\n(마더텅 심화 점검 / 투트랙 운영)", homework: "천재문제모음 오답정리", type: "test" },
-                { id: 16, date: "4/14", day: "화", content: "⚡ [1교시 운영] [EBS] 수능형 핵심 변형 (1)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "EBS 해당 범위 복습", type: "ebs" },
-                { id: 17, date: "4/16", day: "목", content: "⚡ [1교시 운영] [EBS] 수능형 핵심 변형 (2)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "EBS 해당 범위 복습", type: "ebs" },
-                { id: 18, date: "4/18", day: "토", content: "⚡ [1교시 운영] 학교별 실전 모의고사 (1)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "오답 노트 작성", type: "final" },
-                { id: 19, date: "4/21", day: "화", content: "⚡ [1교시 운영] 학교별 실전 모의고사 (2)\n(수업 트랙 & 과제 점검 트랙 병행)", homework: "오답 노트 작성", type: "final" },
-                { id: 20, date: "4/23", day: "목", content: "⚡ [1교시 운영] 평가문제집 부록 및 최종 정리\n(전 범위 약점 보완 질의응답 / 투트랙)", homework: "최종 교재 점검", type: "final" },
-                { id: 21, date: "4/25", day: "토", content: "⚡ [1교시 운영] 시험 전 최종 암기 체크", homework: "마무리 암기", type: "final" },
+                { id: 7, date: "3/24", day: "화", content: "🏆 [TEST] 1차 누적 테스트 (비상문제모음)\n(※ 최소수준성취평가 제출 마감)", homework: "테스트 오답 정리", type: "test" },
+                { id: 8, date: "3/26", day: "목", content: "⚡ [단일 교시] [진도] I. 과학의 기초 대표유형 풀이\n(화학 파트 전 범위 앞단원부터 진행)", homework: "대표유형 문제 풀이", type: "practice" },
+                { id: 9, date: "3/28", day: "토", content: "⚡ [단일 교시] [검사] I단원 과제 검사 및 오답 클리닉\n(틀린 문제 개별 질의응답)", homework: "I단원 오답 노트 완성", type: "practice" },
+                { id: 10, date: "3/31", day: "화", content: "⚡ [단일 교시] [진도] II. 물질과 규칙성 대표유형 풀이\n(지구/생명/물리 앞부분 순차 진행)", homework: "대표유형 문제 풀이", type: "practice" },
+                { id: 11, date: "4/2", day: "목", content: "⚡ [단일 교시] [검사] II단원 과제 검사 및 오답 클리닉\n(틀린 문제 개별 질의응답)", homework: "II단원 오답 노트 완성", type: "practice" },
+                { id: 12, date: "4/4", day: "토", content: "⚡ [단일 교시] [진도] III. 시스템과 상호작용 대표유형 풀이\n(물리/생명 뒷부분 순차 진행)", homework: "대표유형 문제 풀이", type: "practice" },
+                { id: 13, date: "4/7", day: "화", content: "⚡ [단일 교시] [검사] III단원 과제 검사 및 오답 클리닉\n(틀린 문제 개별 질의응답)", homework: "III단원 오답 노트 완성", type: "practice" },
+                { id: 14, date: "4/9", day: "목", content: "⚡ [단일 교시] [진도] 기출 심화 분석 (1)\n(마더텅/EBS 전 범위 고난도 문항)", homework: "기출 심화 문제 풀이", type: "deep" },
+                { id: 15, date: "4/11", day: "토", content: "⚡ [단일 교시] [검사] 기출 심화 (1) 과제 검사 및 클리닉\n(고난도 문항 집중 풀이)", homework: "기출 오답 노트 완성", type: "deep" },
+                { id: 16, date: "4/14", day: "화", content: "⚡ [단일 교시] [진도] 기출 심화 분석 (2)\n(마더텅/EBS 전 범위 고난도 문항)", homework: "기출 심화 문제 풀이", type: "deep" },
+                { id: 17, date: "4/16", day: "목", content: "⚡ [단일 교시] [검사] 기출 심화 (2) 과제 검사 및 클리닉\n(고난도 문항 집중 풀이)", homework: "기출 오답 노트 완성", type: "deep" },
+                { id: 18, date: "4/18", day: "토", content: "🏆 [단일 교시] [TEST] 학교별 실전 모의고사 (1)\n(실전 시간 배분 훈련)", homework: "모의고사 오답 및 분석", type: "test" },
+                { id: 19, date: "4/21", day: "화", content: "⚡ [단일 교시] [검사] 모의고사 (1) 피드백 및 약점 보완\n(개별 취약 파트 집중 점검)", homework: "약점 단원 추가 복습", type: "final" },
+                { id: 20, date: "4/23", day: "목", content: "🏆 [단일 교시] [TEST] 학교별 실전 모의고사 (2)\n(최종 점검)", homework: "모의고사 오답 및 분석", type: "test" },
+                { id: 21, date: "4/25", day: "토", content: "⚡ [단일 교시] [검사] 최종 교재 점검 및 핵심 암기 테스트\n(시험 전 필수 암기 사항 확인)", homework: "마무리 암기", type: "final" },
                 { id: 22, date: "직보", day: "-", content: "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", homework: "1학기 중간고사 1등급!", type: "final" }
             ],
 
