@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휘T Science Vessel</title>
+    <title>휘T Science Vessel - Command Center</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -11,42 +11,84 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Rajdhani (Sci-Fi Text) & Share Tech Mono (Terminal Data) -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .table-row-hover:hover { background-color: #f1f5f9; transition: all 0.2s; }
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #050b14; 
+            color: #94a3b8;
+            background-image: 
+                linear-gradient(rgba(14, 116, 144, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 116, 144, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
         
+        h1, h2, h3, h4, .font-hud { font-family: 'Rajdhani', sans-serif; }
+        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+        
+        /* Terran Panel Style */
+        .terran-panel { 
+            background: rgba(10, 15, 25, 0.85); 
+            border: 1px solid #164e63; /* Cyan-900 */
+            box-shadow: inset 0 0 20px rgba(6, 182, 212, 0.05), 0 4px 15px rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            position: relative;
+        }
+        /* Tech corner accents */
+        .terran-panel::before {
+            content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px;
+            border-top: 2px solid #22d3ee; border-left: 2px solid #22d3ee;
+        }
+        .terran-panel::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px;
+            border-bottom: 2px solid #22d3ee; border-right: 2px solid #22d3ee;
+        }
+
+        .terran-row-hover:hover { background-color: rgba(22, 78, 99, 0.3); transition: all 0.2s; }
+        
+        /* Scanline Overlay */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none; z-index: 50; opacity: 0.6;
+        }
+
+        /* Blinking Cursor */
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
         /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { height: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; border-radius: 0; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 0; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
     </style>
 </head>
 <body>
+    <div class="scanlines"></div>
     <div id="root"></div>
 
     <script type="text/babel">
         // =========================================================================
-        // 👇 여기서부터 데이터를 수정하시면 됩니다 (클래스별로 데이터가 나뉘어 있습니다)
+        // 👇 여기서부터 데이터를 수정하시면 됩니다 (하드코딩 업데이트용)
         // =========================================================================
         const appData = {
-            mainTitle: "휘T Science Vessel",
+            mainTitle: "휘T SCIENCE VESSEL",
             
             classes: {
                 // ==================== [1] 금호고 데이터 ====================
                 kumho: {
-                    name: "🏫 금호고 1학년",
+                    name: "SECTOR: KUMHO_1",
                     title: "금호고 1학년 과학 중간고사 대비반",
-                    subtitle: "선택과 집중! 1등급을 향한 완벽한 4회독 커리큘럼",
+                    subtitle: "STATUS: 1등급 목표 4회독 프로토콜 가동 중",
                     notices: [
-                        "📌 <strong>[수업 개편]</strong> 24일 이전까지 개념 진도를 전면 완료하고, 이후부터는 기출픽과 마더텅을 활용하여 <strong>소단원별 집중 문제풀이</strong>를 진행합니다.",
-                        "⏰ <strong>[문제풀이 분배]</strong> 전체 10개 소단원을 순차적으로 (2개-2개-4개-2개) 속도감 있게 격파하며, 교재 1권이 끝날 때마다 누적 테스트를 치릅니다.",
-                        "📝 <strong>[평가 안내]</strong> 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 첫 시험 전까지 제출 필수!",
-                        "🔄 <strong>[커리큘럼]</strong> 학교 진도 추가 파악 시, 즉시 해당 회차에 오투 개념 진도 유연하게 추가 배치"
+                        "<span class='text-cyan-400'>[SYS.UPDATE]</span> 24일 이전까지 개념 진도 전면 완료. 이후 기출픽/마더텅 활용 <strong>소단원별 집중 타격</strong> 개시.",
+                        "<span class='text-cyan-400'>[CMD.DIST]</span> 전체 10개 소단원 (2개-2개-4개-2개) 분할 격파. 교재 완료 시 누적 시뮬레이션(TEST) 가동.",
+                        "<span class='text-red-400'>[WARN.EVAL]</span> 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 데이터 전송(제출) 필수!",
+                        "<span class='text-emerald-400'>[SYNC.ON]</span> 학교 진도 추가 파악 시, 해당 회차 오투 개념 진도 즉각 동기화 패치."
                     ],
                     examScope: {
                         physics: ["II-2-2. 물질의 전기적 특성", "III-2-1. 중력의 작용"],
@@ -58,9 +100,9 @@
                         { id: 1, date: "3/3", day: "화", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
                         { id: 2, date: "3/5", day: "목", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
                         { id: 3, date: "3/10", day: "화", content: "[1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
-                        { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 이어서 ~ 화학 반응 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                        { id: 5, date: "3/17", day: "화", content: "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                        { id: 6, date: "3/19", day: "목", content: "[1교시] 중력의 작용 (개념 진도) - ★시험범위 개념 1회독 완료!\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 이어서 ~ 화학 반응 (개념)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 5, date: "3/17", day: "화", content: "[1교시] 물질의 전기적 특성 (개념)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 6, date: "3/19", day: "목", content: "[1교시] 중력의 작용 (개념) - ★시험범위 1회독 완료\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
                         { id: 7, date: "3/24", day: "화", content: "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n(※ 최소수준성취평가 제출 마감)", homework: "테스트 오답 정리", type: "test" },
                         { id: 8, date: "3/26", day: "목", content: "⚡ [기출픽] 소단원 2개 진도\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", homework: "기출픽 2개 단원 문제 풀이", type: "practice" },
                         { id: 9, date: "3/28", day: "토", content: "⚡ [기출픽] 소단원 2개 진도\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", homework: "기출픽 2개 단원 문제 풀이", type: "practice" },
@@ -92,30 +134,30 @@
 
                 // ==================== [2] 자양/성수고 데이터 ====================
                 jayang: {
-                    name: "🏫 자양/성수고 (합반)",
-                    title: "자양고·성수고 통합과학 1학기 내신 대비반",
-                    subtitle: "3/23(월) 개강! 학교별 출제 경향을 꿰뚫는 맞춤 커리큘럼",
+                    name: "SECTOR: JAYANG_SUNGSU",
+                    title: "자양/성수고 연합 방어선 (1학기 내신 대비)",
+                    subtitle: "STATUS: 3/23 개강! 학교별 출제 경향 분석 프로토콜 대기 중",
                     notices: [
-                        "📌 <strong>[합반 운영 안내]</strong> 자양고와 성수고의 공통 출제 범위를 묶어 효율적으로 개념을 완성합니다.",
-                        "⏰ <strong>[수업 방식]</strong> 핵심 개념 요약 후, 각 학교별 기출문제와 빈출 유형을 집중적으로 풀이합니다.",
-                        "📝 <strong>[평가 안내]</strong> 매주 수업 전 지난 주차 개념에 대한 미니 테스트가 진행됩니다."
+                        "<span class='text-cyan-400'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동.",
+                        "<span class='text-cyan-400'>[CMD.DIST]</span> 핵심 개념 요약 후, 각 학교별 기출문제 및 빈출 유형 타겟팅 훈련.",
+                        "<span class='text-red-400'>[WARN.EVAL]</span> 매주 접속(수업) 시 지난 주차 데이터 기반 미니 테스트 진행."
                     ],
                     examScope: {
-                        physics: ["(추후 확정 시 업데이트)"],
-                        chemistry: ["(추후 확정 시 업데이트)"],
-                        biology: ["(추후 확정 시 업데이트)"],
-                        earth: ["(추후 확정 시 업데이트)"]
+                        physics: ["(DATA PENDING)"],
+                        chemistry: ["(DATA PENDING)"],
+                        biology: ["(DATA PENDING)"],
+                        earth: ["(DATA PENDING)"]
                     },
                     schedule: [
-                        { id: 1, date: "3/23", day: "월", content: "[개강] 통합과학 오리엔테이션 및 1단원 기본 개념 진도", homework: "기본 개념 복습 및 과제 프린트", type: "concept" },
+                        { id: 1, date: "3/23", day: "월", content: "[개강] 통합과학 시스템 OT 및 1단원 기본 개념 진도", homework: "기본 개념 복습 및 과제 프린트", type: "concept" },
                         { id: 2, date: "3/25", day: "수", content: "1단원 개념 완료 및 대표 유형 문제 풀이", homework: "오투 해당 단원 풀이", type: "concept" },
                         { id: 3, date: "3/30", day: "월", content: "2단원 기본 개념 진도 (물질의 규칙성)", homework: "개념 복습 프린트", type: "concept" },
                         { id: 4, date: "4/01", day: "수", content: "2단원 개념 완료 및 학교별 기출 유형 점검", homework: "오투 해당 단원 풀이", type: "practice" },
                         { id: 5, date: "4/06", day: "월", content: "🏆 1차 누적 점검 테스트 및 오답 클리닉", homework: "오답 노트 작성", type: "test" },
                     ],
-                    students: ['(신규학생1)', '(신규학생2)', '(신규학생3)'],
+                    students: ['(Target_Alpha)', '(Target_Beta)', '(Target_Gamma)'],
                     assignments: [
-                        { id: 1, title: "1주차 프린트 과제", dueDate: "3/30 (월)", status: { '(신규학생1)': '-', '(신규학생2)': '-', '(신규학생3)': '-' } },
+                        { id: 1, title: "1주차 프로토콜 프린트", dueDate: "3/30 (월)", status: { '(Target_Alpha)': '-', '(Target_Beta)': '-', '(Target_Gamma)': '-' } },
                     ]
                 }
             }
@@ -132,21 +174,21 @@
 
             const getBadgeColor = (type) => {
                 switch(type) {
-                    case 'concept': return 'bg-green-100 text-green-800 border-green-200';
-                    case 'practice': return 'bg-blue-100 text-blue-800 border-blue-200';
-                    case 'deep': return 'bg-purple-100 text-purple-800 border-purple-200';
-                    case 'ebs': return 'bg-orange-100 text-orange-800 border-orange-200';
-                    case 'test': return 'bg-red-100 text-red-800 border-red-200';
-                    case 'final': return 'bg-gray-800 text-white border-gray-900';
-                    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+                    case 'concept': return 'bg-cyan-900/50 text-cyan-400 border-cyan-700';
+                    case 'practice': return 'bg-emerald-900/50 text-emerald-400 border-emerald-700';
+                    case 'deep': return 'bg-purple-900/50 text-purple-400 border-purple-700';
+                    case 'ebs': return 'bg-amber-900/50 text-amber-400 border-amber-700';
+                    case 'test': return 'bg-red-900/60 text-red-400 border-red-600 shadow-[0_0_8px_rgba(239,68,68,0.4)]';
+                    case 'final': return 'bg-slate-800 text-slate-200 border-slate-500';
+                    default: return 'bg-slate-800 text-slate-400 border-slate-700';
                 }
             };
 
             const renderAssignmentStatus = (status) => {
-                if (status === 'O') return <span className="text-green-600 font-black text-lg">O</span>;
-                if (status === 'X') return <span className="text-red-500 font-black text-lg">X</span>;
-                if (status === '△') return <span className="text-amber-500 font-black text-lg">△</span>;
-                return <span className="text-gray-300 font-bold">-</span>;
+                if (status === 'O') return <span className="text-emerald-400 font-black text-lg drop-shadow-[0_0_5px_rgba(52,211,153,0.8)]">O</span>;
+                if (status === 'X') return <span className="text-red-500 font-black text-lg drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">X</span>;
+                if (status === '△') return <span className="text-amber-400 font-black text-lg">△</span>;
+                return <span className="text-slate-600 font-bold">-</span>;
             };
 
             const calculateProgress = (statusObj) => {
@@ -161,26 +203,40 @@
             };
 
             return (
-                <div className="min-h-screen pb-20 relative text-gray-800 bg-slate-50">
+                <div className="min-h-screen pb-20 relative z-10 selection:bg-cyan-500 selection:text-white">
                     {/* Header with Main Title and Class Selector */}
-                    <header className="bg-slate-900 text-white pt-10 pb-16 px-6 text-center shadow-xl relative overflow-hidden">
-                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                        <div className="max-w-4xl mx-auto relative z-10">
-                            <h2 className="text-blue-400 font-black tracking-[0.2em] text-sm mb-4">★ JEIL ACADEMY SCIENCE ★</h2>
-                            <h1 className="text-4xl md:text-6xl font-black mb-10 tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text">
+                    <header className="border-b border-cyan-900 bg-black/60 pt-12 pb-10 px-6 text-center relative z-20">
+                        <div className="max-w-4xl mx-auto relative">
+                            <h2 className="font-mono-tech text-cyan-500 font-bold tracking-[0.3em] text-xs mb-3">
+                                [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
+                            </h2>
+                            <h1 className="font-hud text-4xl md:text-6xl font-black mb-1 tracking-wider text-slate-100 drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]">
                                 {appData.mainTitle}
                             </h1>
                             
+                            <div className="flex flex-col items-center gap-3 mb-8 mt-2">
+                                <p className="font-mono-tech text-emerald-400 font-bold tracking-widest text-sm md:text-base flex justify-center items-center gap-2">
+                                    <span className="w-2 h-2 bg-emerald-400 rounded-full cursor-blink shadow-[0_0_8px_#34d399]"></span>
+                                    &gt; Explorer reporting!_
+                                </p>
+                                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-900/20 border border-red-700/50 text-red-400 font-mono-tech text-xs tracking-widest hover:bg-red-900/50 hover:text-red-300 transition-colors shadow-[0_0_10px_rgba(220,38,38,0.15)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                                    </svg>
+                                    [ VIDEO DATALINK ]
+                                </a>
+                            </div>
+                            
                             {/* Class Selection Tabs */}
-                            <div className="flex flex-wrap justify-center gap-3 mt-6">
+                            <div className="flex flex-wrap justify-center gap-4 mt-6">
                                 {Object.entries(appData.classes).map(([id, classInfo]) => (
                                     <button 
                                         key={id}
                                         onClick={() => setSelectedClassId(id)}
-                                        className={`px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-md border-2 ${
+                                        className={`px-8 py-2 font-mono-tech font-bold text-sm tracking-wider uppercase transition-all duration-200 border-b-2 ${
                                             selectedClassId === id 
-                                            ? 'bg-blue-600 border-blue-500 text-white scale-105' 
-                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
+                                            ? 'border-cyan-400 text-cyan-300 bg-cyan-900/30 shadow-[inset_0_-10px_20px_rgba(6,182,212,0.1)]' 
+                                            : 'border-slate-700 text-slate-500 hover:text-cyan-400 hover:border-cyan-800'
                                         }`}
                                     >
                                         {classInfo.name}
@@ -191,25 +247,24 @@
                     </header>
 
                     {/* Main Content Area */}
-                    {/* Fixed overlapping issue by removing negative margin (-mt-12) and placing title inside a solid card */}
-                    <main className="max-w-5xl mx-auto px-4 -mt-8 relative z-20">
+                    <main className="max-w-5xl mx-auto px-4 mt-8 relative z-20">
                         
-                        {/* Class specific title block (Now a proper card so it overlays cleanly on the dark header) */}
-                        <div className="glass-panel rounded-2xl shadow-xl p-8 mb-8 border border-slate-200 bg-white text-center flex flex-col items-center justify-center min-h-[120px]">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-3">{currentData.title}</h2>
-                            <p className="text-slate-500 font-medium">{currentData.subtitle}</p>
+                        {/* Class specific title block */}
+                        <div className="terran-panel p-6 md:p-8 mb-8 text-center flex flex-col items-center justify-center">
+                            <h2 className="text-2xl md:text-3xl font-black text-cyan-100 mb-2 font-hud tracking-wide">{currentData.title}</h2>
+                            <p className="text-cyan-500/80 font-mono-tech text-sm">{currentData.subtitle}</p>
                         </div>
 
                         {/* Notice Section */}
-                        <div className="glass-panel rounded-2xl shadow-lg p-6 md:p-8 mb-6 border border-slate-200 bg-white">
-                            <h3 className="text-xl font-bold mb-5 flex items-center text-slate-800">
-                                <span className="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
-                                학습 안내 및 중요 공지
+                        <div className="terran-panel p-6 md:p-8 mb-6">
+                            <h3 className="text-lg font-mono-tech font-bold mb-4 flex items-center text-cyan-300 uppercase tracking-widest border-b border-cyan-900/50 pb-2">
+                                <span className="text-cyan-500 mr-2 text-xl">■</span>
+                                System Log & Directives
                             </h3>
-                            <div className="space-y-3 bg-slate-50 p-5 rounded-xl border border-slate-100">
+                            <div className="space-y-3 font-mono-tech text-sm">
                                 {currentData.notices.map((notice, idx) => (
-                                    <p key={idx} className="text-sm md:text-base text-slate-700 leading-relaxed flex items-start">
-                                        <span className="mr-2 text-blue-600 font-bold">•</span>
+                                    <p key={idx} className="text-slate-300 leading-relaxed flex items-start">
+                                        <span className="mr-3 text-cyan-600 select-none">&gt;</span>
                                         <span dangerouslySetInnerHTML={{__html: notice}}></span>
                                     </p>
                                 ))}
@@ -217,102 +272,115 @@
                         </div>
 
                         {/* Exam Scope Section */}
-                        <div className="glass-panel rounded-2xl shadow-lg p-6 md:p-8 mb-8 border border-slate-200 bg-white">
-                            <h3 className="text-xl font-bold mb-5 flex items-center text-slate-800">
-                                <span className="bg-indigo-600 w-2 h-6 rounded-full mr-3"></span>
-                                📋 중간고사 예상 시험 범위
+                        <div className="terran-panel p-6 md:p-8 mb-8">
+                            <h3 className="text-lg font-mono-tech font-bold mb-5 flex items-center text-cyan-300 uppercase tracking-widest border-b border-cyan-900/50 pb-2">
+                                <span className="text-cyan-500 mr-2 text-xl">■</span>
+                                Target Coordinates (Exam Scope)
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                                    <h4 className="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2 flex justify-between items-center">
-                                        <span>[A] 물리 파트</span>
-                                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">{currentData.examScope.physics.length}단원</span>
+                                {/* Physics */}
+                                <div className="bg-slate-900/50 border border-slate-700/50 p-4 hover:border-cyan-600 transition-colors group">
+                                    <h4 className="font-mono-tech font-bold text-slate-200 mb-3 border-b border-slate-700 pb-2 flex justify-between items-center group-hover:text-cyan-300 group-hover:border-cyan-800">
+                                        <span>[A] PHYSICS</span>
+                                        <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600 group-hover:border-cyan-600 group-hover:text-cyan-300">{currentData.examScope.physics.length} LOC</span>
                                     </h4>
-                                    <ul className="text-sm text-slate-700 space-y-2">
-                                        {currentData.examScope.physics.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    <ul className="text-xs font-mono-tech text-slate-400 space-y-2">
+                                        {currentData.examScope.physics.map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
                                     </ul>
                                 </div>
-                                <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                                    <h4 className="font-bold text-rose-800 mb-3 border-b border-rose-200 pb-2 flex justify-between items-center">
-                                        <span>[B] 화학 파트</span>
-                                        <span className="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full">{currentData.examScope.chemistry.length}단원</span>
+                                {/* Chemistry */}
+                                <div className="bg-slate-900/50 border border-slate-700/50 p-4 hover:border-cyan-600 transition-colors group">
+                                    <h4 className="font-mono-tech font-bold text-slate-200 mb-3 border-b border-slate-700 pb-2 flex justify-between items-center group-hover:text-cyan-300 group-hover:border-cyan-800">
+                                        <span>[B] CHEMISTRY</span>
+                                        <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600 group-hover:border-cyan-600 group-hover:text-cyan-300">{currentData.examScope.chemistry.length} LOC</span>
                                     </h4>
-                                    <ul className="text-sm text-slate-700 space-y-2">
-                                        {currentData.examScope.chemistry.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    <ul className="text-xs font-mono-tech text-slate-400 space-y-2">
+                                        {currentData.examScope.chemistry.map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
                                     </ul>
                                 </div>
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                                    <h4 className="font-bold text-emerald-800 mb-3 border-b border-emerald-200 pb-2 flex justify-between items-center">
-                                        <span>[C] 생명 파트</span>
-                                        <span className="text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">{currentData.examScope.biology.length}단원</span>
+                                {/* Biology */}
+                                <div className="bg-slate-900/50 border border-slate-700/50 p-4 hover:border-cyan-600 transition-colors group">
+                                    <h4 className="font-mono-tech font-bold text-slate-200 mb-3 border-b border-slate-700 pb-2 flex justify-between items-center group-hover:text-cyan-300 group-hover:border-cyan-800">
+                                        <span>[C] BIOLOGY</span>
+                                        <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600 group-hover:border-cyan-600 group-hover:text-cyan-300">{currentData.examScope.biology.length} LOC</span>
                                     </h4>
-                                    <ul className="text-sm text-slate-700 space-y-2">
-                                        {currentData.examScope.biology.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    <ul className="text-xs font-mono-tech text-slate-400 space-y-2">
+                                        {currentData.examScope.biology.map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
                                     </ul>
                                 </div>
-                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-                                    <h4 className="font-bold text-purple-800 mb-3 border-b border-purple-200 pb-2 flex justify-between items-center">
-                                        <span>[D] 지구 파트</span>
-                                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">{currentData.examScope.earth.length}단원</span>
+                                {/* Earth */}
+                                <div className="bg-slate-900/50 border border-slate-700/50 p-4 hover:border-cyan-600 transition-colors group">
+                                    <h4 className="font-mono-tech font-bold text-slate-200 mb-3 border-b border-slate-700 pb-2 flex justify-between items-center group-hover:text-cyan-300 group-hover:border-cyan-800">
+                                        <span>[D] EARTH SCI</span>
+                                        <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600 group-hover:border-cyan-600 group-hover:text-cyan-300">{currentData.examScope.earth.length} LOC</span>
                                     </h4>
-                                    <ul className="text-sm text-slate-700 space-y-2">
-                                        {currentData.examScope.earth.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    <ul className="text-xs font-mono-tech text-slate-400 space-y-2">
+                                        {currentData.examScope.earth.map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
                                     </ul>
                                 </div>
                             </div>
                         </div>
 
-                        {/* View Navigation Tabs (Schedule vs Assignments) */}
-                        <div className="flex justify-center mb-6 space-x-4">
+                        {/* View Navigation Tabs */}
+                        <div className="flex justify-center mb-4 space-x-2">
                             <button 
                                 onClick={() => setActiveTab('schedule')}
-                                className={`px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-200 border border-slate-200 ${activeTab === 'schedule' ? 'bg-slate-800 text-white scale-105' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                                className={`px-6 py-2 font-mono-tech font-bold text-sm tracking-wider uppercase border transition-all duration-200 ${
+                                    activeTab === 'schedule' 
+                                    ? 'bg-cyan-900/40 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' 
+                                    : 'bg-transparent border-slate-700 text-slate-500 hover:border-cyan-800 hover:text-cyan-500'
+                                }`}
                             >
-                                🗓️ 주차별 진도표
+                                [1] TIME_TABLE
                             </button>
                             <button 
                                 onClick={() => setActiveTab('assignments')}
-                                className={`px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-200 border border-slate-200 ${activeTab === 'assignments' ? 'bg-slate-800 text-white scale-105' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                                className={`px-6 py-2 font-mono-tech font-bold text-sm tracking-wider uppercase border transition-all duration-200 ${
+                                    activeTab === 'assignments' 
+                                    ? 'bg-cyan-900/40 border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]' 
+                                    : 'bg-transparent border-slate-700 text-slate-500 hover:border-cyan-800 hover:text-cyan-500'
+                                }`}
                             >
-                                ✅ 학생별 과제 현황
+                                [2] CREW_TRACKER
                             </button>
                         </div>
 
                         {/* Tab 1: Schedule Content */}
                         {activeTab === 'schedule' && (
-                            <div className="glass-panel rounded-2xl shadow-lg overflow-hidden border border-slate-200 bg-white animate-[fadeIn_0.3s_ease-in-out]">
-                                <div className="p-6 md:p-8 border-b border-slate-100 bg-white">
-                                    <h3 className="text-xl font-bold flex items-center text-slate-800">
-                                        <span className="bg-slate-800 w-2 h-6 rounded-full mr-3"></span>
-                                        세부 진도 및 계획
+                            <div className="terran-panel overflow-hidden animate-[fadeIn_0.3s_ease-in-out]">
+                                <div className="p-4 bg-cyan-950/30 border-b border-cyan-900">
+                                    <h3 className="font-mono-tech font-bold text-cyan-400 text-sm tracking-widest uppercase">
+                                        <span className="text-emerald-500 mr-2">●</span> OPERATION SCHEDULE
                                     </h3>
                                 </div>
                                 <div className="overflow-x-auto custom-scrollbar">
                                     <table className="w-full text-left border-collapse min-w-[800px]">
                                         <thead>
-                                            <tr className="bg-slate-50 text-slate-600 text-sm border-y border-slate-200">
-                                                <th className="py-4 px-6 font-bold w-16 text-center">회차</th>
-                                                <th className="py-4 px-4 font-bold w-24">날짜</th>
-                                                <th className="py-4 px-6 font-bold">수업 내용 및 상세 진도</th>
-                                                <th className="py-4 px-6 font-bold w-1/4 text-center">과제 (당일 완결)</th>
+                                            <tr className="bg-slate-900/80 text-cyan-500 text-xs font-mono-tech tracking-widest border-b border-cyan-900">
+                                                <th className="py-3 px-6 text-center w-16">SEQ</th>
+                                                <th className="py-3 px-4 w-24">DATE</th>
+                                                <th className="py-3 px-6">MISSION_OBJECTIVE</th>
+                                                <th className="py-3 px-6 w-1/4 text-center">REQUIRED_ACTION</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100">
+                                        <tbody className="divide-y divide-slate-800/50 text-sm font-sans">
                                             {currentData.schedule.map((row) => (
-                                                <tr key={row.id} className="table-row-hover group">
+                                                <tr key={row.id} className="terran-row-hover group">
                                                     <td className="py-4 px-6 text-center">
-                                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getBadgeColor(row.type)}`}>
-                                                            {row.id}회
+                                                        <span className={`inline-block px-2 py-0.5 rounded font-mono-tech font-bold border ${getBadgeColor(row.type)}`}>
+                                                            #{String(row.id).padStart(2, '0')}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 px-4 font-medium text-slate-500">
-                                                        {row.date} <span className="text-xs">({row.day})</span>
+                                                    <td className="py-4 px-4 font-mono-tech text-slate-400">
+                                                        {row.date} <span className="text-[10px] text-slate-500 opacity-50">({row.day})</span>
                                                     </td>
-                                                    <td className={`py-4 px-6 font-medium whitespace-pre-line leading-relaxed ${row.type === 'test' ? 'text-red-600 font-bold' : row.type === 'final' ? 'text-slate-900 font-bold' : 'text-slate-800'}`}>
+                                                    <td className={`py-4 px-6 whitespace-pre-line leading-relaxed ${row.type === 'test' ? 'text-red-300 font-bold' : row.type === 'final' ? 'text-cyan-200 font-bold' : 'text-slate-300'}`}>
                                                         {row.content}
                                                     </td>
-                                                    <td className="py-4 px-6 text-slate-600 text-sm font-medium text-center">
-                                                        <span className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 inline-block w-full">{row.homework}</span>
+                                                    <td className="py-4 px-6 text-center">
+                                                        <span className="bg-slate-900/80 font-mono-tech text-xs text-slate-400 px-3 py-1.5 rounded border border-slate-700 block w-full group-hover:border-cyan-800 group-hover:text-cyan-200 transition-colors">
+                                                            {row.homework}
+                                                        </span>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -324,60 +392,60 @@
 
                         {/* Tab 2: Assignment Content */}
                         {activeTab === 'assignments' && (
-                            <div className="glass-panel rounded-2xl shadow-lg overflow-hidden border border-slate-200 bg-white animate-[fadeIn_0.3s_ease-in-out]">
-                                <div className="p-6 md:p-8 border-b border-slate-100 bg-white flex justify-between items-center flex-wrap gap-4">
-                                    <h3 className="text-xl font-bold flex items-center text-slate-800">
-                                        <span className="bg-slate-800 w-2 h-6 rounded-full mr-3"></span>
-                                        학생별 과제 제출 현황 (총 {currentData.students.length}명)
+                            <div className="terran-panel overflow-hidden animate-[fadeIn_0.3s_ease-in-out]">
+                                <div className="p-4 bg-cyan-950/30 border-b border-cyan-900 flex justify-between items-center flex-wrap gap-4">
+                                    <h3 className="font-mono-tech font-bold text-cyan-400 text-sm tracking-widest uppercase">
+                                        <span className="text-emerald-500 mr-2">●</span> CREW TASK STATUS (TOTAL: {currentData.students.length})
                                     </h3>
-                                    <div className="flex space-x-4 text-sm font-bold bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
-                                        <span className="text-green-600">O : 완료</span>
-                                        <span className="text-amber-500">△ : 미흡</span>
-                                        <span className="text-slate-400">- : 미제출</span>
+                                    <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-black/40 px-3 py-1.5 rounded border border-slate-700">
+                                        <span className="text-emerald-400">O:CMPLT</span>
+                                        <span className="text-amber-400">△:PRTL</span>
+                                        <span className="text-slate-500">-:NULL</span>
                                     </div>
                                 </div>
                                 <div className="overflow-x-auto custom-scrollbar">
                                     <table className="w-full text-left border-collapse min-w-[1000px]">
                                         <thead>
-                                            <tr className="bg-slate-50 text-slate-600 text-sm border-y border-slate-200">
-                                                <th className="py-4 px-6 font-bold text-center w-12">#</th>
-                                                <th className="py-4 px-4 font-bold min-w-[200px]">과제명 / 마감일</th>
-                                                <th className="py-4 px-4 font-bold text-center border-l border-slate-200">달성률</th>
+                                            <tr className="bg-slate-900/80 text-cyan-500 text-xs font-mono-tech tracking-widest border-b border-cyan-900">
+                                                <th className="py-3 px-6 text-center w-12">ID</th>
+                                                <th className="py-3 px-4 min-w-[200px]">TASK_NAME / T-MINUS</th>
+                                                <th className="py-3 px-4 text-center border-l border-slate-800">CMPLTN_%</th>
                                                 {currentData.students.map((student, idx) => (
-                                                    <th key={idx} className={`py-4 px-2 font-bold text-center min-w-[60px] ${student === '김건우' ? 'text-blue-600 bg-blue-50/50' : ''}`}>
+                                                    <th key={idx} className={`py-3 px-2 text-center min-w-[60px] ${student === '김건우' ? 'text-blue-400' : 'text-slate-400'}`}>
                                                         {student}
-                                                        {student === '김건우' && <span className="block text-[10px] text-blue-500 mt-1">신규</span>}
                                                     </th>
                                                 ))}
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100">
+                                        <tbody className="divide-y divide-slate-800/50">
                                             {currentData.assignments.length === 0 && (
-                                                <tr><td colSpan={3 + currentData.students.length} className="text-center py-10 text-slate-400">등록된 과제가 없습니다.</td></tr>
+                                                <tr><td colSpan={3 + currentData.students.length} className="text-center py-10 font-mono-tech text-slate-500">NO DATA FOUND.</td></tr>
                                             )}
                                             {currentData.assignments.map((assignment, index) => {
                                                 const progress = calculateProgress(assignment.status);
                                                 return (
-                                                    <tr key={assignment.id} className="table-row-hover">
-                                                        <td className="py-4 px-6 text-center text-slate-400 font-bold">{index + 1}</td>
-                                                        <td className="py-4 px-4">
-                                                            <div className="font-bold text-slate-800">{assignment.title}</div>
-                                                            <div className="text-xs text-slate-500 mt-1 flex items-center">
-                                                                <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded mr-2">마감</span> {assignment.dueDate}
+                                                    <tr key={assignment.id} className="terran-row-hover text-sm font-sans">
+                                                        <td className="py-3 px-6 text-center text-slate-600 font-mono-tech">
+                                                            {String(index + 1).padStart(2, '0')}
+                                                        </td>
+                                                        <td className="py-3 px-4">
+                                                            <div className="font-bold text-slate-200">{assignment.title}</div>
+                                                            <div className="text-[10px] font-mono-tech text-slate-500 mt-1 flex items-center">
+                                                                <span className="text-cyan-600 mr-1">&gt;</span> {assignment.dueDate}
                                                             </div>
                                                         </td>
-                                                        <td className="py-4 px-4 border-l border-slate-100 text-center">
+                                                        <td className="py-3 px-4 border-l border-slate-800/50 text-center">
                                                             <div className="flex flex-col items-center">
-                                                                <span className={`text-sm font-bold ${progress.percentage >= 80 ? 'text-green-600' : progress.percentage > 0 ? 'text-blue-600' : 'text-slate-400'}`}>
+                                                                <span className={`text-xs font-mono-tech font-bold ${progress.percentage >= 80 ? 'text-emerald-400' : progress.percentage > 0 ? 'text-cyan-400' : 'text-slate-500'}`}>
                                                                     {progress.percentage}%
                                                                 </span>
-                                                                <div className="w-16 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                                                                    <div className={`h-full ${progress.percentage >= 80 ? 'bg-green-500' : 'bg-blue-500'}`} style={{width: `${progress.percentage}%`}}></div>
+                                                                <div className="w-12 h-1 bg-slate-900 border border-slate-700 mt-1 overflow-hidden">
+                                                                    <div className={`h-full ${progress.percentage >= 80 ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-cyan-500'}`} style={{width: `${progress.percentage}%`}}></div>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         {currentData.students.map((student, idx) => (
-                                                            <td key={idx} className={`py-4 px-2 text-center border-l border-slate-50 border-dashed ${student === '김건우' ? 'bg-blue-50/20' : ''}`}>
+                                                            <td key={idx} className={`py-3 px-2 text-center border-l border-slate-800/30 ${student === '김건우' ? 'bg-blue-900/10' : ''}`}>
                                                                 {renderAssignmentStatus(assignment.status?.[student] || '-')}
                                                             </td>
                                                         ))}
@@ -393,8 +461,11 @@
                     </main>
 
                     {/* Footer */}
-                    <footer className="mt-16 text-center text-slate-400 text-sm pb-8 font-medium">
-                        <p>© Hwi-T Science Vessel. All systems online.</p>
+                    <footer className="mt-16 text-center text-slate-600 text-xs font-mono-tech pb-8 relative z-20">
+                        <p className="flex justify-center items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-cyan-600 rounded-full animate-pulse"></span>
+                            SYSTEMS ONLINE. ALL COMMS OPEN.
+                        </p>
                     </footer>
                 </div>
             );
@@ -405,5 +476,7 @@
     </script>
 </body>
 </html>
+
+
 
 
