@@ -38,8 +38,8 @@
             title: "금호고 1학년 과학 중간고사 대비반",
             subtitle: "선택과 집중! 1등급을 향한 완벽한 4회독 커리큘럼",
             notices: [
-                "📌 [수업 방식 개편] 개념 정리 후 '대표유형 풀이'가 즉각 진행되며, 1교시(진도) / 2교시(과제검사 및 핑퐁) 체제로 꼼꼼히 관리합니다.",
-                "⏰ [시간표 변경] 3/24(화)부터는 학원 일정이 '하루 1교시' 단축 운영 체제로 전환됩니다. 집중도 높은 실전 훈련이 시작됩니다.",
+                "📌 [수업 개편] 개념 완료 직후 '대표유형 풀이'가 즉각 진행되며, 1교시(진도) / 2교시(과제검사 및 질의응답) 핑퐁 체제로 꼼꼼히 관리합니다.",
+                "⏰ [시간표 변경] 3/24(화)부터는 '하루 1교시'로 단축되나, 단일 교시 내에서도 [수업-과제-수업-과제] 투트랙 핑퐁 시스템을 도입해 밀도 있게 지도합니다.",
                 "📝 [평가 안내] 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 첫 시험 전까지 제출 필수!",
                 "🔄 [커리큘럼] 학교 진도 추가 파악 시, 즉시 해당 회차에 오투 개념 진도 유연하게 추가 배치"
             ],
@@ -66,54 +66,64 @@
                 ]
             },
             
-            // 1. 진도표 데이터 (핑퐁 & 1교시 운영 반영, 줄바꿈 \n 사용)
+            // 1. 진도표 데이터 (투트랙 핑퐁 & 진도 딜레이 반영)
             schedule: [
                 { id: 1, date: "3/3", day: "화", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
                 { id: 2, date: "3/5", day: "목", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
                 { id: 3, date: "3/10", day: "화", content: "[1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
-                { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 (개념 + 대표유형 풀이)\n[2교시] 개별 과제 검사 및 질의응답 (핑퐁)", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                { id: 5, date: "3/17", day: "화", content: "[1교시] 생명 시스템 화학 반응 (개념 + 대표유형)\n[2교시] 개별 과제 검사 및 질의응답 (핑퐁)", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                { id: 6, date: "3/19", day: "목", content: "[1교시] 물질의 전기적 특성 (개념 + 대표유형)\n[2교시] 개별 과제 검사 및 질의응답 (핑퐁)", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                { id: 7, date: "3/24", day: "화", content: "⚡ [1교시 운영] 중력의 작용 (개념 + 대표유형)\n(※ 최소수준평가 제출 마감)", homework: "평가문제집 및 오투 풀이", type: "concept" },
-                { id: 8, date: "3/26", day: "목", content: "⚡ [1교시 운영] 🏆 [TEST] 비상문제모음\n(확정 진도 누적 점검)", homework: "비상문제모음 오답정리", type: "test" },
-                { id: 9, date: "3/28", day: "토", content: "⚡ [1교시 운영] [기출픽] 빈출 유형 풀이 (1)", homework: "기출픽 해당 범위 복습", type: "practice" },
-                { id: 10, date: "3/31", day: "화", content: "⚡ [1교시 운영] [기출픽] 빈출 유형 풀이 (2)", homework: "기출픽 해당 범위 복습", type: "practice" },
-                { id: 11, date: "4/2", day: "목", content: "⚡ [1교시 운영] 🏆 [TEST] 미래엔문제모음\n(기출픽 심화 점검)", homework: "미래엔 오답정리", type: "test" },
-                { id: 12, date: "4/4", day: "토", content: "⚡ [1교시 운영] [마더텅] 고난도 기출 분석 (1)", homework: "마더텅 해당 범위 복습", type: "deep" },
-                { id: 13, date: "4/7", day: "화", content: "⚡ [1교시 운영] [마더텅] 고난도 기출 분석 (2)", homework: "마더텅 해당 범위 복습", type: "deep" },
-                { id: 14, date: "4/9", day: "목", content: "⚡ [1교시 운영] [EBS] 수능형 핵심 변형 (1)", homework: "EBS 해당 범위 복습", type: "ebs" },
-                { id: 15, date: "4/11", day: "토", content: "⚡ [1교시 운영] 🏆 [TEST] 천재문제모음\n(마더텅 심화 점검)", homework: "천재문제모음 오답정리", type: "test" },
-                { id: 16, date: "4/14", day: "화", content: "⚡ [1교시 운영] [EBS] 수능형 핵심 변형 (2)", homework: "EBS 해당 범위 복습", type: "ebs" },
-                { id: 17, date: "4/16", day: "목", content: "⚡ [1교시 운영] 학교별 기출 실전 모의고사 (1)", homework: "오답 노트 작성", type: "final" },
-                { id: 18, date: "4/18", day: "토", content: "⚡ [1교시 운영] 학교별 기출 실전 모의고사 (2)", homework: "오답 노트 작성", type: "final" },
-                { id: 19, date: "4/21", day: "화", content: "⚡ [1교시 운영] 전 범위 약점 보완 및 질의응답", homework: "개별 취약 파트 복습", type: "final" },
-                { id: 20, date: "4/23", day: "목", content: "⚡ [1교시 운영] 평가문제집 부록 및 시험대비 총정리", homework: "최종 교재 점검", type: "final" },
-                { id: 21, date: "4/25", day: "토", content: "⚡ [1교시 운영] 시험 전 최종 암기 체크", homework: "마무리 암기", type: "final" },
+                { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 (개념 + 대표유형 풀이)\n[2교시] 과제 검사 및 질의응답 (핑퐁 운영)", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                { id: 5, date: "3/17", day: "화", content: "[1교시] 생명 시스템 화학 반응 (개념 + 대표유형)\n[2교시] 과제 검사 및 질의응답 (핑퐁 운영)", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                { id: 6, date: "3/19", day: "목", content: "[1교시] 물질의 전기적 특성 (개념 + 대표유형)\n[2교시] 과제 검사 및 질의응답 (핑퐁 운영)", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                { id: 7, date: "3/24", day: "화", content: "⚡ [1교시 투트랙] 중력의 작용 (개념+대표유형)\n(※ 수업↔과제 핑퐁 진행 / 평가 제출 마감)", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                { id: 8, date: "3/26", day: "목", content: "⚡ [1교시 투트랙] 🏆 [TEST] 비상문제모음\n(시험↔오답 핑퐁 진행)", homework: "비상문제모음 오답정리", type: "test" },
+                { id: 9, date: "3/28", day: "토", content: "⚡ [1교시 투트랙] [기출픽] 빈출 유형 풀이 (1)\n(풀이↔점검 핑퐁 진행)", homework: "기출픽 해당 범위 복습", type: "practice" },
+                { id: 10, date: "3/31", day: "화", content: "⚡ [1교시 투트랙] [기출픽] 빈출 유형 풀이 (2)\n(풀이↔점검 핑퐁 진행)", homework: "기출픽 해당 범위 복습", type: "practice" },
+                { id: 11, date: "4/2", day: "목", content: "⚡ [1교시 투트랙] 🏆 [TEST] 미래엔문제모음\n(시험↔오답 핑퐁 진행)", homework: "미래엔 오답정리", type: "test" },
+                { id: 12, date: "4/4", day: "토", content: "⚡ [1교시 투트랙] [마더텅] 고난도 기출 분석 (1)\n(풀이↔점검 핑퐁 진행)", homework: "마더텅 해당 범위 복습", type: "deep" },
+                { id: 13, date: "4/7", day: "화", content: "⚡ [1교시 투트랙] [마더텅] 고난도 기출 분석 (2)\n(풀이↔점검 핑퐁 진행)", homework: "마더텅 해당 범위 복습", type: "deep" },
+                { id: 14, date: "4/9", day: "목", content: "⚡ [1교시 투트랙] [EBS] 수능형 핵심 변형 (1)\n(풀이↔점검 핑퐁 진행)", homework: "EBS 해당 범위 복습", type: "ebs" },
+                { id: 15, date: "4/11", day: "토", content: "⚡ [1교시 투트랙] 🏆 [TEST] 천재문제모음\n(시험↔오답 핑퐁 진행)", homework: "천재문제모음 오답정리", type: "test" },
+                { id: 16, date: "4/14", day: "화", content: "⚡ [1교시 투트랙] [EBS] 수능형 핵심 변형 (2)\n(풀이↔점검 핑퐁 진행)", homework: "EBS 해당 범위 복습", type: "ebs" },
+                { id: 17, date: "4/16", day: "목", content: "⚡ [1교시 투트랙] 학교별 실전 모의고사 (1)\n(시험↔오답 핑퐁 진행)", homework: "오답 노트 작성", type: "final" },
+                { id: 18, date: "4/18", day: "토", content: "⚡ [1교시 투트랙] 학교별 실전 모의고사 (2)\n(시험↔오답 핑퐁 진행)", homework: "오답 노트 작성", type: "final" },
+                { id: 19, date: "4/21", day: "화", content: "⚡ [1교시 투트랙] 전 범위 약점 보완 및 질의응답", homework: "개별 취약 파트 복습", type: "final" },
+                { id: 20, date: "4/23", day: "목", content: "⚡ [1교시 투트랙] 평가문제집 부록 및 최종 정리", homework: "최종 교재 점검", type: "final" },
+                { id: 21, date: "4/25", day: "토", content: "⚡ [1교시 투트랙] 시험 전 최종 암기 체크", homework: "마무리 암기", type: "final" },
                 { id: 22, date: "직보", day: "-", content: "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", homework: "1학기 중간고사 1등급!", type: "final" }
             ],
 
-            // 2. 학생 명단
-            students: ['고성준', '김종윤', '신수민', '오서연', '이승재', '이재윤', '정현경', '진민욱', '한정빈'],
+            // 2. 학생 명단 (김건우 추가)
+            students: ['고성준', '김종윤', '신수민', '오서연', '이승재', '이재윤', '정현경', '진민욱', '한정빈', '김건우'],
             
-            // 3. 학생별 과제 현황 데이터
+            // 3. 학생별 과제 현황 데이터 (엑셀 체크 데이터 완벽 반영)
             assignments: [
                 {
-                    id: 1,
-                    title: "1주차 오투 (화학/지구) 풀이",
-                    dueDate: "3/10 (화)",
-                    status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-' }
+                    id: 1, title: "오투 1단원", dueDate: "3/10 (화)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': 'O', '오서연': 'O', '이승재': '-', '이재윤': 'O', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' }
                 },
                 {
-                    id: 2,
-                    title: "2주차 오투/평가문제집 풀이",
-                    dueDate: "3/17 (화)",
-                    status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-' }
+                    id: 2, title: "오투 2-1-1", dueDate: "3/12 (목)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' }
                 },
                 {
-                    id: 3,
-                    title: "최소수준성취평가 제출",
-                    dueDate: "3/24 (화)",
-                    status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-' }
+                    id: 3, title: "오투 2-1-2", dueDate: "3/12 (목)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' }
+                },
+                {
+                    id: 4, title: "최소수준성취평가", dueDate: "3/24 (화)",
+                    status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-' }
+                },
+                {
+                    id: 5, title: "평가문제집 1단원", dueDate: "3/10 (화)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-' }
+                },
+                {
+                    id: 6, title: "평가문제집 2-1", dueDate: "3/12 (목)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' }
+                },
+                {
+                    id: 7, title: "평가문제집 2-1-2", dueDate: "3/12 (목)",
+                    status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' }
                 }
             ]
         };
@@ -123,7 +133,6 @@
 
         function App() {
             const data = curriculumData;
-            // 'schedule' = 진도표 탭, 'assignments' = 과제 관리 탭
             const [activeTab, setActiveTab] = useState('schedule');
 
             const getBadgeColor = (type) => {
@@ -177,7 +186,7 @@
                                 {data.notices.map((notice, idx) => (
                                     <p key={idx} className="text-sm md:text-base text-gray-700 leading-relaxed flex items-start">
                                         <span className="mr-2 text-green-600 font-bold">•</span>
-                                        <span>{notice}</span>
+                                        <span dangerouslySetInnerHTML={{__html: notice.replace(/핑퐁/g, '<strong>핑퐁</strong>').replace(/1교시/g, '<strong>1교시</strong>')}}></span>
                                     </p>
                                 ))}
                             </div>
@@ -190,7 +199,6 @@
                                 📋 1학기 중간고사 예상 시험 범위 (확정본)
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* [A] 물리 */}
                                 <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
                                     <h4 className="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2 flex justify-between items-center">
                                         <span>[A] 물리 파트</span>
@@ -200,7 +208,6 @@
                                         {data.examScope.physics.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
                                     </ul>
                                 </div>
-                                {/* [B] 화학 */}
                                 <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
                                     <h4 className="font-bold text-rose-800 mb-3 border-b border-rose-200 pb-2 flex justify-between items-center">
                                         <span>[B] 화학 파트</span>
@@ -210,7 +217,6 @@
                                         {data.examScope.chemistry.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
                                     </ul>
                                 </div>
-                                {/* [C] 생명 */}
                                 <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
                                     <h4 className="font-bold text-emerald-800 mb-3 border-b border-emerald-200 pb-2 flex justify-between items-center">
                                         <span>[C] 생명 파트</span>
@@ -220,7 +226,6 @@
                                         {data.examScope.biology.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
                                     </ul>
                                 </div>
-                                {/* [D] 지구 */}
                                 <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
                                     <h4 className="font-bold text-purple-800 mb-3 border-b border-purple-200 pb-2 flex justify-between items-center">
                                         <span>[D] 지구 파트</span>
@@ -279,7 +284,6 @@
                                                     <td className="py-4 px-4 font-medium text-gray-500">
                                                         {row.date} <span className="text-xs">({row.day})</span>
                                                     </td>
-                                                    {/* whitespace-pre-line 클래스 추가하여 \n 줄바꿈 반영 */}
                                                     <td className={`py-4 px-6 font-medium whitespace-pre-line leading-relaxed ${row.type === 'test' ? 'text-red-600 font-bold' : row.type === 'final' ? 'text-gray-900 font-bold' : 'text-gray-800'}`}>
                                                         {row.content}
                                                     </td>
@@ -300,23 +304,26 @@
                                 <div className="p-6 md:p-8 border-b border-gray-100 bg-white flex justify-between items-center flex-wrap gap-4">
                                     <h3 className="text-xl font-bold flex items-center text-gray-800">
                                         <span className="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
-                                        학생별 과제 제출 현황
+                                        학생별 과제 제출 현황 (총 {data.students.length}명)
                                     </h3>
                                     <div className="flex space-x-4 text-sm font-bold bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
                                         <span className="text-green-600">O : 완료</span>
                                         <span className="text-amber-500">△ : 미흡</span>
-                                        <span className="text-red-500">X : 미제출</span>
+                                        <span className="text-gray-400">- : 미제출</span>
                                     </div>
                                 </div>
                                 <div className="overflow-x-auto custom-scrollbar">
-                                    <table className="w-full text-left border-collapse min-w-[900px]">
+                                    <table className="w-full text-left border-collapse min-w-[1000px]">
                                         <thead>
                                             <tr className="bg-gray-50 text-gray-600 text-sm border-y border-gray-200">
                                                 <th className="py-4 px-6 font-bold text-center w-12">#</th>
                                                 <th className="py-4 px-4 font-bold min-w-[200px]">과제명 / 마감일</th>
                                                 <th className="py-4 px-4 font-bold text-center border-l border-gray-200">달성률</th>
                                                 {data.students.map((student, idx) => (
-                                                    <th key={idx} className="py-4 px-2 font-bold text-center min-w-[60px]">{student}</th>
+                                                    <th key={idx} className={`py-4 px-2 font-bold text-center min-w-[60px] ${student === '김건우' ? 'text-blue-600 bg-blue-50/50' : ''}`}>
+                                                        {student}
+                                                        {student === '김건우' && <span className="block text-[10px] text-blue-500 mt-1">신규</span>}
+                                                    </th>
                                                 ))}
                                             </tr>
                                         </thead>
@@ -343,7 +350,7 @@
                                                             </div>
                                                         </td>
                                                         {data.students.map((student, idx) => (
-                                                            <td key={idx} className="py-4 px-2 text-center border-l border-gray-50 border-dashed">
+                                                            <td key={idx} className={`py-4 px-2 text-center border-l border-gray-50 border-dashed ${student === '김건우' ? 'bg-blue-50/20' : ''}`}>
                                                                 {renderAssignmentStatus(assignment.status[student])}
                                                             </td>
                                                         ))}
