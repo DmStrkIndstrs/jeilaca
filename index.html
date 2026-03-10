@@ -1,74 +1,409 @@
-{
-  "stats": {
-    "today": 3.88
-  },
-  "remark": "아오, 내 머리통 쥐어박고 싶네! 아까 낮에 사례집 끝내놓고 방금 스키밍(기본서)이랑 핸드북 17p를 한 번에 다 쳐낸 거였구나! 1시간 42분 동안 두 개 다 끝낸 거면 진짜 칭찬해. 오늘 큼직한 미션 세 개 다 끝냈어! 오늘 누적 3.88H! 이제 맘 편히 단어장 140장만 마저 딸깍이고 자자!",
-  "tasks": [
-    {
-      "id": 1,
-      "title": "민소법 사례 (정규)",
-      "subtitle": "🔥 211Q 달성! (이제 딱 47문제 남음!) 🔥",
-      "status": "completed",
-      "color": "emerald"
-    },
-    {
-      "id": 2,
-      "title": "민소법 스키밍 (4회차)",
-      "subtitle": "🔥 4R 244p까지 완벽 클리어! (49p 폭탄 해체) 🔥",
-      "status": "completed",
-      "color": "emerald"
-    },
-    {
-      "id": 3,
-      "title": "민소법 핸드북 (1회차)",
-      "subtitle": "🔥 1R 175p까지 정독 완료! (안분 17p 컷) 🔥",
-      "status": "completed",
-      "color": "emerald"
-    },
-    {
-      "id": 4,
-      "title": "데일리 SRS 암기",
-      "subtitle": "140장 (어제 빚 70장 + 오늘 70장 💀)",
-      "status": "pending",
-      "color": "emerald"
-    }
-  ],
-  "pillars": [
-    {
-      "name": "특허법",
-      "color": "indigo",
-      "badge": "GS 1/8",
-      "subItems": [
-        { "label": "사례(하) 1/5회독", "detail": "60/103 Q", "percent": 58.3 },
-        { "label": "사례(상) 강의", "detail": "14/23 Lec", "percent": 60.9 },
-        { "label": "스키밍 (5/7회독)", "detail": "현재 5R 34p", "percent": 58.1 }
-      ]
-    },
-    {
-      "name": "상표법",
-      "color": "pink",
-      "subItems": [
-        { "label": "사례집 1/5회독", "detail": "70/130 Q", "percent": 53.8 },
-        { "label": "스키밍 (4/8회독)", "detail": "현재 4R 57p", "percent": 39.3 }
-      ]
-    },
-    {
-      "name": "민사소송법",
-      "color": "purple",
-      "subItems": [
-        { "label": "사례집 1/5회독", "detail": "211/258 Q", "percent": 81.8 },
-        { "label": "스키밍 (4/10회독)", "detail": "현재 4R 244p", "percent": 40.7 },
-        { "label": "핸드북 (1/1회독)", "detail": "175/519 p", "percent": 33.7 }
-      ]
-    }
-  ],
-  "history": [
-    { "day": "3/4", "hours": 6.77 },
-    { "day": "3/5", "hours": 2.98 },
-    { "day": "3/6", "hours": 5.23 },
-    { "day": "3/7", "hours": 5.40 },
-    { "day": "3/8", "hours": 3.56 },
-    { "day": "3/9", "hours": 5.42 },
-    { "day": "3/10", "hours": 3.88 }
-  ]
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>휘T Science Vessel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .table-row-hover:hover { background-color: #f1f5f9; transition: all 0.2s; }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // =========================================================================
+        // 👇 여기서부터 데이터를 수정하시면 됩니다 (클래스별로 데이터가 나뉘어 있습니다)
+        // =========================================================================
+        const appData = {
+            mainTitle: "휘T Science Vessel",
+            
+            classes: {
+                // ==================== [1] 금호고 데이터 ====================
+                kumho: {
+                    name: "🏫 금호고 1학년",
+                    title: "금호고 1학년 과학 중간고사 대비반",
+                    subtitle: "선택과 집중! 1등급을 향한 완벽한 4회독 커리큘럼",
+                    notices: [
+                        "📌 <strong>[수업 개편]</strong> 24일 이전까지 개념 진도를 전면 완료하고, 이후부터는 기출픽과 마더텅을 활용하여 <strong>소단원별 집중 문제풀이</strong>를 진행합니다.",
+                        "⏰ <strong>[문제풀이 분배]</strong> 전체 10개 소단원을 순차적으로 (2개-2개-4개-2개) 속도감 있게 격파하며, 교재 1권이 끝날 때마다 누적 테스트를 치릅니다.",
+                        "📝 <strong>[평가 안내]</strong> 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 첫 시험 전까지 제출 필수!",
+                        "🔄 <strong>[커리큘럼]</strong> 학교 진도 추가 파악 시, 즉시 해당 회차에 오투 개념 진도 유연하게 추가 배치"
+                    ],
+                    examScope: {
+                        physics: ["II-2-2. 물질의 전기적 특성", "III-2-1. 중력의 작용"],
+                        chemistry: ["I-1-1. 시간과 공간", "I-1-2. 기본량과 단위", "I-2-1. 측정과 측정 표준", "I-2-2. 신호와 정보"],
+                        biology: ["II-2-1. 지각과 생명체를 구성하는 물질", "III-3-1. 생명 시스템에서의 화학 반응"],
+                        earth: ["II-1-1. 우주 초기에 생성된 원소", "II-1-2. 별의 진화와 원소의 생성"]
+                    },
+                    schedule: [
+                        { id: 1, date: "3/3", day: "화", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                        { id: 2, date: "3/5", day: "목", content: "[1·2교시] 화학 파트 / 지구 파트 기본 진도", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                        { id: 3, date: "3/10", day: "화", content: "[1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", homework: "오투 해당 단원 문제 풀이", type: "concept" },
+                        { id: 4, date: "3/12", day: "목", content: "[1교시] 생명체 구성 물질 이어서 ~ 화학 반응 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 5, date: "3/17", day: "화", content: "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 6, date: "3/19", day: "목", content: "[1교시] 중력의 작용 (개념 진도) - ★시험범위 개념 1회독 완료!\n[2교시] 과제 검사 및 질의응답", homework: "평가문제집 및 오투 풀이", type: "concept" },
+                        { id: 7, date: "3/24", day: "화", content: "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n(※ 최소수준성취평가 제출 마감)", homework: "테스트 오답 정리", type: "test" },
+                        { id: 8, date: "3/26", day: "목", content: "⚡ [기출픽] 소단원 2개 진도\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", homework: "기출픽 2개 단원 문제 풀이", type: "practice" },
+                        { id: 9, date: "3/28", day: "토", content: "⚡ [기출픽] 소단원 2개 진도\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", homework: "기출픽 2개 단원 문제 풀이", type: "practice" },
+                        { id: 10, date: "3/31", day: "화", content: "⚡ [기출픽] 소단원 4개 진도\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질 / 화학 반응)", homework: "기출픽 4개 단원 문제 풀이", type: "practice" },
+                        { id: 11, date: "4/2", day: "목", content: "⚡ [기출픽] 소단원 2개 진도\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", homework: "기출픽 2개 단원 문제 풀이", type: "practice" },
+                        { id: 12, date: "4/4", day: "토", content: "🏆 [TEST] 2차 기출픽 누적 테스트 (미래엔/천재)\n(기출픽 전체 범위 누적 점검)", homework: "테스트 오답 노트 작성", type: "test" },
+                        { id: 13, date: "4/7", day: "화", content: "🔥 [마더텅] 소단원 2개 진도\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", homework: "마더텅 2개 단원 문제 풀이", type: "deep" },
+                        { id: 14, date: "4/9", day: "목", content: "🔥 [마더텅] 소단원 2개 진도\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", homework: "마더텅 2개 단원 문제 풀이", type: "deep" },
+                        { id: 15, date: "4/11", day: "토", content: "⚡ [실전대비] 인근 학교 기출 실전 분석\n(고난도 출제 트렌드 파악 및 점검)", homework: "기출문제 1회분 풀이", type: "ebs" },
+                        { id: 16, date: "4/14", day: "화", content: "🔥 [마더텅] 소단원 4개 진도\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질 / 화학 반응)", homework: "마더텅 4개 단원 문제 풀이", type: "deep" },
+                        { id: 17, date: "4/16", day: "목", content: "🔥 [마더텅] 소단원 2개 진도\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", homework: "마더텅 2개 단원 문제 풀이", type: "deep" },
+                        { id: 18, date: "4/18", day: "토", content: "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)", homework: "테스트 오답 노트 작성", type: "test" },
+                        { id: 19, date: "4/21", day: "화", content: "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", homework: "모의고사 오답 분석", type: "final" },
+                        { id: 20, date: "4/23", day: "목", content: "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", homework: "개별 취약 파트 복습", type: "final" },
+                        { id: 21, date: "4/25", day: "토", content: "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", homework: "마무리 총정리 암기", type: "final" },
+                        { id: 22, date: "직보", day: "-", content: "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", homework: "1학기 중간고사 1등급!", type: "final" }
+                    ],
+                    students: ['고성준', '김종윤', '신수민', '오서연', '이승재', '이재윤', '정현경', '진민욱', '한정빈', '김건우'],
+                    assignments: [
+                        { id: 1, title: "오투 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': 'O', '오서연': 'O', '이승재': '-', '이재윤': 'O', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 2, title: "오투 2-1-1", dueDate: "3/12 (목)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 3, title: "오투 2-1-2", dueDate: "3/12 (목)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 4, title: "최소수준성취평가", dueDate: "3/24 (화)", status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 5, title: "평가문제집 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 6, title: "평가문제집 2-1", dueDate: "3/12 (목)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' } },
+                        { id: 7, title: "평가문제집 2-1-2", dueDate: "3/12 (목)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '-', '한정빈': '-', '김건우': '-' } }
+                    ]
+                },
+
+                // ==================== [2] 자양/성수고 데이터 ====================
+                jayang: {
+                    name: "🏫 자양/성수고 (합반)",
+                    title: "자양고·성수고 통합과학 1학기 내신 대비반",
+                    subtitle: "3/23(월) 개강! 학교별 출제 경향을 꿰뚫는 맞춤 커리큘럼",
+                    notices: [
+                        "📌 <strong>[합반 운영 안내]</strong> 자양고와 성수고의 공통 출제 범위를 묶어 효율적으로 개념을 완성합니다.",
+                        "⏰ <strong>[수업 방식]</strong> 핵심 개념 요약 후, 각 학교별 기출문제와 빈출 유형을 집중적으로 풀이합니다.",
+                        "📝 <strong>[평가 안내]</strong> 매주 수업 전 지난 주차 개념에 대한 미니 테스트가 진행됩니다."
+                    ],
+                    examScope: {
+                        physics: ["(추후 확정 시 업데이트)"],
+                        chemistry: ["(추후 확정 시 업데이트)"],
+                        biology: ["(추후 확정 시 업데이트)"],
+                        earth: ["(추후 확정 시 업데이트)"]
+                    },
+                    schedule: [
+                        { id: 1, date: "3/23", day: "월", content: "[개강] 통합과학 오리엔테이션 및 1단원 기본 개념 진도", homework: "기본 개념 복습 및 과제 프린트", type: "concept" },
+                        { id: 2, date: "3/25", day: "수", content: "1단원 개념 완료 및 대표 유형 문제 풀이", homework: "오투 해당 단원 풀이", type: "concept" },
+                        { id: 3, date: "3/30", day: "월", content: "2단원 기본 개념 진도 (물질의 규칙성)", homework: "개념 복습 프린트", type: "concept" },
+                        { id: 4, date: "4/01", day: "수", content: "2단원 개념 완료 및 학교별 기출 유형 점검", homework: "오투 해당 단원 풀이", type: "practice" },
+                        { id: 5, date: "4/06", day: "월", content: "🏆 1차 누적 점검 테스트 및 오답 클리닉", homework: "오답 노트 작성", type: "test" },
+                    ],
+                    students: ['(신규학생1)', '(신규학생2)', '(신규학생3)'],
+                    assignments: [
+                        { id: 1, title: "1주차 프린트 과제", dueDate: "3/30 (월)", status: { '(신규학생1)': '-', '(신규학생2)': '-', '(신규학생3)': '-' } },
+                    ]
+                }
+            }
+        };
+        // =========================================================================
+
+        const { useState } = React;
+
+        function App() {
+            const [selectedClassId, setSelectedClassId] = useState('kumho');
+            const [activeTab, setActiveTab] = useState('schedule');
+
+            const currentData = appData.classes[selectedClassId];
+
+            const getBadgeColor = (type) => {
+                switch(type) {
+                    case 'concept': return 'bg-green-100 text-green-800 border-green-200';
+                    case 'practice': return 'bg-blue-100 text-blue-800 border-blue-200';
+                    case 'deep': return 'bg-purple-100 text-purple-800 border-purple-200';
+                    case 'ebs': return 'bg-orange-100 text-orange-800 border-orange-200';
+                    case 'test': return 'bg-red-100 text-red-800 border-red-200';
+                    case 'final': return 'bg-gray-800 text-white border-gray-900';
+                    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+                }
+            };
+
+            const renderAssignmentStatus = (status) => {
+                if (status === 'O') return <span className="text-green-600 font-black text-lg">O</span>;
+                if (status === 'X') return <span className="text-red-500 font-black text-lg">X</span>;
+                if (status === '△') return <span className="text-amber-500 font-black text-lg">△</span>;
+                return <span className="text-gray-300 font-bold">-</span>;
+            };
+
+            const calculateProgress = (statusObj) => {
+                if (!statusObj) return { completed: 0, partial: 0, total: 1, percentage: 0 };
+                const total = currentData.students.length;
+                if(total === 0) return { completed: 0, partial: 0, total: 0, percentage: 0 };
+                
+                const completed = Object.values(statusObj).filter(s => s === 'O').length;
+                const partial = Object.values(statusObj).filter(s => s === '△').length;
+                const percentage = Math.round((completed / total) * 100);
+                return { completed, partial, total, percentage };
+            };
+
+            return (
+                <div className="min-h-screen pb-20 relative text-gray-800 bg-slate-50">
+                    {/* Header with Main Title and Class Selector */}
+                    <header className="bg-slate-900 text-white pt-10 pb-16 px-6 text-center shadow-xl relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                        <div className="max-w-4xl mx-auto relative z-10">
+                            <h2 className="text-blue-400 font-black tracking-[0.2em] text-sm mb-4">★ JEIL ACADEMY SCIENCE ★</h2>
+                            <h1 className="text-4xl md:text-6xl font-black mb-10 tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text">
+                                {appData.mainTitle}
+                            </h1>
+                            
+                            {/* Class Selection Tabs */}
+                            <div className="flex flex-wrap justify-center gap-3 mt-6">
+                                {Object.entries(appData.classes).map(([id, classInfo]) => (
+                                    <button 
+                                        key={id}
+                                        onClick={() => setSelectedClassId(id)}
+                                        className={`px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-md border-2 ${
+                                            selectedClassId === id 
+                                            ? 'bg-blue-600 border-blue-500 text-white scale-105' 
+                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
+                                        }`}
+                                    >
+                                        {classInfo.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    {/* Fixed overlapping issue by removing negative margin (-mt-12) and placing title inside a solid card */}
+                    <main className="max-w-5xl mx-auto px-4 -mt-8 relative z-20">
+                        
+                        {/* Class specific title block (Now a proper card so it overlays cleanly on the dark header) */}
+                        <div className="glass-panel rounded-2xl shadow-xl p-8 mb-8 border border-slate-200 bg-white text-center flex flex-col items-center justify-center min-h-[120px]">
+                            <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-3">{currentData.title}</h2>
+                            <p className="text-slate-500 font-medium">{currentData.subtitle}</p>
+                        </div>
+
+                        {/* Notice Section */}
+                        <div className="glass-panel rounded-2xl shadow-lg p-6 md:p-8 mb-6 border border-slate-200 bg-white">
+                            <h3 className="text-xl font-bold mb-5 flex items-center text-slate-800">
+                                <span className="bg-blue-600 w-2 h-6 rounded-full mr-3"></span>
+                                학습 안내 및 중요 공지
+                            </h3>
+                            <div className="space-y-3 bg-slate-50 p-5 rounded-xl border border-slate-100">
+                                {currentData.notices.map((notice, idx) => (
+                                    <p key={idx} className="text-sm md:text-base text-slate-700 leading-relaxed flex items-start">
+                                        <span className="mr-2 text-blue-600 font-bold">•</span>
+                                        <span dangerouslySetInnerHTML={{__html: notice}}></span>
+                                    </p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Exam Scope Section */}
+                        <div className="glass-panel rounded-2xl shadow-lg p-6 md:p-8 mb-8 border border-slate-200 bg-white">
+                            <h3 className="text-xl font-bold mb-5 flex items-center text-slate-800">
+                                <span className="bg-indigo-600 w-2 h-6 rounded-full mr-3"></span>
+                                📋 중간고사 예상 시험 범위
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                                    <h4 className="font-bold text-blue-800 mb-3 border-b border-blue-200 pb-2 flex justify-between items-center">
+                                        <span>[A] 물리 파트</span>
+                                        <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">{currentData.examScope.physics.length}단원</span>
+                                    </h4>
+                                    <ul className="text-sm text-slate-700 space-y-2">
+                                        {currentData.examScope.physics.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    </ul>
+                                </div>
+                                <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                                    <h4 className="font-bold text-rose-800 mb-3 border-b border-rose-200 pb-2 flex justify-between items-center">
+                                        <span>[B] 화학 파트</span>
+                                        <span className="text-xs bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full">{currentData.examScope.chemistry.length}단원</span>
+                                    </h4>
+                                    <ul className="text-sm text-slate-700 space-y-2">
+                                        {currentData.examScope.chemistry.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    </ul>
+                                </div>
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                                    <h4 className="font-bold text-emerald-800 mb-3 border-b border-emerald-200 pb-2 flex justify-between items-center">
+                                        <span>[C] 생명 파트</span>
+                                        <span className="text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">{currentData.examScope.biology.length}단원</span>
+                                    </h4>
+                                    <ul className="text-sm text-slate-700 space-y-2">
+                                        {currentData.examScope.biology.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    </ul>
+                                </div>
+                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                                    <h4 className="font-bold text-purple-800 mb-3 border-b border-purple-200 pb-2 flex justify-between items-center">
+                                        <span>[D] 지구 파트</span>
+                                        <span className="text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">{currentData.examScope.earth.length}단원</span>
+                                    </h4>
+                                    <ul className="text-sm text-slate-700 space-y-2">
+                                        {currentData.examScope.earth.map((item, i) => <li key={i} className="leading-snug">✓ {item}</li>)}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* View Navigation Tabs (Schedule vs Assignments) */}
+                        <div className="flex justify-center mb-6 space-x-4">
+                            <button 
+                                onClick={() => setActiveTab('schedule')}
+                                className={`px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-200 border border-slate-200 ${activeTab === 'schedule' ? 'bg-slate-800 text-white scale-105' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                🗓️ 주차별 진도표
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('assignments')}
+                                className={`px-6 py-3 rounded-full font-bold shadow-sm transition-all duration-200 border border-slate-200 ${activeTab === 'assignments' ? 'bg-slate-800 text-white scale-105' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                ✅ 학생별 과제 현황
+                            </button>
+                        </div>
+
+                        {/* Tab 1: Schedule Content */}
+                        {activeTab === 'schedule' && (
+                            <div className="glass-panel rounded-2xl shadow-lg overflow-hidden border border-slate-200 bg-white animate-[fadeIn_0.3s_ease-in-out]">
+                                <div className="p-6 md:p-8 border-b border-slate-100 bg-white">
+                                    <h3 className="text-xl font-bold flex items-center text-slate-800">
+                                        <span className="bg-slate-800 w-2 h-6 rounded-full mr-3"></span>
+                                        세부 진도 및 계획
+                                    </h3>
+                                </div>
+                                <div className="overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-left border-collapse min-w-[800px]">
+                                        <thead>
+                                            <tr className="bg-slate-50 text-slate-600 text-sm border-y border-slate-200">
+                                                <th className="py-4 px-6 font-bold w-16 text-center">회차</th>
+                                                <th className="py-4 px-4 font-bold w-24">날짜</th>
+                                                <th className="py-4 px-6 font-bold">수업 내용 및 상세 진도</th>
+                                                <th className="py-4 px-6 font-bold w-1/4 text-center">과제 (당일 완결)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {currentData.schedule.map((row) => (
+                                                <tr key={row.id} className="table-row-hover group">
+                                                    <td className="py-4 px-6 text-center">
+                                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${getBadgeColor(row.type)}`}>
+                                                            {row.id}회
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 px-4 font-medium text-slate-500">
+                                                        {row.date} <span className="text-xs">({row.day})</span>
+                                                    </td>
+                                                    <td className={`py-4 px-6 font-medium whitespace-pre-line leading-relaxed ${row.type === 'test' ? 'text-red-600 font-bold' : row.type === 'final' ? 'text-slate-900 font-bold' : 'text-slate-800'}`}>
+                                                        {row.content}
+                                                    </td>
+                                                    <td className="py-4 px-6 text-slate-600 text-sm font-medium text-center">
+                                                        <span className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 inline-block w-full">{row.homework}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab 2: Assignment Content */}
+                        {activeTab === 'assignments' && (
+                            <div className="glass-panel rounded-2xl shadow-lg overflow-hidden border border-slate-200 bg-white animate-[fadeIn_0.3s_ease-in-out]">
+                                <div className="p-6 md:p-8 border-b border-slate-100 bg-white flex justify-between items-center flex-wrap gap-4">
+                                    <h3 className="text-xl font-bold flex items-center text-slate-800">
+                                        <span className="bg-slate-800 w-2 h-6 rounded-full mr-3"></span>
+                                        학생별 과제 제출 현황 (총 {currentData.students.length}명)
+                                    </h3>
+                                    <div className="flex space-x-4 text-sm font-bold bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
+                                        <span className="text-green-600">O : 완료</span>
+                                        <span className="text-amber-500">△ : 미흡</span>
+                                        <span className="text-slate-400">- : 미제출</span>
+                                    </div>
+                                </div>
+                                <div className="overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-left border-collapse min-w-[1000px]">
+                                        <thead>
+                                            <tr className="bg-slate-50 text-slate-600 text-sm border-y border-slate-200">
+                                                <th className="py-4 px-6 font-bold text-center w-12">#</th>
+                                                <th className="py-4 px-4 font-bold min-w-[200px]">과제명 / 마감일</th>
+                                                <th className="py-4 px-4 font-bold text-center border-l border-slate-200">달성률</th>
+                                                {currentData.students.map((student, idx) => (
+                                                    <th key={idx} className={`py-4 px-2 font-bold text-center min-w-[60px] ${student === '김건우' ? 'text-blue-600 bg-blue-50/50' : ''}`}>
+                                                        {student}
+                                                        {student === '김건우' && <span className="block text-[10px] text-blue-500 mt-1">신규</span>}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {currentData.assignments.length === 0 && (
+                                                <tr><td colSpan={3 + currentData.students.length} className="text-center py-10 text-slate-400">등록된 과제가 없습니다.</td></tr>
+                                            )}
+                                            {currentData.assignments.map((assignment, index) => {
+                                                const progress = calculateProgress(assignment.status);
+                                                return (
+                                                    <tr key={assignment.id} className="table-row-hover">
+                                                        <td className="py-4 px-6 text-center text-slate-400 font-bold">{index + 1}</td>
+                                                        <td className="py-4 px-4">
+                                                            <div className="font-bold text-slate-800">{assignment.title}</div>
+                                                            <div className="text-xs text-slate-500 mt-1 flex items-center">
+                                                                <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded mr-2">마감</span> {assignment.dueDate}
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 px-4 border-l border-slate-100 text-center">
+                                                            <div className="flex flex-col items-center">
+                                                                <span className={`text-sm font-bold ${progress.percentage >= 80 ? 'text-green-600' : progress.percentage > 0 ? 'text-blue-600' : 'text-slate-400'}`}>
+                                                                    {progress.percentage}%
+                                                                </span>
+                                                                <div className="w-16 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                                                                    <div className={`h-full ${progress.percentage >= 80 ? 'bg-green-500' : 'bg-blue-500'}`} style={{width: `${progress.percentage}%`}}></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        {currentData.students.map((student, idx) => (
+                                                            <td key={idx} className={`py-4 px-2 text-center border-l border-slate-50 border-dashed ${student === '김건우' ? 'bg-blue-50/20' : ''}`}>
+                                                                {renderAssignmentStatus(assignment.status?.[student] || '-')}
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-16 text-center text-slate-400 text-sm pb-8 font-medium">
+                        <p>© Hwi-T Science Vessel. All systems online.</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
+
