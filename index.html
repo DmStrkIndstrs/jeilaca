@@ -1,494 +1,164 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휘T Science Vessel</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- html2canvas for Image Capture -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --bg: #f0f4f8;
-            --panel: rgba(255,255,255,0.97);
-            --border: #cbd5e1;
-            --accent: #0284c7;
-            --text: #1e293b;
-            --grid: rgba(14,116,144,0.05);
-        }
-
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            background-image:
-                linear-gradient(var(--grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-            background-size: 30px 30px;
-            min-height: 100vh;
-        }
-
-        h1,h2,h3,h4,.font-hud { font-family: 'Rajdhani', sans-serif; }
-        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
-
-        .terran-panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            backdrop-filter: blur(8px);
-            position: relative;
-        }
-        .terran-panel::before {
-            content:''; position:absolute; top:-1px; left:-1px; width:12px; height:12px;
-            border-top:3px solid var(--accent); border-left:3px solid var(--accent);
-        }
-        .terran-panel::after {
-            content:''; position:absolute; bottom:-1px; right:-1px; width:12px; height:12px;
-            border-bottom:3px solid var(--accent); border-right:3px solid var(--accent);
-        }
-
-        .terran-row-hover:hover { background-color:#f1f5f9; transition:all 0.2s; }
-
-        .cursor-blink { animation: blink 1s step-end infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-        .fade-in { animation: fadeIn 0.35s ease-out both; }
-
-        .custom-scrollbar::-webkit-scrollbar { height:8px; width:8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background:#e2e8f0; border-radius:4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#64748b; }
-
-        .tech-pattern {
-            background-image:linear-gradient(-45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent);
-            background-size:10px 10px;
-        }
-
-        .capture-mode { background-color:#f8fafc !important; }
-    </style>
-</head>
-<body>
-<div id="root"></div>
-
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useRef, useEffect } = React;
+
+// 👇 초기 데이터 (가장 최신 진도/과제 현황 내장. 로컬스토리지에 데이터가 없을 때 이 데이터를 기본으로 띄웁니다.)
+const initialAppData = {
+  "mainTitle": "휘T SCIENCE VESSEL",
+  "classes": {
+    "kumho": {
+      "name": "SECTOR: KUMHO_1",
+      "title": "금호고 1학년 과학 중간고사 대비반",
+      "subtitle": "STATUS: 1등급 목표 4회독 프로토콜 가동 중",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 기출픽/마더텅 활용 <strong>소단원별 집중 타격</strong>이 진행됩니다.",
+        "🚀 <span class='text-blue-600 font-bold'>[MODE.SWITCH]</span> <strong>기출픽 단계</strong>: 휘T가 대표문제를 직접 풀어주는 강의식 진행.<br>&nbsp;&nbsp;&nbsp;<strong>마더텅 단계</strong>: 개별 과제 검사 및 1:1 약점 보완(클리닉) 방식으로 전환됩니다.",
+        "<span class='text-purple-600 font-bold'>[STUDY.RULE]</span> <strong>기출문제는 책에 직접 풀지 않고 '노트'에 풉니다.</strong> 채점 후 틀린 문제만 책에 체크하세요!",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.TEST]</span> 3/19(목) 단위변환훈련 테스트 진행! (기준: 46개 이상 합격 / 45개 이하 정답자 <strong>무한 재시험</strong>)",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 최소수준성취평가 3/24(화) 제출 필수! (신규생은 3/17 배부)"
+      ],
+      "examScope": {
+        "physics": [
+          "II-2-2. 물질의 전기적 특성",
+          "III-2-1. 중력의 작용"
+        ],
+        "chemistry": [
+          "I-1-1. 시간과 공간",
+          "I-1-2. 기본량과 단위",
+          "I-2-1. 측정과 측정 표준",
+          "I-2-2. 신호와 정보"
+        ],
+        "biology": [
+          "II-2-1. 지각과 생명체를 구성하는 물질"
+        ],
+        "earth": [
+          "II-1-1. 우주 초기에 생성된 원소",
+          "II-1-2. 별의 진화와 원소의 생성"
+        ]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/3", "day": "화", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 2, "date": "3/5", "day": "목", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 3, "date": "3/10", "day": "화", "content": "✅ [종료] [1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 4, "date": "3/12", "day": "목", "content": "✅ [종료] [1교시] 생명체 구성 물질 (개념 진도)\n[2교시] 과제 검사 및 질의응답", "homework": "평가문제집 및 오투 풀이", "type": "completed" },
+        { "id": 5, "date": "3/17", "day": "화", "content": "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 기존생: 문제풀이 / 신입생: 1단원 개념\n📝 (단위변환 문제 & 신입생 성취평가 배부)", "homework": "평가문제집 및 오투 풀이", "type": "concept" },
+        { "id": 6, "date": "3/19", "day": "목", "content": "[1교시] 중력의 작용 (개념 진도)\n[2교시] 기존생: 과제검사 / 신입생: 우주 초기 원소\n🚨 단위변환 TEST (45개 이하 무한 재시험)", "homework": "단위변환 오답 노트", "type": "concept" },
+        { "id": 7, "date": "3/24", "day": "화", "content": "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n[범위: 시간과공간~신호와정보, 우주초기원소, 지각과생명체, 전기적특성]\n(※ 최소수준성취평가 제출 마감)\n📚 [배부] 기출픽 교재", "homework": "테스트 오답 정리", "type": "test" },
+        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 (대표문제 직접 풀이)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 문제 풀이", "type": "practice" },
+        { "id": 11, "date": "4/2", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 12, "date": "4/4", "day": "토", "content": "🏆 [TEST] 2차 기출픽 누적 테스트 (미래엔/천재)\n(기출픽 전체 범위 누적 점검)", "homework": "테스트 오답 노트 작성", "type": "test" },
+        { "id": 13, "date": "4/7", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 14, "date": "4/9", "day": "목", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [마더텅] 소단원 3개 (개별검사 진행)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "마더텅 3개 단원 문제 풀이", "type": "deep" },
+        { "id": 16, "date": "4/14", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)\n📚 [배부] 피날레 교재 (암기자료 + 기출모음)", "homework": "테스트 오답 및 피날레 예습", "type": "test" },
+        { "id": 18, "date": "4/18", "day": "토", "content": "⚡ [실전대비] 인근 학교 기출 실전 분석\n(피날레 기출모음 집중 풀이 훈련)", "homework": "기출노트에 풀고 오답만 책에 체크", "type": "ebs" },
+        { "id": 19, "date": "4/21", "day": "화", "content": "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", "homework": "모의고사 오답 분석", "type": "final" },
+        { "id": 20, "date": "4/23", "day": "목", "content": "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", "homework": "개별 취약 파트 복습", "type": "final" },
+        { "id": 21, "date": "4/25", "day": "토", "content": "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", "homework": "마무리 총정리 암기", "type": "final" },
+        { "id": 22, "date": "직보", "day": "-", "content": "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", "homework": "1학기 중간고사 1등급!", "type": "final" }
+      ],
+      "students": ["고성준", "김종윤", "신수민", "오서연", "이승재", "이재윤", "정현경", "진민욱", "한정빈", "김건우", "박시우"],
+      "assignments": [
+        { "id": 1, "title": "오투 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 2, "title": "오투 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 3, "title": "오투 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 4, "title": "최소성취수준평가", "dueDate": "3/24 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "-", "한정빈": "-", "김건우": "H", "박시우": "H" } },
+        { "id": 5, "title": "평가문제집 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 6, "title": "평가문제집 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 7, "title": "평가문제집 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 8, "title": "오투 II-2-1. 지각과 생명체...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } },
+        { "id": 9, "title": "평가문제집 II-2-1. 지각...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } }
+      ]
+    },
+    "jayang": {
+      "name": "SECTOR: JAYANG_SUNGSU",
+      "title": "자양/성수고 연합 방어선 (1학기 내신 대비)",
+      "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)",
+        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 핵심 개념 요약 후, 각 학교별 기출문제 및 빈출 유형 타겟팅 훈련.",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 매주 접속(수업) 시 지난 주차 데이터 기반 미니 테스트 진행."
+      ],
+      "examScope": {
+        "physics": ["(DATA PENDING)"],
+        "chemistry": ["(DATA PENDING)"],
+        "biology": ["(DATA PENDING)"],
+        "earth": ["(DATA PENDING)"]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 통합과학 시스템 OT 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
+        { "id": 2, "date": "3/26", "day": "목", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/28", "day": "토", "content": "2단원 기본 개념 진도 (물질의 규칙성)", "homework": "개념 복습 프린트", "type": "concept" },
+        { "id": 4, "date": "3/31", "day": "화", "content": "2단원 개념 완료 및 학교별 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/02", "day": "목", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
+      ],
+      "students": ["(Target_Alpha)", "(Target_Beta)", "(Target_Gamma)"],
+      "assignments": [
+        { "id": 1, "title": "1주차 프로토콜 프린트", "dueDate": "3/28 (토)", "status": { "(Target_Alpha)": "-", "(Target_Beta)": "-", "(Target_Gamma)": "-" } }
+      ]
+    },
+    "middle3": {
+      "name": "SECTOR: MID_YEAR3",
+      "title": "중3 과학 내신 연합 특강 (동마·한대부·마장중)",
+      "subtitle": "STATUS: 3/23(월) 개강! 월/수/금 중등 최상위권 도약 프로토콜",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 동마중, 한대부중, 마장중 연합 내신 대비반이 3/23(월)에 본격 가동됩니다. (월/수/금 진행)",
+        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 3개 학교의 공통 출제 범위를 묶어 효율적인 1등급 달성 커리큘럼으로 진행됩니다.",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 학교별 시험 일정 및 세부 진도가 파악되는 대로 즉각 맞춤 훈련으로 전환됩니다."
+      ],
+      "examScope": {
+        "physics": ["(DATA PENDING)"],
+        "chemistry": ["(DATA PENDING)"],
+        "biology": ["(DATA PENDING)"],
+        "earth": ["(DATA PENDING)"]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/23", "day": "월", "content": "[개강] 중3 과학 오리엔테이션 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
+        { "id": 2, "date": "3/25", "day": "수", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/27", "day": "금", "content": "2단원 기본 개념 진도", "homework": "개념 복습 프린트", "type": "concept" },
+        { "id": 4, "date": "3/30", "day": "월", "content": "2단원 개념 완료 및 공통 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/01", "day": "수", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
+      ],
+      "students": ["(대기중1)", "(대기중2)", "(대기중3)"],
+      "assignments": [
+        { "id": 1, "title": "1주차 오리엔테이션 프린트", "dueDate": "3/30 (월)", "status": { "(대기중1)": "-", "(대기중2)": "-", "(대기중3)": "-" } }
+      ]
+    }
+  }
+};
 
 // ──────────────────────────────────────────────
-// Dashboard Screen (메인 화면)
+// 1. Upload Screen (JSON 입력기)
 // ──────────────────────────────────────────────
-function Dashboard({ appData }) {
-    const [selectedClassId, setSelectedClassId] = useState(Object.keys(appData.classes)[0]);
-    const [activeTab, setActiveTab] = useState('schedule');
-
-    const currentData = appData.classes[selectedClassId];
-
-    // 이미지 캡처 기능 (학생들도 자기 진도 캡처 가능)
-    const handleDownloadImage = () => {
-        const element = document.getElementById('capture-area');
-        if (!element) return;
-        element.classList.add('capture-mode');
-        window.html2canvas(element, { backgroundColor:'#f8fafc', scale:2, useCORS:true, logging:false })
-            .then(canvas => {
-                const link = document.createElement('a');
-                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.','');
-                link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                element.classList.remove('capture-mode');
-            })
-            .catch(err => {
-                console.error(err);
-                element.classList.remove('capture-mode');
-                alert("캡처에 실패했습니다.");
-            });
-    };
-
-    const getBadgeColor = (type) => {
-        switch(type) {
-            case 'concept':  return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-            case 'practice': return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'deep':     return 'bg-purple-100 text-purple-800 border-purple-200';
-            case 'ebs':      return 'bg-amber-100 text-amber-800 border-amber-200';
-            case 'test':     return 'bg-red-100 text-red-800 border-red-200 font-bold';
-            case 'final':    return 'bg-slate-800 text-white border-slate-900';
-            case 'completed': return 'bg-slate-200 text-slate-500 border-slate-300';
-            default:         return 'bg-slate-100 text-slate-800 border-slate-200';
-        }
-    };
-
-    const renderStatus = (status) => {
-        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg">O</span>;
-        if (status === 'X')  return <span className="text-red-600 font-black text-lg">X</span>;
-        if (status === '△') return <span className="text-amber-500 font-black text-lg">△</span>;
-        if (status === 'H')  return <span className="text-blue-600 font-black text-lg">H</span>;
-        return <span className="text-slate-300 font-bold">-</span>;
-    };
-
-    const isExempt = (name) => {
-        return currentData.assignments.every(a => (a.status?.[name] === 'H' || a.status?.[name] === undefined));
-    };
-
-    const calcProgress = (statusObj) => {
-        if (!statusObj) return { percentage: 0 };
-        const vals = Object.values(statusObj).filter(s => s !== 'H');
-        const total = vals.length;
-        if (!total) return { percentage: 0 };
-        const score = vals.filter(s => s === 'O').length + vals.filter(s => s === '△').length * 0.5;
-        return { percentage: Math.round((score / total) * 100) };
-    };
-
-    const calcStudentProgress = (name, assignments) => {
-        let total = 0, score = 0;
-        assignments.forEach(a => {
-            const active = Object.values(a.status || {}).some(v => v === 'O' || v === 'X' || v === '△');
-            if (active) {
-                const s = a.status?.[name];
-                if (s !== 'H') {
-                    total++;
-                    if (s === 'O') score += 1;
-                    if (s === '△') score += 0.5;
-                }
-            }
-        });
-        if (!total) return { percentage: 0, hasData: false };
-        return { percentage: Math.round((score / total) * 100), hasData: true };
-    };
-
-    return (
-        <div className="min-h-screen pb-20 relative z-10 fade-in">
-            {/* Header */}
-            <header className="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
-                <div className="max-w-4xl mx-auto relative">
-                    <h2 className="font-mono-tech text-blue-600 font-bold tracking-[0.3em] text-xs mb-3">
-                        [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
-                    </h2>
-                    <h1 className="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
-                        {appData.mainTitle}
-                    </h1>
-                    
-                    <div className="flex flex-col items-center gap-3 mb-5 mt-2">
-                        <p className="font-mono-tech text-emerald-600 font-bold tracking-widest text-sm flex items-center gap-2">
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full cursor-blink inline-block"></span>
-                            &gt; System online. Data verified._
-                        </p>
-                    </div>
-
-                    {/* Youtube Link */}
-                    <div className="flex justify-center mb-6 no-print">
-                        <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
-                            </svg>
-                            [ 휘T 유튜브 복습 링크 ]
-                        </a>
-                    </div>
-
-                    {/* Class Tabs */}
-                    <div className="flex flex-wrap justify-center gap-3 mt-4 no-print">
-                        {Object.entries(appData.classes).map(([id, cls]) => (
-                            <button key={id} onClick={() => { setSelectedClassId(id); setActiveTab('schedule'); }}
-                                className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase transition-all border rounded ${
-                                    selectedClassId === id
-                                    ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                                    : 'bg-white border-slate-300 text-slate-500 hover:text-blue-600 hover:border-blue-300'
-                                }`}>
-                                {cls.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-5xl mx-auto px-4 mt-8 relative z-20">
-
-                {/* Title Block */}
-                <div className="terran-panel p-6 md:p-8 mb-6 text-center">
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2 font-hud tracking-wide">{currentData.title}</h2>
-                    <p className="text-slate-500 font-mono-tech text-sm">{currentData.subtitle}</p>
-                </div>
-
-                {/* Notices */}
-                <div className="terran-panel p-6 md:p-8 mb-6">
-                    <h3 className="text-lg font-mono-tech font-bold mb-4 flex items-center text-blue-700 uppercase tracking-widest border-b border-slate-200 pb-2">
-                        <span className="text-blue-500 mr-2 text-xl">■</span>
-                        System Log & Directives
-                    </h3>
-                    <div className="space-y-3 font-mono-tech text-sm">
-                        {(currentData.notices || []).map((notice, i) => (
-                            <p key={i} className="text-slate-700 leading-relaxed flex items-start">
-                                <span className="mr-3 text-blue-500 select-none">&gt;</span>
-                                <span dangerouslySetInnerHTML={{__html: notice}}></span>
-                            </p>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Exam Scope */}
-                <div className="terran-panel p-6 md:p-8 mb-8">
-                    <h3 className="text-lg font-mono-tech font-bold mb-5 flex items-center text-blue-700 uppercase tracking-widest border-b border-slate-200 pb-2">
-                        <span className="text-blue-500 mr-2 text-xl">■</span>
-                        Target Coordinates (Exam Scope)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[['physics','[A] PHYSICS'],['chemistry','[B] CHEMISTRY'],['biology','[C] BIOLOGY'],['earth','[D] EARTH SCI']].map(([key, label]) => (
-                            <div key={key} className="bg-slate-50 border border-slate-200 p-4 hover:border-blue-400 transition-colors group rounded-sm">
-                                <h4 className="font-mono-tech font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 flex justify-between items-center group-hover:text-blue-600">
-                                    <span>{label}</span>
-                                    <span className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200">
-                                        {(currentData.examScope?.[key] || []).length} LOC
-                                    </span>
-                                </h4>
-                                <ul className="text-xs font-mono-tech text-slate-600 space-y-2">
-                                    {(currentData.examScope?.[key] || []).map((item, i) => (
-                                        <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Sub Tabs */}
-                <div className="flex justify-center mb-4 space-x-2 no-print">
-                    {[['schedule','[1] TIME_TABLE'],['assignments','[2] CREW_TRACKER']].map(([tab, label]) => (
-                        <button key={tab} onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase border transition-all duration-200 rounded-t-md ${
-                                activeTab === tab
-                                ? 'bg-white border-slate-300 border-b-white text-blue-600 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]'
-                                : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-white hover:text-blue-500'
-                            }`}
-                            style={activeTab === tab ? { marginBottom:'-1px', zIndex:10, position:'relative' } : {}}>
-                            {label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Schedule Tab */}
-                {activeTab === 'schedule' && (
-                    <div className="terran-panel overflow-hidden fade-in">
-                        <div className="p-4 bg-slate-50 border-b border-slate-200">
-                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
-                                <span className="text-blue-500 mr-2">●</span> OPERATION SCHEDULE
-                            </h3>
-                        </div>
-                        <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full text-left border-collapse min-w-[800px]">
-                                <thead>
-                                    <tr className="bg-slate-100 text-slate-600 text-xs font-mono-tech tracking-widest border-b border-slate-200">
-                                        <th className="py-3 px-6 text-center w-16">SEQ</th>
-                                        <th className="py-3 px-4 w-24">DATE</th>
-                                        <th className="py-3 px-6">MISSION_OBJECTIVE</th>
-                                        <th className="py-3 px-6 w-1/4 text-center">REQUIRED_ACTION</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm font-sans">
-                                    {(currentData.schedule || []).map((row) => (
-                                        <tr key={row.id} className={`terran-row-hover group ${row.type === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
-                                            <td className="py-4 px-6 text-center">
-                                                <span className={`inline-block px-2 py-0.5 rounded font-mono-tech font-bold border ${getBadgeColor(row.type)}`}>
-                                                    #{String(row.id).padStart(2,'0')}
-                                                </span>
-                                            </td>
-                                            <td className="py-4 px-4 font-mono-tech text-slate-500 font-bold">
-                                                {row.date} <span className="text-[10px] text-slate-400 font-normal">({row.day})</span>
-                                            </td>
-                                            <td className={`py-4 px-6 whitespace-pre-line leading-relaxed ${row.type==='test'?'text-red-600 font-bold':row.type==='final'?'text-slate-900 font-bold':row.type==='completed'?'text-slate-500':'text-slate-700'}`}>
-                                                {row.content}
-                                            </td>
-                                            <td className="py-4 px-6 text-center">
-                                                <span className={`bg-white font-mono-tech text-xs font-bold px-3 py-1.5 rounded border border-slate-200 block w-full transition-colors ${row.type === 'completed' ? 'text-slate-400' : 'text-slate-600 group-hover:border-blue-300 group-hover:text-blue-700'}`}>
-                                                    {row.homework}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
-                {/* Assignments Tab */}
-                {activeTab === 'assignments' && (
-                    <div id="capture-area" className="terran-panel overflow-hidden fade-in flex flex-col pt-1">
-                        <div className="p-4 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-white">
-                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
-                                <span className="text-blue-500 mr-2">●</span>
-                                CREW TASK STATUS (TOTAL: {currentData.students.length})
-                            </h3>
-                            <div className="flex items-center gap-3">
-                                <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
-                                    <span className="text-emerald-600">O:완료</span>
-                                    <span className="text-amber-500">△:미흡</span>
-                                    <span className="text-blue-600">H:HOLD</span>
-                                    <span className="text-slate-400">-:미제출</span>
-                                </div>
-                                {/* Capture Button */}
-                                <button onClick={handleDownloadImage}
-                                    className="no-print flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors font-bold rounded">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                        <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
-                                    </svg>
-                                    [ 캡처하기 ]
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="overflow-x-auto custom-scrollbar flex-1 bg-white">
-                            <table className="w-full text-left border-collapse min-w-[1000px]">
-                                <thead>
-                                    <tr className="bg-slate-100 text-slate-600 text-xs font-mono-tech tracking-widest border-b border-slate-200">
-                                        <th className="py-3 px-6 text-center w-12">ID</th>
-                                        <th className="py-3 px-4 min-w-[200px]">TASK / DUE</th>
-                                        <th className="py-3 px-4 text-center border-l border-slate-200">CMPLTN_%</th>
-                                        {currentData.students.map((s, i) => (
-                                            <th key={i} className={`py-3 px-2 text-center min-w-[60px] ${isExempt(s) ? 'text-blue-600' : 'text-slate-600'}`}>
-                                                {s}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {(currentData.assignments || []).length === 0 && (
-                                        <tr><td colSpan={3+currentData.students.length} className="text-center py-10 font-mono-tech text-slate-400">NO DATA</td></tr>
-                                    )}
-                                    {(currentData.assignments || []).map((a, idx) => {
-                                        const { percentage } = calcProgress(a.status);
-                                        return (
-                                            <tr key={a.id} className="terran-row-hover text-sm font-sans">
-                                                <td className="py-3 px-6 text-center text-slate-400 font-mono-tech font-bold">
-                                                    {String(idx+1).padStart(2,'0')}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="font-bold text-slate-700">{a.title}</div>
-                                                    <div className="text-[10px] font-mono-tech text-slate-500 mt-1 font-bold">
-                                                        <span className="text-blue-500 mr-1">&gt;</span>{a.dueDate}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4 border-l border-slate-100 text-center">
-                                                    <div className="flex flex-col items-center">
-                                                        <span className={`text-xs font-mono-tech font-bold ${percentage>=80?'text-emerald-600':percentage>0?'text-blue-600':'text-slate-400'}`}>
-                                                            {percentage}%
-                                                        </span>
-                                                        <div className="w-12 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                                                            <div className={`h-full ${percentage>=80?'bg-emerald-500':'bg-blue-500'}`} style={{width:`${percentage}%`}}></div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                {currentData.students.map((s, i) => (
-                                                    <td key={i} className={`py-3 px-2 text-center border-l border-slate-50 ${isExempt(s)?'bg-blue-50/40':''}`}>
-                                                        {renderStatus(a.status?.[s] || '-')}
-                                                    </td>
-                                                ))}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Performance Metrics */}
-                        <div className="p-6 bg-slate-50 border-t border-slate-200">
-                            <h4 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase mb-5 flex items-center">
-                                <span className="text-blue-500 mr-2 text-lg">📊</span> CREW PERFORMANCE METRICS
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                                {currentData.students.map(s => {
-                                    const { percentage, hasData } = calcStudentProgress(s, currentData.assignments || []);
-                                    return (
-                                        <div key={s} className="flex items-center gap-3 font-mono-tech">
-                                            <div className={`w-16 text-sm truncate font-bold ${isExempt(s)?'text-blue-600':'text-slate-600'}`}>{s}</div>
-                                            <div className="flex-1 h-3 bg-slate-200 border border-slate-300 relative overflow-hidden rounded-sm">
-                                                {hasData ? (
-                                                    <div
-                                                        className={`h-full transition-all duration-1000 ease-out ${percentage>=80?'bg-emerald-500':percentage>=50?'bg-amber-400':'bg-red-500'}`}
-                                                        style={{width:`${percentage}%`}}>
-                                                        <div className="absolute inset-0 tech-pattern opacity-50"></div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="h-full bg-slate-100 flex items-center justify-center text-[9px] text-slate-400 tracking-widest font-bold">
-                                                        {isExempt(s) ? 'HOLD' : 'NO DATA'}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className={`w-10 text-right text-sm font-bold ${hasData?(percentage>=80?'text-emerald-600':percentage>=50?'text-amber-600':'text-red-600'):'text-slate-400'}`}>
-                                                {hasData ? `${percentage}%` : 'N/A'}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </main>
-
-            <footer className="mt-12 text-center text-slate-400 text-xs font-mono-tech pb-8 relative z-20 font-bold">
-                <p className="flex justify-center items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse inline-block"></span>
-                    SYSTEMS ONLINE. ALL COMMS OPEN.
-                </p>
-            </footer>
-        </div>
-    );
-}
-
-// ──────────────────────────────────────────────
-// Root App (JSON Fetch Logic)
+@@ -593,11 +724,24 @@ <h4 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest u
+// Root App
 // ──────────────────────────────────────────────
 function App() {
     const [appData, setAppData] = useState(null);
-    const [error, setError] = useState(null);
+    // 브라우저 로컬 저장소(localStorage)를 확인하여 업로드한 데이터가 있으면 띄우고, 없으면 기본 내장 데이터를 띄웁니다.
+    const [appData, setAppData] = useState(() => {
+        const saved = localStorage.getItem('scienceVesselData');
+        if (saved) {
+            try { return JSON.parse(saved); } catch(e) {}
+        }
+        return initialAppData; 
+    });
 
-    useEffect(() => {
-        // 깃허브 캐시(과거 기록)를 무시하고 항상 최신 data.json을 가져오도록 시간값을 뒤에 붙여줍니다.
-        const url = `./data.json?t=${new Date().getTime()}`;
-        
-        fetch(url)
-            .then(res => {
-                if(!res.ok) throw new Error("서버에서 데이터를 불러오지 못했습니다.");
-                return res.json();
-            })
-            .then(data => setAppData(data))
-            .catch(err => setError(err.message));
-    }, []);
+    // 새 데이터를 업로드하면 로컬 저장소에 저장하여 새로고침해도 무조건 유지되게 합니다.
+    const handleLoadData = (data) => {
+        localStorage.setItem('scienceVesselData', JSON.stringify(data));
+        setAppData(data);
+    };
 
-    if (error) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center">
-                <p className="text-red-500 font-bold mb-2">⚠ Error: {error}</p>
-                <p className="text-slate-500 text-sm">data.json 파일이 깃허브에 정상적으로 업로드되었는지 확인해 주세요.</p>
-            </div>
-        );
-    }
-
-    if (!appData) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center">
-                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="font-mono-tech text-blue-600 font-bold tracking-widest text-sm cursor-blink">
-                    [ SYSTEM BOOTING... ]
-                </p>
-            </div>
-        );
-    }
-
-    return <Dashboard appData={appData} />;
+return appData
+? <Dashboard appData={appData} onReset={() => setAppData(null)} />
+        : <UploadScreen onLoad={setAppData} />;
+        : <UploadScreen onLoad={handleLoadData} />;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-</script>
-</body>
-</html>
