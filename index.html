@@ -263,6 +263,7 @@ function Dashboard({ appData, onReset }) {
             case 'ebs':      return 'bg-amber-100 text-amber-800 border-amber-200';
             case 'test':     return 'bg-red-100 text-red-800 border-red-200 font-bold';
             case 'final':    return 'bg-slate-800 text-white border-slate-900';
+            case 'completed': return 'bg-slate-200 text-slate-500 border-slate-300'; // 새로 추가된 완료 상태
             default:         return 'bg-slate-100 text-slate-800 border-slate-200';
         }
     };
@@ -437,7 +438,7 @@ function Dashboard({ appData, onReset }) {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm font-sans">
                                     {(currentData.schedule || []).map((row) => (
-                                        <tr key={row.id} className="terran-row-hover group">
+                                        <tr key={row.id} className={`terran-row-hover group ${row.type === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
                                             <td className="py-4 px-6 text-center">
                                                 <span className={`inline-block px-2 py-0.5 rounded font-mono-tech font-bold border ${getBadgeColor(row.type)}`}>
                                                     #{String(row.id).padStart(2,'0')}
@@ -446,11 +447,11 @@ function Dashboard({ appData, onReset }) {
                                             <td className="py-4 px-4 font-mono-tech text-slate-500 font-bold">
                                                 {row.date} <span className="text-[10px] text-slate-400 font-normal">({row.day})</span>
                                             </td>
-                                            <td className={`py-4 px-6 whitespace-pre-line leading-relaxed ${row.type==='test'?'text-red-600 font-bold':row.type==='final'?'text-slate-900 font-bold':'text-slate-700'}`}>
+                                            <td className={`py-4 px-6 whitespace-pre-line leading-relaxed ${row.type==='test'?'text-red-600 font-bold':row.type==='final'?'text-slate-900 font-bold':row.type==='completed'?'text-slate-500':'text-slate-700'}`}>
                                                 {row.content}
                                             </td>
                                             <td className="py-4 px-6 text-center">
-                                                <span className="bg-white font-mono-tech text-xs text-slate-600 font-bold px-3 py-1.5 rounded border border-slate-200 block w-full group-hover:border-blue-300 group-hover:text-blue-700 transition-colors">
+                                                <span className={`bg-white font-mono-tech text-xs font-bold px-3 py-1.5 rounded border border-slate-200 block w-full transition-colors ${row.type === 'completed' ? 'text-slate-400' : 'text-slate-600 group-hover:border-blue-300 group-hover:text-blue-700'}`}>
                                                     {row.homework}
                                                 </span>
                                             </td>
