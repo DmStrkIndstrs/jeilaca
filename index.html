@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휘T Science Vessel - Data Uploader</title>
+    <title>휘T Science Vessel</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React & ReactDOM -->
@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- html2canvas for Image Capture -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts: Rajdhani (Sci-Fi Text) & Share Tech Mono (Terminal Data) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <style>
@@ -64,32 +64,6 @@
         @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .fade-in { animation: fadeIn 0.35s ease-out both; }
 
-        .json-textarea {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            resize: vertical;
-            outline: none;
-            border: 2px solid #cbd5e1;
-            background: #f8fafc;
-            color: #1e293b;
-            transition: border-color 0.2s, background 0.2s;
-            width: 100%;
-            min-height: 300px;
-            padding: 16px;
-            border-radius: 4px;
-        }
-        .json-textarea:focus {
-            border-color: #0284c7;
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(2,132,199,0.1);
-        }
-        .json-textarea.has-error {
-            border-color: #ef4444;
-            background: #fff5f5;
-        }
-        .json-textarea::placeholder { color: #94a3b8; }
-
         .custom-scrollbar::-webkit-scrollbar { height:8px; width:8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background:#e2e8f0; border-radius:4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:4px; }
@@ -100,24 +74,6 @@
             background-size:10px 10px;
         }
 
-        .upload-screen {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .error-shake { animation: shake 0.4s ease; }
-        @keyframes shake {
-            0%,100%{transform:translateX(0)}
-            20%{transform:translateX(-8px)}
-            40%{transform:translateX(8px)}
-            60%{transform:translateX(-4px)}
-            80%{transform:translateX(4px)}
-        }
-
         .capture-mode { background-color:#f8fafc !important; }
     </style>
 </head>
@@ -125,247 +81,18 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
-
-// 👇 초기 데이터 (가장 최신 진도/과제 현황 내장. 로컬스토리지에 데이터가 없을 때 이 데이터를 기본으로 띄웁니다.)
-const initialAppData = {
-  "mainTitle": "휘T SCIENCE VESSEL",
-  "classes": {
-    "kumho": {
-      "name": "SECTOR: KUMHO_1",
-      "title": "금호고 1학년 과학 중간고사 대비반",
-      "subtitle": "STATUS: 1등급 목표 4회독 프로토콜 가동 중",
-      "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 기출픽/마더텅 활용 <strong>소단원별 집중 타격</strong>이 진행됩니다.",
-        "🚀 <span class='text-blue-600 font-bold'>[MODE.SWITCH]</span> <strong>기출픽 단계</strong>: 휘T가 대표문제를 직접 풀어주는 강의식 진행.<br>&nbsp;&nbsp;&nbsp;<strong>마더텅 단계</strong>: 개별 과제 검사 및 1:1 약점 보완(클리닉) 방식으로 전환됩니다.",
-        "<span class='text-purple-600 font-bold'>[STUDY.RULE]</span> <strong>기출문제는 책에 직접 풀지 않고 '노트'에 풉니다.</strong> 채점 후 틀린 문제만 책에 체크하세요!",
-        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
-        "<span class='text-red-600 font-bold'>[WARN.TEST]</span> 3/19(목) 단위변환훈련 테스트 진행! (기준: 46개 이상 합격 / 45개 이하 정답자 <strong>무한 재시험</strong>)",
-        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 최소수준성취평가 3/24(화) 제출 필수! (신규생은 3/17 배부)"
-      ],
-      "examScope": {
-        "physics": [
-          "II-2-2. 물질의 전기적 특성",
-          "III-2-1. 중력의 작용"
-        ],
-        "chemistry": [
-          "I-1-1. 시간과 공간",
-          "I-1-2. 기본량과 단위",
-          "I-2-1. 측정과 측정 표준",
-          "I-2-2. 신호와 정보"
-        ],
-        "biology": [
-          "II-2-1. 지각과 생명체를 구성하는 물질"
-        ],
-        "earth": [
-          "II-1-1. 우주 초기에 생성된 원소",
-          "II-1-2. 별의 진화와 원소의 생성"
-        ]
-      },
-      "schedule": [
-        { "id": 1, "date": "3/3", "day": "화", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
-        { "id": 2, "date": "3/5", "day": "목", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
-        { "id": 3, "date": "3/10", "day": "화", "content": "✅ [종료] [1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
-        { "id": 4, "date": "3/12", "day": "목", "content": "✅ [종료] [1교시] 생명체 구성 물질 (개념 진도)\n[2교시] 과제 검사 및 질의응답", "homework": "평가문제집 및 오투 풀이", "type": "completed" },
-        { "id": 5, "date": "3/17", "day": "화", "content": "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 기존생: 문제풀이 / 신입생: 1단원 개념\n📝 (단위변환 문제 & 신입생 성취평가 배부)", "homework": "평가문제집 및 오투 풀이", "type": "concept" },
-        { "id": 6, "date": "3/19", "day": "목", "content": "[1교시] 중력의 작용 (개념 진도)\n[2교시] 기존생: 과제검사 / 신입생: 우주 초기 원소\n🚨 단위변환 TEST (45개 이하 무한 재시험)", "homework": "단위변환 오답 노트", "type": "concept" },
-        { "id": 7, "date": "3/24", "day": "화", "content": "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n[범위: 시간과공간~신호와정보, 우주초기원소, 지각과생명체, 전기적특성]\n(※ 최소수준성취평가 제출 마감)\n📚 [배부] 기출픽 교재", "homework": "테스트 오답 정리", "type": "test" },
-        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
-        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
-        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 (대표문제 직접 풀이)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 문제 풀이", "type": "practice" },
-        { "id": 11, "date": "4/2", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
-        { "id": 12, "date": "4/4", "day": "토", "content": "🏆 [TEST] 2차 기출픽 누적 테스트 (미래엔/천재)\n(기출픽 전체 범위 누적 점검)", "homework": "테스트 오답 노트 작성", "type": "test" },
-        { "id": 13, "date": "4/7", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
-        { "id": 14, "date": "4/9", "day": "목", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
-        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [마더텅] 소단원 3개 (개별검사 진행)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "마더텅 3개 단원 문제 풀이", "type": "deep" },
-        { "id": 16, "date": "4/14", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
-        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)\n📚 [배부] 피날레 교재 (암기자료 + 기출모음)", "homework": "테스트 오답 및 피날레 예습", "type": "test" },
-        { "id": 18, "date": "4/18", "day": "토", "content": "⚡ [실전대비] 인근 학교 기출 실전 분석\n(피날레 기출모음 집중 풀이 훈련)", "homework": "기출노트에 풀고 오답만 책에 체크", "type": "ebs" },
-        { "id": 19, "date": "4/21", "day": "화", "content": "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", "homework": "모의고사 오답 분석", "type": "final" },
-        { "id": 20, "date": "4/23", "day": "목", "content": "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", "homework": "개별 취약 파트 복습", "type": "final" },
-        { "id": 21, "date": "4/25", "day": "토", "content": "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", "homework": "마무리 총정리 암기", "type": "final" },
-        { "id": 22, "date": "직보", "day": "-", "content": "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", "homework": "1학기 중간고사 1등급!", "type": "final" }
-      ],
-      "students": ["고성준", "김종윤", "신수민", "오서연", "이승재", "이재윤", "정현경", "진민욱", "한정빈", "김건우", "박시우"],
-      "assignments": [
-        { "id": 1, "title": "오투 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 2, "title": "오투 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 3, "title": "오투 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 4, "title": "최소성취수준평가", "dueDate": "3/24 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "-", "한정빈": "-", "김건우": "H", "박시우": "H" } },
-        { "id": 5, "title": "평가문제집 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 6, "title": "평가문제집 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 7, "title": "평가문제집 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
-        { "id": 8, "title": "오투 II-2-1. 지각과 생명체...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } },
-        { "id": 9, "title": "평가문제집 II-2-1. 지각...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } }
-      ]
-    },
-    "jayang": {
-      "name": "SECTOR: JAYANG_SUNGSU",
-      "title": "자양/성수고 연합 방어선 (1학기 내신 대비)",
-      "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
-      "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)",
-        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 핵심 개념 요약 후, 각 학교별 기출문제 및 빈출 유형 타겟팅 훈련.",
-        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
-        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 매주 접속(수업) 시 지난 주차 데이터 기반 미니 테스트 진행."
-      ],
-      "examScope": {
-        "physics": ["(DATA PENDING)"],
-        "chemistry": ["(DATA PENDING)"],
-        "biology": ["(DATA PENDING)"],
-        "earth": ["(DATA PENDING)"]
-      },
-      "schedule": [
-        { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 통합과학 시스템 OT 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
-        { "id": 2, "date": "3/26", "day": "목", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
-        { "id": 3, "date": "3/28", "day": "토", "content": "2단원 기본 개념 진도 (물질의 규칙성)", "homework": "개념 복습 프린트", "type": "concept" },
-        { "id": 4, "date": "3/31", "day": "화", "content": "2단원 개념 완료 및 학교별 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
-        { "id": 5, "date": "4/02", "day": "목", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
-      ],
-      "students": ["(Target_Alpha)", "(Target_Beta)", "(Target_Gamma)"],
-      "assignments": [
-        { "id": 1, "title": "1주차 프로토콜 프린트", "dueDate": "3/28 (토)", "status": { "(Target_Alpha)": "-", "(Target_Beta)": "-", "(Target_Gamma)": "-" } }
-      ]
-    },
-    "middle3": {
-      "name": "SECTOR: MID_YEAR3",
-      "title": "중3 과학 내신 연합 특강 (동마·한대부·마장중)",
-      "subtitle": "STATUS: 3/23(월) 개강! 월/수/금 중등 최상위권 도약 프로토콜",
-      "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 동마중, 한대부중, 마장중 연합 내신 대비반이 3/23(월)에 본격 가동됩니다. (월/수/금 진행)",
-        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 3개 학교의 공통 출제 범위를 묶어 효율적인 1등급 달성 커리큘럼으로 진행됩니다.",
-        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
-        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 학교별 시험 일정 및 세부 진도가 파악되는 대로 즉각 맞춤 훈련으로 전환됩니다."
-      ],
-      "examScope": {
-        "physics": ["(DATA PENDING)"],
-        "chemistry": ["(DATA PENDING)"],
-        "biology": ["(DATA PENDING)"],
-        "earth": ["(DATA PENDING)"]
-      },
-      "schedule": [
-        { "id": 1, "date": "3/23", "day": "월", "content": "[개강] 중3 과학 오리엔테이션 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
-        { "id": 2, "date": "3/25", "day": "수", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
-        { "id": 3, "date": "3/27", "day": "금", "content": "2단원 기본 개념 진도", "homework": "개념 복습 프린트", "type": "concept" },
-        { "id": 4, "date": "3/30", "day": "월", "content": "2단원 개념 완료 및 공통 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
-        { "id": 5, "date": "4/01", "day": "수", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
-      ],
-      "students": ["(대기중1)", "(대기중2)", "(대기중3)"],
-      "assignments": [
-        { "id": 1, "title": "1주차 오리엔테이션 프린트", "dueDate": "3/30 (월)", "status": { "(대기중1)": "-", "(대기중2)": "-", "(대기중3)": "-" } }
-      ]
-    }
-  }
-};
+const { useState, useEffect } = React;
 
 // ──────────────────────────────────────────────
-// 1. Upload Screen (JSON 입력기)
+// Dashboard Screen (메인 화면)
 // ──────────────────────────────────────────────
-function UploadScreen({ onLoad }) {
-    const [text, setText] = useState('');
-    const [error, setError] = useState('');
-    const [shaking, setShaking] = useState(false);
-
-    const triggerShake = () => {
-        setShaking(true);
-        setTimeout(() => setShaking(false), 500);
-    };
-
-    const handleSubmit = () => {
-        const trimmed = text.trim();
-        if (!trimmed) {
-            setError('⚠ JSON 코드를 붙여넣어 주세요');
-            triggerShake();
-            return;
-        }
-        try {
-            const data = JSON.parse(trimmed);
-            if (!data.classes) throw new Error('classes 필드 없음');
-            setError('');
-            onLoad(data);
-        } catch (err) {
-            setError('⚠ JSON 파싱 오류 — 올바른 데이터 형식인지 확인하세요');
-            triggerShake();
-        }
-    };
-
-    const handleKeyDown = (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            handleSubmit();
-        }
-    };
-
-    return (
-        <div className="upload-screen fade-in">
-            <div className="text-center mb-10">
-                <p className="font-mono-tech text-blue-600 tracking-[0.3em] text-xs font-bold mb-3">
-                    [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
-                </p>
-                <h1 className="font-hud text-5xl md:text-6xl font-black tracking-wider text-slate-800 mb-2">
-                    휘T SCIENCE VESSEL
-                </h1>
-                <p className="font-mono-tech text-emerald-600 text-sm font-bold flex justify-center items-center gap-2">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full cursor-blink inline-block"></span>
-                    &gt; Awaiting data transmission..._
-                </p>
-            </div>
-
-            <div className={`w-full max-w-3xl ${shaking ? 'error-shake' : ''}`}>
-                <div className="terran-panel p-6">
-                    <p className="font-mono-tech text-sm text-blue-600 font-bold tracking-widest mb-3 flex items-center gap-2">
-                        <span className="text-blue-500">■</span>
-                        JSON 코드 붙여넣기
-                        <span className="ml-auto text-slate-400 text-xs bg-slate-100 px-2 py-1 rounded">Ctrl + Enter 실행</span>
-                    </p>
-
-                    <textarea
-                        className={`json-textarea custom-scrollbar ${error ? 'has-error' : ''}`}
-                        placeholder={`여기에 AI가 만들어준 JSON 코드를 그대로 붙여넣으세요 (Ctrl+V)...\n\n예시:\n{\n  "mainTitle": "휘T SCIENCE VESSEL",\n  "classes": { ... }\n}`}
-                        value={text}
-                        onChange={e => { setText(e.target.value); setError(''); }}
-                        onKeyDown={handleKeyDown}
-                        spellCheck={false}
-                        autoComplete="off"
-                    />
-
-                    {error && (
-                        <div className="mt-3 font-mono-tech text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded font-bold fade-in">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="flex items-center gap-3 mt-4">
-                        <button
-                            onClick={handleSubmit}
-                            className="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white font-mono-tech font-bold text-base tracking-widest uppercase transition-colors rounded shadow-md"
-                        >
-                            [ 시스템 연동 및 대시보드 열기 ]
-                        </button>
-                        {text && (
-                            <button
-                                onClick={() => { setText(''); setError(''); }}
-                                className="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-mono-tech text-sm font-bold tracking-widest uppercase transition-colors rounded border border-slate-200"
-                            >
-                                초기화
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ──────────────────────────────────────────────
-// 2. Dashboard Screen (데이터 출력기)
-// ──────────────────────────────────────────────
-function Dashboard({ appData, onReset }) {
+function Dashboard({ appData }) {
     const [selectedClassId, setSelectedClassId] = useState(Object.keys(appData.classes)[0]);
     const [activeTab, setActiveTab] = useState('schedule');
 
     const currentData = appData.classes[selectedClassId];
 
-    // 이미지 캡처 기능
+    // 이미지 캡처 기능 (학생들도 자기 진도 캡처 가능)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
@@ -394,7 +121,7 @@ function Dashboard({ appData, onReset }) {
             case 'ebs':      return 'bg-amber-100 text-amber-800 border-amber-200';
             case 'test':     return 'bg-red-100 text-red-800 border-red-200 font-bold';
             case 'final':    return 'bg-slate-800 text-white border-slate-900';
-            case 'completed': return 'bg-slate-200 text-slate-500 border-slate-300'; // 새로 추가된 완료 상태
+            case 'completed': return 'bg-slate-200 text-slate-500 border-slate-300';
             default:         return 'bg-slate-100 text-slate-800 border-slate-200';
         }
     };
@@ -413,7 +140,7 @@ function Dashboard({ appData, onReset }) {
 
     const calcProgress = (statusObj) => {
         if (!statusObj) return { percentage: 0 };
-        const vals = Object.values(statusObj).filter(s => s !== 'H'); // H는 모수에서 제외
+        const vals = Object.values(statusObj).filter(s => s !== 'H');
         const total = vals.length;
         if (!total) return { percentage: 0 };
         const score = vals.filter(s => s === 'O').length + vals.filter(s => s === '△').length * 0.5;
@@ -452,21 +179,18 @@ function Dashboard({ appData, onReset }) {
                     <div className="flex flex-col items-center gap-3 mb-5 mt-2">
                         <p className="font-mono-tech text-emerald-600 font-bold tracking-widest text-sm flex items-center gap-2">
                             <span className="w-2 h-2 bg-emerald-500 rounded-full cursor-blink inline-block"></span>
-                            &gt; System online. Data loaded._
+                            &gt; System online. Data verified._
                         </p>
                     </div>
 
-                    {/* Control Buttons */}
-                    <div className="flex flex-wrap justify-center items-center gap-3 mb-6 no-print">
+                    {/* Youtube Link */}
+                    <div className="flex justify-center mb-6 no-print">
                         <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                                 <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
                             </svg>
-                            [ VIDEO DATALINK ]
+                            [ 휘T 유튜브 복습 링크 ]
                         </a>
-                        <button onClick={onReset} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-300 text-slate-600 font-mono-tech text-xs tracking-widest hover:bg-slate-200 hover:text-slate-800 transition-colors rounded font-bold">
-                            ↩ [ JSON 새로 입력하기 ]
-                        </button>
                     </div>
 
                     {/* Class Tabs */}
@@ -616,7 +340,7 @@ function Dashboard({ appData, onReset }) {
                                         <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
                                         <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
                                     </svg>
-                                    [ CAPTURE ]
+                                    [ 캡처하기 ]
                                 </button>
                             </div>
                         </div>
@@ -721,27 +445,46 @@ function Dashboard({ appData, onReset }) {
 }
 
 // ──────────────────────────────────────────────
-// Root App
+// Root App (JSON Fetch Logic)
 // ──────────────────────────────────────────────
 function App() {
-    // 브라우저 로컬 저장소(localStorage)를 확인하여 업로드한 데이터가 있으면 띄우고, 없으면 기본 내장 데이터를 띄웁니다.
-    const [appData, setAppData] = useState(() => {
-        const saved = localStorage.getItem('scienceVesselData');
-        if (saved) {
-            try { return JSON.parse(saved); } catch(e) {}
-        }
-        return initialAppData; 
-    });
+    const [appData, setAppData] = useState(null);
+    const [error, setError] = useState(null);
 
-    // 새 데이터를 업로드하면 로컬 저장소에 저장하여 새로고침해도 무조건 유지되게 합니다.
-    const handleLoadData = (data) => {
-        localStorage.setItem('scienceVesselData', JSON.stringify(data));
-        setAppData(data);
-    };
+    useEffect(() => {
+        // 깃허브 캐시(과거 기록)를 무시하고 항상 최신 data.json을 가져오도록 시간값을 뒤에 붙여줍니다.
+        const url = `./data.json?t=${new Date().getTime()}`;
+        
+        fetch(url)
+            .then(res => {
+                if(!res.ok) throw new Error("서버에서 데이터를 불러오지 못했습니다.");
+                return res.json();
+            })
+            .then(data => setAppData(data))
+            .catch(err => setError(err.message));
+    }, []);
 
-    return appData
-        ? <Dashboard appData={appData} onReset={() => setAppData(null)} />
-        : <UploadScreen onLoad={handleLoadData} />;
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <p className="text-red-500 font-bold mb-2">⚠ Error: {error}</p>
+                <p className="text-slate-500 text-sm">data.json 파일이 깃허브에 정상적으로 업로드되었는지 확인해 주세요.</p>
+            </div>
+        );
+    }
+
+    if (!appData) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="font-mono-tech text-blue-600 font-bold tracking-widest text-sm cursor-blink">
+                    [ SYSTEM BOOTING... ]
+                </p>
+            </div>
+        );
+    }
+
+    return <Dashboard appData={appData} />;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
