@@ -11,6 +11,8 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas for Image Capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Google Fonts: Rajdhani (Sci-Fi Text) & Share Tech Mono (Terminal Data) -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -65,10 +67,19 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; border-radius: 0; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 0; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
+
+        /* Tech Progress Bar Pattern */
+        .tech-pattern {
+            background-image: linear-gradient(-45deg, rgba(0,0,0,0.15) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15) 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+        }
+
+        /* Capture specific styles to ensure solid background */
+        .capture-mode { background-color: #050b14 !important; }
     </style>
 </head>
 <body>
-    <div class="scanlines"></div>
+    <div class="scanlines no-print"></div>
     <div id="root"></div>
 
     <script type="text/babel">
@@ -172,6 +183,32 @@
 
             const currentData = appData.classes[selectedClassId];
 
+            // 이미지 다운로드 캡처 기능
+            const handleDownloadImage = () => {
+                const element = document.getElementById('capture-area');
+                if(!element) return;
+                
+                // 임시로 UI 최적화용 배경색 부여
+                element.classList.add('capture-mode');
+                
+                window.html2canvas(element, { 
+                    backgroundColor: '#050b14', // 테란 테마 배경색
+                    scale: 2, // 고해상도 캡처
+                    useCORS: true 
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
+                    link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    element.classList.remove('capture-mode');
+                }).catch(err => {
+                    console.error("Capture Failed:", err);
+                    element.classList.remove('capture-mode');
+                    alert("이미지 캡처 중 오류가 발생했습니다.");
+                });
+            };
+
             const getBadgeColor = (type) => {
                 switch(type) {
                     case 'concept': return 'bg-cyan-900/50 text-cyan-400 border-cyan-700';
@@ -194,13 +231,43 @@
 
             const calculateProgress = (statusObj) => {
                 if (!statusObj) return { completed: 0, partial: 0, total: 1, percentage: 0 };
-                const total = currentData.students.length;
+                
+                // 'H' (보류) 상태인 학생은 전체 모수(total)에서 제외
+                const validStatuses = Object.values(statusObj).filter(s => s !== 'H');
+                const total = validStatuses.length;
                 if(total === 0) return { completed: 0, partial: 0, total: 0, percentage: 0 };
                 
-                const completed = Object.values(statusObj).filter(s => s === 'O').length;
-                const partial = Object.values(statusObj).filter(s => s === '△').length;
-                const percentage = Math.round((completed / total) * 100);
+                const completed = validStatuses.filter(s => s === 'O').length;
+                const partial = validStatuses.filter(s => s === '△').length;
+                // 과제별 달성률 (완료 100%, 미흡 50% 반영)
+                const score = completed + (partial * 0.5);
+                const percentage = Math.round((score / total) * 100);
                 return { completed, partial, total, percentage };
+            };
+
+            // 개별 학생의 누적 성취도 계산 함수
+            const calculateStudentProgress = (studentName, assignments) => {
+                let totalAssigned = 0;
+                let score = 0;
+                
+                assignments.forEach(a => {
+                    // 해당 과제가 1명이라도 채점(O, X, △)되었다면 기한이 지난 '검사 완료' 과제로 간주
+                    const isAssignmentActive = Object.values(a.status || {}).some(val => val === 'O' || val === 'X' || val === '△');
+                    
+                    if (isAssignmentActive) {
+                        const status = a.status?.[studentName];
+                        // 'H'(보류)가 아닌 학생들만 모수(totalAssigned)에 포함
+                        if (status !== 'H') {
+                            totalAssigned++;
+                            if (status === 'O') score += 1;
+                            if (status === '△') score += 0.5;
+                            // '-' (미제출) 또는 'X'인 경우는 점수는 0점이지만 모수에는 포함되어 달성률을 깎음
+                        }
+                    }
+                });
+                
+                if (totalAssigned === 0) return { percentage: 0, hasData: false };
+                return { percentage: Math.round((score / totalAssigned) * 100), hasData: true };
             };
 
             return (
@@ -220,7 +287,7 @@
                                     <span className="w-2 h-2 bg-emerald-400 rounded-full cursor-blink shadow-[0_0_8px_#34d399]"></span>
                                     &gt; Explorer reporting!_
                                 </p>
-                                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-900/20 border border-red-700/50 text-red-400 font-mono-tech text-xs tracking-widest hover:bg-red-900/50 hover:text-red-300 transition-colors shadow-[0_0_10px_rgba(220,38,38,0.15)]">
+                                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-900/20 border border-red-700/50 text-red-400 font-mono-tech text-xs tracking-widest hover:bg-red-900/50 hover:text-red-300 transition-colors shadow-[0_0_10px_rgba(220,38,38,0.15)] no-print">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
                                     </svg>
@@ -229,7 +296,7 @@
                             </div>
                             
                             {/* Class Selection Tabs */}
-                            <div className="flex flex-wrap justify-center gap-4 mt-6">
+                            <div className="flex flex-wrap justify-center gap-4 mt-6 no-print">
                                 {Object.entries(appData.classes).map(([id, classInfo]) => (
                                     <button 
                                         key={id}
@@ -323,7 +390,7 @@
                         </div>
 
                         {/* View Navigation Tabs */}
-                        <div className="flex justify-center mb-4 space-x-2">
+                        <div className="flex justify-center mb-4 space-x-2 no-print">
                             <button 
                                 onClick={() => setActiveTab('schedule')}
                                 className={`px-6 py-2 font-mono-tech font-bold text-sm tracking-wider uppercase border transition-all duration-200 ${
@@ -391,21 +458,35 @@
                             </div>
                         )}
 
-                        {/* Tab 2: Assignment Content */}
+                        {/* Tab 2: Assignment Content (Wrap inside an ID for capture) */}
                         {activeTab === 'assignments' && (
-                            <div className="terran-panel overflow-hidden animate-[fadeIn_0.3s_ease-in-out]">
-                                <div className="p-4 bg-cyan-950/30 border-b border-cyan-900 flex justify-between items-center flex-wrap gap-4">
+                            <div id="capture-area" className="terran-panel overflow-hidden animate-[fadeIn_0.3s_ease-in-out] flex flex-col pt-1">
+                                <div className="p-4 border-b border-cyan-900 flex justify-between items-center flex-wrap gap-4">
                                     <h3 className="font-mono-tech font-bold text-cyan-400 text-sm tracking-widest uppercase">
                                         <span className="text-emerald-500 mr-2">●</span> CREW TASK STATUS (TOTAL: {currentData.students.length})
                                     </h3>
-                                    <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-black/40 px-3 py-1.5 rounded border border-slate-700">
-                                        <span className="text-emerald-400">O:CMPLT</span>
-                                        <span className="text-amber-400">△:PRTL</span>
-                                        <span className="text-blue-400">H:HOLD</span>
-                                        <span className="text-slate-500">-:NULL</span>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-black/40 px-3 py-1.5 rounded border border-slate-700">
+                                            <span className="text-emerald-400">O:CMPLT</span>
+                                            <span className="text-amber-400">△:PRTL</span>
+                                            <span className="text-blue-400">H:HOLD</span>
+                                            <span className="text-slate-500">-:NULL</span>
+                                        </div>
+                                        {/* Download Button */}
+                                        <button 
+                                            onClick={handleDownloadImage}
+                                            className="no-print flex items-center gap-2 px-3 py-1.5 bg-emerald-900/40 border border-emerald-500/50 text-emerald-300 font-mono-tech text-xs tracking-widest hover:bg-emerald-800 hover:text-emerald-100 transition-colors shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                                                <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
+                                            </svg>
+                                            [ CAPTURE ]
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="overflow-x-auto custom-scrollbar">
+                                <div className="overflow-x-auto custom-scrollbar flex-1">
                                     <table className="w-full text-left border-collapse min-w-[1000px]">
                                         <thead>
                                             <tr className="bg-slate-900/80 text-cyan-500 text-xs font-mono-tech tracking-widest border-b border-cyan-900">
@@ -456,6 +537,43 @@
                                             })}
                                         </tbody>
                                     </table>
+                                </div>
+                                
+                                {/* CREW PERFORMANCE METRICS (Achievement Graph) */}
+                                <div className="p-6 bg-slate-900/60 border-t border-cyan-900/50 mt-auto">
+                                    <h4 className="font-mono-tech font-bold text-cyan-500 text-sm tracking-widest uppercase mb-5 flex items-center">
+                                        <span className="text-cyan-400 mr-2 text-lg">📊</span> CREW PERFORMANCE METRICS
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                                        {currentData.students.map((student) => {
+                                            const { percentage, hasData } = calculateStudentProgress(student, currentData.assignments);
+                                            return (
+                                                <div key={student} className="flex items-center gap-3 font-mono-tech">
+                                                    <div className={`w-16 text-sm truncate ${student === '김건우' ? 'text-blue-400 font-bold' : 'text-slate-300'}`}>
+                                                        {student}
+                                                    </div>
+                                                    <div className="flex-1 h-3 bg-slate-950 border border-slate-700 relative overflow-hidden rounded-sm">
+                                                        {hasData ? (
+                                                            <div 
+                                                                className={`h-full relative transition-all duration-1000 ease-out ${percentage >= 80 ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : percentage >= 50 ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`} 
+                                                                style={{width: `${percentage}%`}}
+                                                            >
+                                                                {/* Striped Pattern Overlay */}
+                                                                <div className="absolute top-0 left-0 w-full h-full tech-pattern"></div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="h-full w-full bg-slate-800 flex items-center justify-center text-[9px] text-slate-500 tracking-widest">
+                                                                NO DATA / HOLD
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className={`w-10 text-right text-sm font-bold ${hasData ? (percentage >= 80 ? 'text-emerald-400' : percentage >= 50 ? 'text-amber-400' : 'text-red-400') : 'text-slate-600'}`}>
+                                                        {hasData ? `${percentage}%` : 'N/A'}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         )}
