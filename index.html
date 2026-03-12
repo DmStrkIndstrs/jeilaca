@@ -75,9 +75,9 @@
 
     <script type="text/babel">
         // =========================================================================
-        // 👇 데이터 세팅 영역
+        // 👇 초기 데이터 (JSON Import시 덮어씌워짐)
         // =========================================================================
-        const appData = {
+        const initialAppData = {
             mainTitle: "휘T SCIENCE VESSEL",
             
             classes: {
@@ -89,6 +89,7 @@
                     notices: [
                         "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 기출픽/마더텅 활용 <strong>소단원별 집중 타격(2-2-4-2 방식)</strong>이 진행됩니다.",
                         "🚀 <span class='text-blue-600 font-bold'>[MODE.SWITCH]</span> <strong>기출픽 단계</strong>: 휘T가 대표문제를 직접 풀어주는 강의식 진행.<br>&nbsp;&nbsp;&nbsp;<strong>마더텅 단계</strong>: 개별 과제 검사 및 1:1 약점 보완(클리닉) 방식으로 전환됩니다.",
+                        "<span class='text-purple-600 font-bold'>[STUDY.RULE]</span> <strong>기출문제는 책에 직접 풀지 않고 '노트'에 풉니다.</strong> 채점 후 틀린 문제만 책에 체크하세요!",
                         "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
                         "<span class='text-red-600 font-bold'>[WARN.TEST]</span> 3/19(목) 단위변환훈련 테스트 진행! (기준: 46개 이상 합격 / 45개 이하 정답자 <strong>무한 재시험</strong>)",
                         "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 최소수준성취평가(1-1, 1-2, 2-1) 3/10(화) 배부 ▶ 3/24(화) 제출 필수!"
@@ -116,22 +117,24 @@
                         { id: 14, date: "4/9", day: "목", content: "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", homework: "마더텅 2개 단원 문제 풀이", type: "deep" },
                         { id: 15, date: "4/11", day: "토", content: "🔥 [마더텅] 소단원 4개 (개별검사 진행)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질 / 화학 반응)", homework: "마더텅 4개 단원 문제 풀이", type: "deep" },
                         { id: 16, date: "4/14", day: "화", content: "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", homework: "마더텅 2개 단원 문제 풀이", type: "deep" },
-                        { id: 17, date: "4/16", day: "목", content: "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)", homework: "테스트 오답 노트 작성", type: "test" },
-                        { id: 18, date: "4/18", day: "토", content: "⚡ [실전대비] 인근 학교 기출 실전 분석\n(고난도 출제 트렌드 파악 및 실전 훈련)", homework: "기출문제 1회분 풀이", type: "ebs" },
+                        { id: 17, date: "4/16", day: "목", content: "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)\n📚 [배부] 피날레 교재 (암기자료 + 기출모음)", homework: "테스트 오답 및 피날레 예습", type: "test" },
+                        { id: 18, date: "4/18", day: "토", content: "⚡ [실전대비] 인근 학교 기출 실전 분석\n(피날레 기출모음 집중 풀이 훈련)", homework: "기출노트에 풀고 오답만 책에 체크", type: "ebs" },
                         { id: 19, date: "4/21", day: "화", content: "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", homework: "모의고사 오답 분석", type: "final" },
                         { id: 20, date: "4/23", day: "목", content: "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", homework: "개별 취약 파트 복습", type: "final" },
                         { id: 21, date: "4/25", day: "토", content: "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", homework: "마무리 총정리 암기", type: "final" },
                         { id: 22, date: "직보", day: "-", content: "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", homework: "1학기 중간고사 1등급!", type: "final" }
                     ],
-                    students: ['고성준', '김종윤', '신수민', '오서연', '이승재', '이재윤', '정현경', '진민욱', '한정빈', '김건우'],
+                    students: ['고성준', '김종윤', '신수민', '오서연', '이승재', '이재윤', '정현경', '진민욱', '한정빈', '김건우', '박시우'],
                     assignments: [
-                        { id: 1, title: "오투 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': 'O', '오서연': 'O', '이승재': '-', '이재윤': 'O', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } },
-                        { id: 2, title: "오투 2-1-1", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } },
-                        { id: 3, title: "오투 2-1-2", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } },
-                        { id: 4, title: "최소성취수준평가", dueDate: "3/24 (화)", status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': 'H' } },
-                        { id: 5, title: "평가문제집 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } },
-                        { id: 6, title: "평가문제집 2-1-1", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } },
-                        { id: 7, title: "평가문제집 2-1-2", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': '△', '한정빈': 'O', '김건우': 'H' } }
+                        { id: 1, title: "오투 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': 'O', '오서연': 'O', '이승재': '-', '이재윤': 'O', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 2, title: "오투 2-1-1", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 3, title: "오투 2-1-2", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': 'O', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 4, title: "최소성취수준평가", dueDate: "3/24 (화)", status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': 'E', '박시우': 'E' } },
+                        { id: 5, title: "평가문제집 1단원", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 6, title: "평가문제집 2-1-1", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 7, title: "평가문제집 2-1-2", dueDate: "3/10 (화)", status: { '고성준': 'O', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': 'O', '진민욱': 'O', '한정빈': 'O', '김건우': 'E', '박시우': 'E' } },
+                        { id: 8, title: "오투 II-2-1. 지각과 생명체...", dueDate: "3/17 (화)", status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-', '박시우': '-' } },
+                        { id: 9, title: "평가문제집 II-2-1. 지각...", dueDate: "3/17 (화)", status: { '고성준': '-', '김종윤': '-', '신수민': '-', '오서연': '-', '이승재': '-', '이재윤': '-', '정현경': '-', '진민욱': '-', '한정빈': '-', '김건우': '-', '박시우': '-' } }
                     ]
                 },
 
@@ -198,23 +201,70 @@
         };
         // =========================================================================
 
-        const { useState } = React;
+        const { useState, useRef } = React;
 
         function App() {
+            // State를 사용하여 데이터를 동적으로 관리
+            const [appState, setAppState] = useState(initialAppData);
             const [selectedClassId, setSelectedClassId] = useState('kumho');
             const [activeTab, setActiveTab] = useState('schedule');
+            const fileInputRef = useRef(null);
 
-            const currentData = appData.classes[selectedClassId];
+            const currentData = appState.classes[selectedClassId];
+
+            // 1. JSON 내보내기 (Export)
+            const handleExportJSON = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `SCIENCE_VESSEL_DATA_${today}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            };
+
+            // 2. JSON 불러오기 (Import) - 병합 로직
+            const handleImportJSON = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const json = JSON.parse(event.target.result);
+                        if (json.classes) {
+                            setAppState(prevState => {
+                                const nextState = { ...prevState, ...json };
+                                nextState.classes = { ...prevState.classes };
+                                // 부분적으로 수정된 JSON을 업로드해도 기존 데이터와 병합됨
+                                for (const key in json.classes) {
+                                    nextState.classes[key] = { ...prevState.classes[key], ...json.classes[key] };
+                                }
+                                return nextState;
+                            });
+                            alert("데이터 시스템 연동이 성공적으로 완료되었습니다!");
+                        } else {
+                            alert("올바른 형식의 JSON 데이터가 아닙니다.");
+                        }
+                    } catch (err) {
+                        alert("파일을 파싱하는 중 오류가 발생했습니다.");
+                        console.error(err);
+                    }
+                    // 동일 파일 재업로드 시 이벤트 트리거를 위해 input 초기화
+                    e.target.value = null;
+                };
+                reader.readAsText(file);
+            };
 
             // 이미지 다운로드 캡처 기능
             const handleDownloadImage = () => {
                 const element = document.getElementById('capture-area');
                 if(!element) return;
                 
-                element.classList.add('capture-mode'); // 캡처용 밝은 배경 강제 적용
+                element.classList.add('capture-mode'); 
                 
                 window.html2canvas(element, { 
-                    backgroundColor: '#f8fafc', // Light Theme Background
+                    backgroundColor: '#f8fafc',
                     scale: 2, 
                     useCORS: true 
                 }).then(canvas => {
@@ -247,15 +297,14 @@
                 if (status === 'O') return <span className="text-emerald-600 font-black text-lg">O</span>;
                 if (status === 'X') return <span className="text-red-600 font-black text-lg">X</span>;
                 if (status === '△') return <span className="text-amber-500 font-black text-lg">△</span>;
-                if (status === 'H') return <span className="text-blue-600 font-black text-lg">H</span>;
+                if (status === 'E') return <span className="text-blue-600 font-black text-lg">ㅁ</span>;
                 return <span className="text-slate-300 font-bold">-</span>;
             };
 
             const calculateProgress = (statusObj) => {
                 if (!statusObj) return { completed: 0, partial: 0, total: 1, percentage: 0 };
                 
-                // 'H' (보류) 상태인 학생은 전체 모수(total)에서 제외
-                const validStatuses = Object.values(statusObj).filter(s => s !== 'H');
+                const validStatuses = Object.values(statusObj).filter(s => s !== 'E');
                 const total = validStatuses.length;
                 if(total === 0) return { completed: 0, partial: 0, total: 0, percentage: 0 };
                 
@@ -274,7 +323,7 @@
                     const isAssignmentActive = Object.values(a.status || {}).some(val => val === 'O' || val === 'X' || val === '△');
                     if (isAssignmentActive) {
                         const status = a.status?.[studentName];
-                        if (status !== 'H') {
+                        if (status !== 'E') {
                             totalAssigned++;
                             if (status === 'O') score += 1;
                             if (status === '△') score += 0.5;
@@ -290,31 +339,44 @@
                 <div className="min-h-screen pb-20 relative z-10 selection:bg-blue-200 selection:text-blue-900 text-slate-800">
                     
                     {/* Header (Light Tech) */}
-                    <header className="bg-white border-b border-slate-200 pt-10 pb-8 px-6 text-center relative z-20 shadow-sm">
+                    <header className="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
                         <div className="max-w-4xl mx-auto relative">
                             <h2 className="font-mono-tech text-blue-600 font-bold tracking-[0.3em] text-xs mb-3">
                                 [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
                             </h2>
                             <h1 className="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
-                                {appData.mainTitle}
+                                {appState.mainTitle}
                             </h1>
                             
-                            <div className="flex flex-col items-center gap-3 mb-6 mt-2">
+                            <div className="flex flex-col items-center gap-3 mb-4 mt-2">
                                 <p className="font-mono-tech text-emerald-600 font-bold tracking-widest text-sm flex justify-center items-center gap-2">
                                     <span className="w-2 h-2 bg-emerald-500 rounded-full cursor-blink"></span>
                                     &gt; Explorer reporting!_
                                 </p>
-                                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded-sm no-print font-bold">
+                            </div>
+                            
+                            {/* Control Buttons (Youtube, Export, Import) */}
+                            <div className="flex flex-wrap justify-center items-center gap-3 mb-6 no-print">
+                                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded-sm font-bold">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
                                     </svg>
                                     [ VIDEO DATALINK ]
                                 </a>
+                                
+                                <button onClick={handleExportJSON} className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-300 text-slate-600 font-mono-tech text-xs tracking-widest hover:bg-slate-100 hover:text-slate-800 transition-colors rounded-sm font-bold">
+                                    📥 [ EXPORT DATA ]
+                                </button>
+                                
+                                <button onClick={() => fileInputRef.current.click()} className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-300 text-slate-600 font-mono-tech text-xs tracking-widest hover:bg-slate-100 hover:text-slate-800 transition-colors rounded-sm font-bold">
+                                    📤 [ IMPORT DATA ]
+                                </button>
+                                <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImportJSON} />
                             </div>
-                            
+
                             {/* Class Selection Tabs */}
                             <div className="flex flex-wrap justify-center gap-3 mt-4 no-print">
-                                {Object.entries(appData.classes).map(([id, classInfo]) => (
+                                {Object.entries(appState.classes).map(([id, classInfo]) => (
                                     <button 
                                         key={id}
                                         onClick={() => setSelectedClassId(id)}
@@ -370,10 +432,10 @@
                                         <div key={subject} className="bg-slate-50 border border-slate-200 p-4 hover:border-blue-400 transition-colors group rounded-sm">
                                             <h4 className="font-mono-tech font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 flex justify-between items-center group-hover:text-blue-600">
                                                 <span>{labels[index]}</span>
-                                                <span className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200">{currentData.examScope[subject].length} LOC</span>
+                                                <span className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200">{currentData.examScope[subject]?.length || 0} LOC</span>
                                             </h4>
                                             <ul className="text-xs font-mono-tech text-slate-600 space-y-2">
-                                                {currentData.examScope[subject].map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
+                                                {currentData.examScope[subject]?.map((item, i) => <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>)}
                                             </ul>
                                         </div>
                                     )
@@ -464,7 +526,7 @@
                                         <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-slate-50 px-3 py-1.5 rounded-sm border border-slate-200">
                                             <span className="text-emerald-600">O:CMPLT</span>
                                             <span className="text-amber-500">△:PRTL</span>
-                                            <span className="text-blue-600">H:HOLD</span>
+                                            <span className="text-blue-600">ㅁ:EXMPT</span>
                                             <span className="text-slate-400">-:NULL</span>
                                         </div>
                                         {/* Download Button */}
@@ -488,7 +550,7 @@
                                                 <th className="py-3 px-4 min-w-[200px]">TASK_NAME / T-MINUS</th>
                                                 <th className="py-3 px-4 text-center border-l border-slate-200">CMPLTN_%</th>
                                                 {currentData.students.map((student, idx) => (
-                                                    <th key={idx} className={`py-3 px-2 text-center min-w-[60px] ${student === '김건우' ? 'text-blue-600' : 'text-slate-600'}`}>
+                                                    <th key={idx} className={`py-3 px-2 text-center min-w-[60px] ${(student === '김건우' || student === '박시우') ? 'text-blue-600' : 'text-slate-600'}`}>
                                                         {student}
                                                     </th>
                                                 ))}
@@ -522,7 +584,7 @@
                                                             </div>
                                                         </td>
                                                         {currentData.students.map((student, idx) => (
-                                                            <td key={idx} className={`py-3 px-2 text-center border-l border-slate-50 ${student === '김건우' ? 'bg-blue-50/50' : ''}`}>
+                                                            <td key={idx} className={`py-3 px-2 text-center border-l border-slate-50 ${(student === '김건우' || student === '박시우') ? 'bg-blue-50/50' : ''}`}>
                                                                 {renderAssignmentStatus(assignment.status?.[student] || '-')}
                                                             </td>
                                                         ))}
@@ -543,7 +605,7 @@
                                             const { percentage, hasData } = calculateStudentProgress(student, currentData.assignments);
                                             return (
                                                 <div key={student} className="flex items-center gap-3 font-mono-tech">
-                                                    <div className={`w-16 text-sm truncate font-bold ${student === '김건우' ? 'text-blue-600' : 'text-slate-600'}`}>
+                                                    <div className={`w-16 text-sm truncate font-bold ${(student === '김건우' || student === '박시우') ? 'text-blue-600' : 'text-slate-600'}`}>
                                                         {student}
                                                     </div>
                                                     <div className="flex-1 h-3 bg-slate-200 border border-slate-300 relative overflow-hidden rounded-sm">
@@ -589,5 +651,3 @@
     </script>
 </body>
 </html>
-
-
