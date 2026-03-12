@@ -127,6 +127,137 @@
 <script type="text/babel">
 const { useState, useRef, useEffect } = React;
 
+// 👇 초기 데이터 (가장 최신 진도/과제 현황 내장. 로컬스토리지에 데이터가 없을 때 이 데이터를 기본으로 띄웁니다.)
+const initialAppData = {
+  "mainTitle": "휘T SCIENCE VESSEL",
+  "classes": {
+    "kumho": {
+      "name": "SECTOR: KUMHO_1",
+      "title": "금호고 1학년 과학 중간고사 대비반",
+      "subtitle": "STATUS: 1등급 목표 4회독 프로토콜 가동 중",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 기출픽/마더텅 활용 <strong>소단원별 집중 타격</strong>이 진행됩니다.",
+        "🚀 <span class='text-blue-600 font-bold'>[MODE.SWITCH]</span> <strong>기출픽 단계</strong>: 휘T가 대표문제를 직접 풀어주는 강의식 진행.<br>&nbsp;&nbsp;&nbsp;<strong>마더텅 단계</strong>: 개별 과제 검사 및 1:1 약점 보완(클리닉) 방식으로 전환됩니다.",
+        "<span class='text-purple-600 font-bold'>[STUDY.RULE]</span> <strong>기출문제는 책에 직접 풀지 않고 '노트'에 풉니다.</strong> 채점 후 틀린 문제만 책에 체크하세요!",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.TEST]</span> 3/19(목) 단위변환훈련 테스트 진행! (기준: 46개 이상 합격 / 45개 이하 정답자 <strong>무한 재시험</strong>)",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 최소수준성취평가 3/24(화) 제출 필수! (신규생은 3/17 배부)"
+      ],
+      "examScope": {
+        "physics": [
+          "II-2-2. 물질의 전기적 특성",
+          "III-2-1. 중력의 작용"
+        ],
+        "chemistry": [
+          "I-1-1. 시간과 공간",
+          "I-1-2. 기본량과 단위",
+          "I-2-1. 측정과 측정 표준",
+          "I-2-2. 신호와 정보"
+        ],
+        "biology": [
+          "II-2-1. 지각과 생명체를 구성하는 물질"
+        ],
+        "earth": [
+          "II-1-1. 우주 초기에 생성된 원소",
+          "II-1-2. 별의 진화와 원소의 생성"
+        ]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/3", "day": "화", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 2, "date": "3/5", "day": "목", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 3, "date": "3/10", "day": "화", "content": "✅ [종료] [1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 4, "date": "3/12", "day": "목", "content": "✅ [종료] [1교시] 생명체 구성 물질 (개념 진도)\n[2교시] 과제 검사 및 질의응답", "homework": "평가문제집 및 오투 풀이", "type": "completed" },
+        { "id": 5, "date": "3/17", "day": "화", "content": "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 기존생: 문제풀이 / 신입생: 1단원 개념\n📝 (단위변환 문제 & 신입생 성취평가 배부)", "homework": "평가문제집 및 오투 풀이", "type": "concept" },
+        { "id": 6, "date": "3/19", "day": "목", "content": "[1교시] 중력의 작용 (개념 진도)\n[2교시] 기존생: 과제검사 / 신입생: 우주 초기 원소\n🚨 단위변환 TEST (45개 이하 무한 재시험)", "homework": "단위변환 오답 노트", "type": "concept" },
+        { "id": 7, "date": "3/24", "day": "화", "content": "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n[범위: 시간과공간~신호와정보, 우주초기원소, 지각과생명체, 전기적특성]\n(※ 최소수준성취평가 제출 마감)\n📚 [배부] 기출픽 교재", "homework": "테스트 오답 정리", "type": "test" },
+        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 (대표문제 직접 풀이)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 문제 풀이", "type": "practice" },
+        { "id": 11, "date": "4/2", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 12, "date": "4/4", "day": "토", "content": "🏆 [TEST] 2차 기출픽 누적 테스트 (미래엔/천재)\n(기출픽 전체 범위 누적 점검)", "homework": "테스트 오답 노트 작성", "type": "test" },
+        { "id": 13, "date": "4/7", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 14, "date": "4/9", "day": "목", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [마더텅] 소단원 3개 (개별검사 진행)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "마더텅 3개 단원 문제 풀이", "type": "deep" },
+        { "id": 16, "date": "4/14", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)\n📚 [배부] 피날레 교재 (암기자료 + 기출모음)", "homework": "테스트 오답 및 피날레 예습", "type": "test" },
+        { "id": 18, "date": "4/18", "day": "토", "content": "⚡ [실전대비] 인근 학교 기출 실전 분석\n(피날레 기출모음 집중 풀이 훈련)", "homework": "기출노트에 풀고 오답만 책에 체크", "type": "ebs" },
+        { "id": 19, "date": "4/21", "day": "화", "content": "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", "homework": "모의고사 오답 분석", "type": "final" },
+        { "id": 20, "date": "4/23", "day": "목", "content": "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", "homework": "개별 취약 파트 복습", "type": "final" },
+        { "id": 21, "date": "4/25", "day": "토", "content": "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", "homework": "마무리 총정리 암기", "type": "final" },
+        { "id": 22, "date": "직보", "day": "-", "content": "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", "homework": "1학기 중간고사 1등급!", "type": "final" }
+      ],
+      "students": ["고성준", "김종윤", "신수민", "오서연", "이승재", "이재윤", "정현경", "진민욱", "한정빈", "김건우", "박시우"],
+      "assignments": [
+        { "id": 1, "title": "오투 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 2, "title": "오투 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 3, "title": "오투 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 4, "title": "최소성취수준평가", "dueDate": "3/24 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "-", "한정빈": "-", "김건우": "H", "박시우": "H" } },
+        { "id": 5, "title": "평가문제집 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 6, "title": "평가문제집 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 7, "title": "평가문제집 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H" } },
+        { "id": 8, "title": "오투 II-2-1. 지각과 생명체...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } },
+        { "id": 9, "title": "평가문제집 II-2-1. 지각...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-" } }
+      ]
+    },
+    "jayang": {
+      "name": "SECTOR: JAYANG_SUNGSU",
+      "title": "자양/성수고 연합 방어선 (1학기 내신 대비)",
+      "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)",
+        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 핵심 개념 요약 후, 각 학교별 기출문제 및 빈출 유형 타겟팅 훈련.",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 매주 접속(수업) 시 지난 주차 데이터 기반 미니 테스트 진행."
+      ],
+      "examScope": {
+        "physics": ["(DATA PENDING)"],
+        "chemistry": ["(DATA PENDING)"],
+        "biology": ["(DATA PENDING)"],
+        "earth": ["(DATA PENDING)"]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 통합과학 시스템 OT 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
+        { "id": 2, "date": "3/26", "day": "목", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/28", "day": "토", "content": "2단원 기본 개념 진도 (물질의 규칙성)", "homework": "개념 복습 프린트", "type": "concept" },
+        { "id": 4, "date": "3/31", "day": "화", "content": "2단원 개념 완료 및 학교별 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/02", "day": "목", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
+      ],
+      "students": ["(Target_Alpha)", "(Target_Beta)", "(Target_Gamma)"],
+      "assignments": [
+        { "id": 1, "title": "1주차 프로토콜 프린트", "dueDate": "3/28 (토)", "status": { "(Target_Alpha)": "-", "(Target_Beta)": "-", "(Target_Gamma)": "-" } }
+      ]
+    },
+    "middle3": {
+      "name": "SECTOR: MID_YEAR3",
+      "title": "중3 과학 내신 연합 특강 (동마·한대부·마장중)",
+      "subtitle": "STATUS: 3/23(월) 개강! 월/수/금 중등 최상위권 도약 프로토콜",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 동마중, 한대부중, 마장중 연합 내신 대비반이 3/23(월)에 본격 가동됩니다. (월/수/금 진행)",
+        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 3개 학교의 공통 출제 범위를 묶어 효율적인 1등급 달성 커리큘럼으로 진행됩니다.",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 학교별 시험 일정 및 세부 진도가 파악되는 대로 즉각 맞춤 훈련으로 전환됩니다."
+      ],
+      "examScope": {
+        "physics": ["(DATA PENDING)"],
+        "chemistry": ["(DATA PENDING)"],
+        "biology": ["(DATA PENDING)"],
+        "earth": ["(DATA PENDING)"]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/23", "day": "월", "content": "[개강] 중3 과학 오리엔테이션 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
+        { "id": 2, "date": "3/25", "day": "수", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/27", "day": "금", "content": "2단원 기본 개념 진도", "homework": "개념 복습 프린트", "type": "concept" },
+        { "id": 4, "date": "3/30", "day": "월", "content": "2단원 개념 완료 및 공통 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/01", "day": "수", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
+      ],
+      "students": ["(대기중1)", "(대기중2)", "(대기중3)"],
+      "assignments": [
+        { "id": 1, "title": "1주차 오리엔테이션 프린트", "dueDate": "3/30 (월)", "status": { "(대기중1)": "-", "(대기중2)": "-", "(대기중3)": "-" } }
+      ]
+    }
+  }
+};
+
 // ──────────────────────────────────────────────
 // 1. Upload Screen (JSON 입력기)
 // ──────────────────────────────────────────────
@@ -593,11 +724,24 @@ function Dashboard({ appData, onReset }) {
 // Root App
 // ──────────────────────────────────────────────
 function App() {
-    const [appData, setAppData] = useState(null);
+    // 브라우저 로컬 저장소(localStorage)를 확인하여 업로드한 데이터가 있으면 띄우고, 없으면 기본 내장 데이터를 띄웁니다.
+    const [appData, setAppData] = useState(() => {
+        const saved = localStorage.getItem('scienceVesselData');
+        if (saved) {
+            try { return JSON.parse(saved); } catch(e) {}
+        }
+        return initialAppData; 
+    });
+
+    // 새 데이터를 업로드하면 로컬 저장소에 저장하여 새로고침해도 무조건 유지되게 합니다.
+    const handleLoadData = (data) => {
+        localStorage.setItem('scienceVesselData', JSON.stringify(data));
+        setAppData(data);
+    };
 
     return appData
         ? <Dashboard appData={appData} onReset={() => setAppData(null)} />
-        : <UploadScreen onLoad={setAppData} />;
+        : <UploadScreen onLoad={handleLoadData} />;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
