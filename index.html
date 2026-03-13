@@ -111,7 +111,7 @@ function Dashboard({ appData }) {
 
     const currentData = appData.classes[selectedClassId];
 
-    // 📸 이미지 캡처 기능 (DOM 인라인 조작으로 투명도/블러 완벽 제거)
+    // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending으로 뿌연 현상 완벽 해결)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
@@ -142,16 +142,30 @@ function Dashboard({ appData }) {
             el.style.backdropFilter = 'none';
             el.style.webkitBackdropFilter = 'none';
 
-            // 투명도(rgba)가 들어간 배경을 완전 불투명(rgb) 또는 흰색으로 치환
+            // 투명도(rgba) 배경을 흰색 배경 기준의 완전 불투명(rgb)로 치환 (Alpha Blending)
             if (el.classList.contains('terran-panel')) {
-                // 테란 패널은 완벽한 흰색으로 강제 고정
+                // 테란 메인 패널은 완벽한 흰색으로 강제 고정
                 el.style.background = '#ffffff';
+                el.style.backgroundColor = '#ffffff';
             } else {
                 const bg = computedStyle.backgroundColor;
-                if (bg && bg.includes('rgba')) {
-                    // rgba(r, g, b, a) 문자열에서 a를 버리고 rgb(r, g, b)로 변환
-                    const rgb = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgb($1, $2, $3)');
-                    el.style.backgroundColor = rgb;
+                if (bg && bg.startsWith('rgba')) {
+                    const match = bg.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+                    if (match) {
+                        const r = parseInt(match[1], 10);
+                        const g = parseInt(match[2], 10);
+                        const b = parseInt(match[3], 10);
+                        const a = parseFloat(match[4]);
+                        
+                        if (a === 0) {
+                            // 완전 투명(a=0)은 검은색이 되지 않도록 transparent로 명시
+                            el.style.backgroundColor = 'transparent';
+                        } else if (a < 1) {
+                            // 배경이 흰색(#ffffff)이라고 가정하고 혼합(Blending) 색상 계산
+                            const blend = (colorChannel) => Math.round(colorChannel * a + 255 * (1 - a));
+                            el.style.backgroundColor = `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
+                        }
+                    }
                 }
             }
         });
