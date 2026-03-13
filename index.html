@@ -86,7 +86,6 @@
 
         /* 📸 캡처 모드 전용 스타일 */
         .capture-mode { 
-            background-color: #ffffff !important;
             width: max-content !important; 
             padding: 24px !important; 
             box-shadow: none !important;
@@ -112,64 +111,61 @@ function Dashboard({ appData }) {
 
     const currentData = appData.classes[selectedClassId];
 
-    // 📸 이미지 캡처 기능
-    // html2canvas는 backdrop-filter를 지원하지 않아 rgba 배경이 투명하게 렌더링됨.
-    // CSS 주입이 아닌 DOM 인라인 스타일 직접 조작으로 캡처 전 완전한 불투명 배경을 강제함.
+    // 📸 이미지 캡처 기능 (DOM 인라인 조작으로 투명도/블러 완벽 제거)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
 
         const scrollDiv = element.querySelector('.overflow-x-auto');
 
-        // 1. 캡처 대상 전체 요소를 순회하며 원본 인라인 스타일을 저장하고, 투명도 관련 속성을 직접 덮어씀
-        const allNodes = [element, ...element.querySelectorAll('*')];
-        const savedStyles = allNodes.map(el => ({
-            backdropFilter:         el.style.backdropFilter,
-            webkitBackdropFilter:   el.style.webkitBackdropFilter,
-            background:             el.style.background,
-            backgroundColor:        el.style.backgroundColor,
-            overflow:               el.style.overflow,
-            width:                  el.style.width,
-        }));
+        // 1. 캡처 영역 레이아웃 확장 (잘림 방지)
+        element.classList.add('capture-mode');
+        if (scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
 
-        allNodes.forEach(el => {
-            // backdrop-filter 제거
-            el.style.backdropFilter       = 'none';
+        // 2. DOM 인라인 스타일 직접 조작 및 원본 백업
+        const originalStyles = [];
+        const allElements = [element, ...element.querySelectorAll('*')];
+
+        allElements.forEach((el) => {
+            const computedStyle = window.getComputedStyle(el);
+            
+            // 원래 인라인 스타일 백업
+            originalStyles.push({
+                el: el,
+                background: el.style.background,
+                backgroundColor: el.style.backgroundColor,
+                backdropFilter: el.style.backdropFilter,
+                webkitBackdropFilter: el.style.webkitBackdropFilter
+            });
+
+            // 블러(Blur) 완벽 차단
+            el.style.backdropFilter = 'none';
             el.style.webkitBackdropFilter = 'none';
 
-            // rgba 배경 → 완전 불투명으로 교체
-            const computed = window.getComputedStyle(el);
-            const bg = computed.backgroundColor;
-            if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
-                // rgba(r,g,b,a) → rgb(r,g,b) 으로 강제 변환
-                el.style.backgroundColor = bg.replace(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/, 'rgb($1,$2,$3)');
-            }
-            const bgImage = computed.backgroundImage;
-            // gradient 패턴(grid)이 있는 경우 캡처 시 제거
-            if (bgImage && bgImage !== 'none' && bgImage.includes('linear-gradient') && el === element) {
-                el.style.backgroundImage = 'none';
+            // 투명도(rgba)가 들어간 배경을 완전 불투명(rgb) 또는 흰색으로 치환
+            if (el.classList.contains('terran-panel')) {
+                // 테란 패널은 완벽한 흰색으로 강제 고정
+                el.style.background = '#ffffff';
+            } else {
+                const bg = computedStyle.backgroundColor;
+                if (bg && bg.includes('rgba')) {
+                    // rgba(r, g, b, a) 문자열에서 a를 버리고 rgb(r, g, b)로 변환
+                    const rgb = bg.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/, 'rgb($1, $2, $3)');
+                    el.style.backgroundColor = rgb;
+                }
             }
         });
 
-        // 2. 캡처 영역 너비/스크롤 확장 (잘림 방지)
-        element.style.width    = 'max-content';
-        element.style.padding  = '24px';
-        if (scrollDiv) {
-            scrollDiv.style.overflow = 'visible';
-            scrollDiv.style.width    = 'max-content';
-        }
-
-        // 3. 레이아웃 재계산 대기 후 캡처
+        // 3. 브라우저 렌더링을 기다린 후 html2canvas 실행
         setTimeout(() => {
             window.html2canvas(element, {
-                backgroundColor: '#ffffff',
+                backgroundColor: '#ffffff', // 캔버스 밖의 배경도 완전 흰색
                 scale: 3,
                 useCORS: true,
                 allowTaint: true,
                 logging: false,
-                imageTimeout: 0,
                 windowWidth: element.scrollWidth + 50,
-                width: element.scrollWidth,
+                width: element.scrollWidth
             })
             .then(canvas => {
                 const link = document.createElement('a');
@@ -183,21 +179,16 @@ function Dashboard({ appData }) {
                 alert("캡처에 실패했습니다.");
             })
             .finally(() => {
-                // 4. 원본 인라인 스타일 완전 복구
-                allNodes.forEach((el, i) => {
-                    el.style.backdropFilter       = savedStyles[i].backdropFilter;
-                    el.style.webkitBackdropFilter = savedStyles[i].webkitBackdropFilter;
-                    el.style.background           = savedStyles[i].background;
-                    el.style.backgroundColor      = savedStyles[i].backgroundColor;
-                    el.style.overflow             = savedStyles[i].overflow;
-                    el.style.width                = savedStyles[i].width;
+                // 4. 캡처 종료 후 클래스 및 인라인 스타일 원상 복구
+                element.classList.remove('capture-mode');
+                if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
+                
+                originalStyles.forEach(item => {
+                    item.el.style.background = item.background;
+                    item.el.style.backgroundColor = item.backgroundColor;
+                    item.el.style.backdropFilter = item.backdropFilter;
+                    item.el.style.webkitBackdropFilter = item.webkitBackdropFilter;
                 });
-                element.style.padding        = savedStyles[0].padding || '';
-                element.style.backgroundImage = '';
-                if (scrollDiv) {
-                    scrollDiv.style.overflow = savedStyles[allNodes.indexOf(scrollDiv)].overflow;
-                    scrollDiv.style.width    = savedStyles[allNodes.indexOf(scrollDiv)].width;
-                }
             });
         }, 150);
     };
@@ -227,18 +218,36 @@ function Dashboard({ appData }) {
         return currentData.assignments.every(a => (a.status?.[name] === 'H' || a.status?.[name] === undefined));
     };
 
-    const calcProgress = (statusObj) => {
-        if (!statusObj) return { percentage: 0 };
+    // 오늘 날짜 기준으로 마감일이 도래했거나 지났는지 판별하는 함수
+    const isPastDueFunc = (dueDateStr) => {
+        if (!dueDateStr) return true;
+        const match = dueDateStr.match(/(\d+)\/(\d+)/);
+        if (!match) return true;
+        const today = new Date();
+        today.setHours(0,0,0,0); // 시간 제외, 자정 기준
+        const currentYear = today.getFullYear();
+        const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
+        return dueDate <= today; // 오늘이거나 과거면 true
+    };
+
+    const calcProgress = (statusObj, dueDateStr) => {
+        if (!statusObj) return { percentage: 0, isFuture: !isPastDueFunc(dueDateStr) };
+        if (!isPastDueFunc(dueDateStr)) return { percentage: 0, isFuture: true };
+
         const vals = Object.values(statusObj).filter(s => s !== 'H');
         const total = vals.length;
-        if (!total) return { percentage: 0 };
+        if (!total) return { percentage: 0, isFuture: false };
         const score = vals.filter(s => s === 'O').length + vals.filter(s => s === '△').length * 0.5;
-        return { percentage: Math.round((score / total) * 100) };
+        return { percentage: Math.round((score / total) * 100), isFuture: false };
     };
 
     const calcStudentProgress = (name, assignments) => {
         let total = 0, score = 0;
+        
         assignments.forEach(a => {
+            // 마감일이 아직 지나지 않은 미래의 과제는 성취도 모수에서 완전 제외
+            if (!isPastDueFunc(a.dueDate)) return;
+
             const active = Object.values(a.status || {}).some(v => v === 'O' || v === 'X' || v === '△');
             if (active) {
                 const s = a.status?.[name];
@@ -249,6 +258,7 @@ function Dashboard({ appData }) {
                 }
             }
         });
+        
         if (!total) return { percentage: 0, hasData: false };
         return { percentage: Math.round((score / total) * 100), hasData: true };
     };
@@ -452,7 +462,7 @@ function Dashboard({ appData }) {
                                         <tr><td colSpan={3+currentData.students.length} className="text-center py-10 font-mono-tech text-slate-400">NO DATA</td></tr>
                                     )}
                                     {(currentData.assignments || []).map((a, idx) => {
-                                        const { percentage } = calcProgress(a.status);
+                                        const { percentage, isFuture } = calcProgress(a.status, a.dueDate);
                                         return (
                                             <tr key={a.id} className="terran-row-hover text-sm font-sans">
                                                 <td className="py-3 px-6 text-center text-slate-400 font-mono-tech font-bold">
@@ -465,14 +475,18 @@ function Dashboard({ appData }) {
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 border-l border-slate-100 text-center">
-                                                    <div className="flex flex-col items-center">
-                                                        <span className={`text-xs font-mono-tech font-bold ${percentage>=80?'text-emerald-600':percentage>0?'text-blue-600':'text-slate-400'}`}>
-                                                            {percentage}%
-                                                        </span>
-                                                        <div className="w-12 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                                                            <div className={`h-full ${percentage>=80?'bg-emerald-500':'bg-blue-500'}`} style={{width:`${percentage}%`}}></div>
+                                                    {isFuture ? (
+                                                        <span className="text-[10px] font-mono-tech font-bold text-slate-400 tracking-widest">TBD</span>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center">
+                                                            <span className={`text-xs font-mono-tech font-bold ${percentage>=80?'text-emerald-600':percentage>0?'text-blue-600':'text-slate-400'}`}>
+                                                                {percentage}%
+                                                            </span>
+                                                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
+                                                                <div className={`h-full ${percentage>=80?'bg-emerald-500':'bg-blue-500'}`} style={{width:`${percentage}%`}}></div>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    )}
                                                 </td>
                                                 {currentData.students.map((s, i) => (
                                                     <td key={i} className={`py-3 px-2 text-center border-l border-slate-50 ${isExempt(s)?'bg-blue-50/40':''}`}>
