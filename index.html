@@ -244,6 +244,18 @@ function Dashboard({ appData }) {
         return dueDate <= today; // 오늘이거나 과거면 true
     };
 
+    // 마감일이 완전히 지났는지 확인하는 함수 (비상! 표시용)
+    const isExpiredFunc = (dueDateStr) => {
+        if (!dueDateStr) return false;
+        const match = dueDateStr.match(/(\d+)\/(\d+)/);
+        if (!match) return false;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const currentYear = today.getFullYear();
+        const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
+        return dueDate < today; // 과거면 true
+    };
+
     const calcProgress = (statusObj, dueDateStr) => {
         if (!statusObj) return { percentage: 0, isFuture: !isPastDueFunc(dueDateStr) };
         if (!isPastDueFunc(dueDateStr)) return { percentage: 0, isFuture: true };
@@ -477,13 +489,20 @@ function Dashboard({ appData }) {
                                     )}
                                     {(currentData.assignments || []).map((a, idx) => {
                                         const { percentage, isFuture } = calcProgress(a.status, a.dueDate);
+                                        
+                                        // 마감일이 지났고, 아직 전원 제출(100%)이 아닌 경우에만 비상! 표시
+                                        const isEmergency = isExpiredFunc(a.dueDate) && percentage < 100;
+
                                         return (
                                             <tr key={a.id} className="terran-row-hover text-sm font-sans">
                                                 <td className="py-3 px-6 text-center text-slate-400 font-mono-tech font-bold">
                                                     {String(idx+1).padStart(2,'0')}
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="font-bold text-slate-700">{a.title}</div>
+                                                    <div className="font-bold text-slate-700 flex items-center gap-2">
+                                                        <span>{a.title}</span>
+                                                        {isEmergency && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] rounded-sm font-black tracking-widest animate-pulse border border-red-300">🚨비상!</span>}
+                                                    </div>
                                                     <div className="text-[10px] font-mono-tech text-slate-500 mt-1 font-bold">
                                                         <span className="text-blue-500 mr-1">&gt;</span>{a.dueDate}
                                                     </div>
