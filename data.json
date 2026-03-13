@@ -75,26 +75,42 @@
       "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
       "notices": [
         "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)",
-        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 핵심 개념 요약 후, 각 학교별 기출문제 및 빈출 유형 타겟팅 훈련.",
+        "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 첫 일주일(3/24~3/28) 간 비어있는 오투 개념 진도를 최우선으로 진행합니다.",
         "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
-        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 매주 접속(수업) 시 지난 주차 데이터 기반 미니 테스트 진행."
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 오투 진도 완료 후 기출픽 배부 및 소단원별 타격이 즉각 시작됩니다."
       ],
       "examScope": {
-        "physics": ["(DATA PENDING)"],
-        "chemistry": ["(DATA PENDING)"],
-        "biology": ["(DATA PENDING)"],
-        "earth": ["(DATA PENDING)"]
+        "physics": [
+          "II-2-2. 물질의 전기적 특성",
+          "III-2-1. 중력의 작용"
+        ],
+        "chemistry": [
+          "I-1-1. 시간과 공간",
+          "I-1-2. 기본량과 단위",
+          "I-2-1. 측정과 측정 표준",
+          "I-2-2. 신호와 정보"
+        ],
+        "biology": [
+          "II-2-1. 지각과 생명체를 구성하는 물질"
+        ],
+        "earth": [
+          "II-1-1. 우주 초기에 생성된 원소",
+          "II-1-2. 별의 진화와 원소의 생성"
+        ]
       },
       "schedule": [
-        { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 통합과학 시스템 OT 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
-        { "id": 2, "date": "3/26", "day": "목", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
-        { "id": 3, "date": "3/28", "day": "토", "content": "2단원 기본 개념 진도 (물질의 규칙성)", "homework": "개념 복습 프린트", "type": "concept" },
-        { "id": 4, "date": "3/31", "day": "화", "content": "2단원 개념 완료 및 학교별 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
-        { "id": 5, "date": "4/02", "day": "목", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
+        { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 오투 빈 곳 진도 보충 (1)", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 2, "date": "3/26", "day": "목", "content": "[오투] 오투 빈 곳 진도 보충 (2)", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/28", "day": "토", "content": "[오투] 오투 빈 곳 진도 보충 (3) 및 진도 완료\n📚 [배부] 기출픽 교재", "homework": "오투 오답 정리", "type": "concept" },
+        { "id": 4, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 진행\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/02", "day": "목", "content": "⚡ [기출픽] 소단원 2개 진행\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 6, "date": "4/04", "day": "토", "content": "⚡ [기출픽] 소단원 2개 진행\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 7, "date": "4/07", "day": "화", "content": "⚡ [기출픽] 소단원 2개 진행\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 8, "date": "4/09", "day": "목", "content": "🏆 [TEST] 1차 기출픽 누적 점검 테스트\n(기출픽 전체 범위)", "homework": "테스트 오답 노트 작성", "type": "test" }
       ],
       "students": ["(Target_Alpha)", "(Target_Beta)", "(Target_Gamma)"],
       "assignments": [
-        { "id": 1, "title": "1주차 프로토콜 프린트", "dueDate": "3/28 (토)", "status": { "(Target_Alpha)": "-", "(Target_Beta)": "-", "(Target_Gamma)": "-" } }
+        { "id": 1, "title": "1주차 오투 과제 제출", "dueDate": "3/28 (토)", "status": { "(Target_Alpha)": "-", "(Target_Beta)": "-", "(Target_Gamma)": "-" } }
       ]
     },
     "middle3": {
