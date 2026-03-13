@@ -112,32 +112,54 @@ function Dashboard({ appData }) {
 
     const currentData = appData.classes[selectedClassId];
 
-    // 📸 이미지 캡처 기능 (backdrop-filter 전역 제거로 뿌연 현상 완전 해결)
+    // 📸 이미지 캡처 기능
+    // html2canvas는 backdrop-filter를 지원하지 않아 rgba 배경이 투명하게 렌더링됨.
+    // CSS 주입이 아닌 DOM 인라인 스타일 직접 조작으로 캡처 전 완전한 불투명 배경을 강제함.
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
 
         const scrollDiv = element.querySelector('.overflow-x-auto');
 
-        // 1. 전역 style 태그 주입: backdrop-filter를 페이지 전체에서 완전히 차단
-        const styleOverride = document.createElement('style');
-        styleOverride.id = 'capture-override';
-        styleOverride.textContent = `
-            * {
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
-            }
-            .terran-panel {
-                background: #ffffff !important;
-            }
-        `;
-        document.head.appendChild(styleOverride);
+        // 1. 캡처 대상 전체 요소를 순회하며 원본 인라인 스타일을 저장하고, 투명도 관련 속성을 직접 덮어씀
+        const allNodes = [element, ...element.querySelectorAll('*')];
+        const savedStyles = allNodes.map(el => ({
+            backdropFilter:         el.style.backdropFilter,
+            webkitBackdropFilter:   el.style.webkitBackdropFilter,
+            background:             el.style.background,
+            backgroundColor:        el.style.backgroundColor,
+            overflow:               el.style.overflow,
+            width:                  el.style.width,
+        }));
 
-        // 2. 캡처 영역 레이아웃 확장 (잘림 방지)
-        element.classList.add('capture-mode');
-        if (scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
+        allNodes.forEach(el => {
+            // backdrop-filter 제거
+            el.style.backdropFilter       = 'none';
+            el.style.webkitBackdropFilter = 'none';
 
-        // 3. 스타일 적용 대기 후 캡처
+            // rgba 배경 → 완전 불투명으로 교체
+            const computed = window.getComputedStyle(el);
+            const bg = computed.backgroundColor;
+            if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+                // rgba(r,g,b,a) → rgb(r,g,b) 으로 강제 변환
+                el.style.backgroundColor = bg.replace(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/, 'rgb($1,$2,$3)');
+            }
+            const bgImage = computed.backgroundImage;
+            // gradient 패턴(grid)이 있는 경우 캡처 시 제거
+            if (bgImage && bgImage !== 'none' && bgImage.includes('linear-gradient') && el === element) {
+                el.style.backgroundImage = 'none';
+            }
+        });
+
+        // 2. 캡처 영역 너비/스크롤 확장 (잘림 방지)
+        element.style.width    = 'max-content';
+        element.style.padding  = '24px';
+        if (scrollDiv) {
+            scrollDiv.style.overflow = 'visible';
+            scrollDiv.style.width    = 'max-content';
+        }
+
+        // 3. 레이아웃 재계산 대기 후 캡처
         setTimeout(() => {
             window.html2canvas(element, {
                 backgroundColor: '#ffffff',
@@ -147,7 +169,7 @@ function Dashboard({ appData }) {
                 logging: false,
                 imageTimeout: 0,
                 windowWidth: element.scrollWidth + 50,
-                width: element.scrollWidth
+                width: element.scrollWidth,
             })
             .then(canvas => {
                 const link = document.createElement('a');
@@ -161,10 +183,21 @@ function Dashboard({ appData }) {
                 alert("캡처에 실패했습니다.");
             })
             .finally(() => {
-                // 4. 복구: 클래스 및 주입된 style 태그 제거
-                element.classList.remove('capture-mode');
-                if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
-                document.getElementById('capture-override')?.remove();
+                // 4. 원본 인라인 스타일 완전 복구
+                allNodes.forEach((el, i) => {
+                    el.style.backdropFilter       = savedStyles[i].backdropFilter;
+                    el.style.webkitBackdropFilter = savedStyles[i].webkitBackdropFilter;
+                    el.style.background           = savedStyles[i].background;
+                    el.style.backgroundColor      = savedStyles[i].backgroundColor;
+                    el.style.overflow             = savedStyles[i].overflow;
+                    el.style.width                = savedStyles[i].width;
+                });
+                element.style.padding        = savedStyles[0].padding || '';
+                element.style.backgroundImage = '';
+                if (scrollDiv) {
+                    scrollDiv.style.overflow = savedStyles[allNodes.indexOf(scrollDiv)].overflow;
+                    scrollDiv.style.width    = savedStyles[allNodes.indexOf(scrollDiv)].width;
+                }
             });
         }, 150);
     };
