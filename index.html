@@ -84,16 +84,12 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* 📸 캡처 모드 전용 스타일 (잘림 방지 및 화질 개선) */
+        /* 📸 캡처 모드 전용 스타일 */
         .capture-mode { 
-            background-color: #ffffff !important; /* 뿌옇게 나오는 현상 방지를 위해 완전 흰색 */
+            background-color: #ffffff !important;
             width: max-content !important; 
             padding: 24px !important; 
-            backdrop-filter: none !important; /* 뿌옇게 만드는 원인 제거 */
             box-shadow: none !important;
-        }
-        .capture-mode * {
-            backdrop-filter: none !important; /* 자식 요소들의 블러 효과도 일괄 제거 */
         }
         .capture-scroll-visible {
             overflow: visible !important; 
@@ -116,45 +112,61 @@ function Dashboard({ appData }) {
 
     const currentData = appData.classes[selectedClassId];
 
-    // 📸 이미지 캡처 기능 (뿌옇게 나오는 현상 완벽 해결)
+    // 📸 이미지 캡처 기능 (backdrop-filter 전역 제거로 뿌연 현상 완전 해결)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
-        
+
         const scrollDiv = element.querySelector('.overflow-x-auto');
-        
-        // 1. 캡처 전: 강제로 너비를 최대로 늘리고, 배경 블러 효과를 완전히 끕니다.
+
+        // 1. 전역 style 태그 주입: backdrop-filter를 페이지 전체에서 완전히 차단
+        const styleOverride = document.createElement('style');
+        styleOverride.id = 'capture-override';
+        styleOverride.textContent = `
+            * {
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+            .terran-panel {
+                background: #ffffff !important;
+            }
+        `;
+        document.head.appendChild(styleOverride);
+
+        // 2. 캡처 영역 레이아웃 확장 (잘림 방지)
         element.classList.add('capture-mode');
-        if(scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
-        
-        // 2. CSS 렌더링이 반영될 수 있도록 0.1초(100ms) 대기 후 사진을 찍습니다.
+        if (scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
+
+        // 3. 스타일 적용 대기 후 캡처
         setTimeout(() => {
-            window.html2canvas(element, { 
-                backgroundColor: '#ffffff', // 투명도 없는 완전한 흰색 배경
-                scale: 3, // 화질을 3배로 뻥튀기하여 텍스트 선명도 극대화
-                useCORS: true, 
+            window.html2canvas(element, {
+                backgroundColor: '#ffffff',
+                scale: 3,
+                useCORS: true,
+                allowTaint: true,
                 logging: false,
-                windowWidth: element.scrollWidth + 50, 
+                imageTimeout: 0,
+                windowWidth: element.scrollWidth + 50,
                 width: element.scrollWidth
             })
             .then(canvas => {
                 const link = document.createElement('a');
-                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.','');
+                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
                 link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                
-                // 3. 캡처 완료 후 클래스 제거 (원래의 예쁜 UI로 복구)
-                element.classList.remove('capture-mode');
-                if(scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
             })
             .catch(err => {
                 console.error(err);
-                element.classList.remove('capture-mode');
-                if(scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
                 alert("캡처에 실패했습니다.");
+            })
+            .finally(() => {
+                // 4. 복구: 클래스 및 주입된 style 태그 제거
+                element.classList.remove('capture-mode');
+                if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
+                document.getElementById('capture-override')?.remove();
             });
-        }, 100);
+        }, 150);
     };
 
     const getBadgeColor = (type) => {
@@ -496,7 +508,6 @@ function App() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // data.json 파일을 불러옵니다. 브라우저 캐시 무효화를 위해 파라미터를 붙입니다.
         fetch('data.json?t=' + new Date().getTime())
             .then(response => {
                 if (!response.ok) {
