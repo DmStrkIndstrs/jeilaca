@@ -144,7 +144,6 @@ function Dashboard({ appData }) {
 
             // 투명도(rgba) 배경을 흰색 배경 기준의 완전 불투명(rgb)로 치환 (Alpha Blending)
             if (el.classList.contains('terran-panel')) {
-                // 테란 메인 패널은 완벽한 흰색으로 강제 고정
                 el.style.background = '#ffffff';
                 el.style.backgroundColor = '#ffffff';
             } else {
@@ -158,10 +157,8 @@ function Dashboard({ appData }) {
                         const a = parseFloat(match[4]);
                         
                         if (a === 0) {
-                            // 완전 투명(a=0)은 검은색이 되지 않도록 transparent로 명시
                             el.style.backgroundColor = 'transparent';
                         } else if (a < 1) {
-                            // 배경이 흰색(#ffffff)이라고 가정하고 혼합(Blending) 색상 계산
                             const blend = (colorChannel) => Math.round(colorChannel * a + 255 * (1 - a));
                             el.style.backgroundColor = `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
                         }
@@ -173,7 +170,7 @@ function Dashboard({ appData }) {
         // 3. 브라우저 렌더링을 기다린 후 html2canvas 실행
         setTimeout(() => {
             window.html2canvas(element, {
-                backgroundColor: '#ffffff', // 캔버스 밖의 배경도 완전 흰색
+                backgroundColor: '#ffffff',
                 scale: 3,
                 useCORS: true,
                 allowTaint: true,
@@ -193,7 +190,7 @@ function Dashboard({ appData }) {
                 alert("캡처에 실패했습니다.");
             })
             .finally(() => {
-                // 4. 캡처 종료 후 클래스 및 인라인 스타일 원상 복구
+                // 4. 캡처 종료 후 복구
                 element.classList.remove('capture-mode');
                 if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
                 
@@ -232,19 +229,19 @@ function Dashboard({ appData }) {
         return currentData.assignments.every(a => (a.status?.[name] === 'H' || a.status?.[name] === undefined));
     };
 
-    // 오늘 날짜 기준으로 마감일이 도래했거나 지났는지 판별하는 함수
+    // 오늘 날짜 기준으로 마감일이 도래했거나 지났는지 판별하는 함수 (그래프 계산용)
     const isPastDueFunc = (dueDateStr) => {
         if (!dueDateStr) return true;
         const match = dueDateStr.match(/(\d+)\/(\d+)/);
         if (!match) return true;
         const today = new Date();
-        today.setHours(0,0,0,0); // 시간 제외, 자정 기준
+        today.setHours(0,0,0,0);
         const currentYear = today.getFullYear();
         const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
-        return dueDate <= today; // 오늘이거나 과거면 true
+        return dueDate <= today;
     };
 
-    // 마감일이 완전히 지났는지 확인하는 함수 (비상! 표시용)
+    // 마감일이 '완전히' 지났는지 확인하는 함수 (🚨비상 경고용)
     const isExpiredFunc = (dueDateStr) => {
         if (!dueDateStr) return false;
         const match = dueDateStr.match(/(\d+)\/(\d+)/);
@@ -253,7 +250,7 @@ function Dashboard({ appData }) {
         today.setHours(0,0,0,0);
         const currentYear = today.getFullYear();
         const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
-        return dueDate < today; // 과거면 true
+        return dueDate < today;
     };
 
     const calcProgress = (statusObj, dueDateStr) => {
@@ -269,9 +266,7 @@ function Dashboard({ appData }) {
 
     const calcStudentProgress = (name, assignments) => {
         let total = 0, score = 0;
-        
         assignments.forEach(a => {
-            // 마감일이 아직 지나지 않은 미래의 과제는 성취도 모수에서 완전 제외
             if (!isPastDueFunc(a.dueDate)) return;
 
             const active = Object.values(a.status || {}).some(v => v === 'O' || v === 'X' || v === '△');
@@ -284,7 +279,6 @@ function Dashboard({ appData }) {
                 }
             }
         });
-        
         if (!total) return { percentage: 0, hasData: false };
         return { percentage: Math.round((score / total) * 100), hasData: true };
     };
@@ -490,21 +484,21 @@ function Dashboard({ appData }) {
                                     {(currentData.assignments || []).map((a, idx) => {
                                         const { percentage, isFuture } = calcProgress(a.status, a.dueDate);
                                         
-                                        // 마감일이 지났고, 아직 전원 제출(100%)이 아닌 경우에만 비상! 표시
+                                        // 마감일이 지났고 100%가 아니면 비상 경고 활성화
                                         const isEmergency = isExpiredFunc(a.dueDate) && percentage < 100;
 
                                         return (
-                                            <tr key={a.id} className="terran-row-hover text-sm font-sans">
-                                                <td className="py-3 px-6 text-center text-slate-400 font-mono-tech font-bold">
+                                            <tr key={a.id} className={`terran-row-hover text-sm font-sans transition-colors ${isEmergency ? 'bg-red-50/80' : ''}`}>
+                                                <td className={`py-3 px-6 text-center font-mono-tech font-bold ${isEmergency ? 'text-red-500' : 'text-slate-400'}`}>
                                                     {String(idx+1).padStart(2,'0')}
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="font-bold text-slate-700 flex items-center gap-2">
-                                                        <span>{a.title}</span>
-                                                        {isEmergency && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] rounded-sm font-black tracking-widest animate-pulse border border-red-300">🚨비상!</span>}
+                                                    <div className={`font-bold flex flex-wrap items-center gap-1.5 ${isEmergency ? 'text-red-700' : 'text-slate-700'}`}>
+                                                        <span className="break-all leading-snug">{a.title}</span>
+                                                        {isEmergency && <span className="shrink-0 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded font-black tracking-widest animate-pulse shadow-sm">🚨비상!</span>}
                                                     </div>
-                                                    <div className="text-[10px] font-mono-tech text-slate-500 mt-1 font-bold">
-                                                        <span className="text-blue-500 mr-1">&gt;</span>{a.dueDate}
+                                                    <div className={`text-[10px] font-mono-tech mt-1 font-bold ${isEmergency ? 'text-red-500' : 'text-slate-500'}`}>
+                                                        <span className={`${isEmergency ? 'text-red-500' : 'text-blue-500'} mr-1`}>&gt;</span>{a.dueDate}
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 border-l border-slate-100 text-center">
@@ -522,7 +516,7 @@ function Dashboard({ appData }) {
                                                     )}
                                                 </td>
                                                 {currentData.students.map((s, i) => (
-                                                    <td key={i} className={`py-3 px-2 text-center border-l border-slate-50 ${isExempt(s)?'bg-blue-50/40':''}`}>
+                                                    <td key={i} className={`py-3 px-2 text-center border-l ${isEmergency ? 'border-red-100' : 'border-slate-50'} ${isExempt(s)?'bg-blue-50/40':''}`}>
                                                         {renderStatus(a.status?.[s] || '-')}
                                                     </td>
                                                 ))}
