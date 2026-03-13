@@ -77,7 +77,7 @@
         "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)",
         "<span class='text-blue-600 font-bold'>[CMD.DIST]</span> 첫 일주일(3/24~3/28) 간 비어있는 오투 개념 진도를 최우선으로 진행합니다.",
         "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
-        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 오투 진도 완료 후 기출픽 배부 및 소단원별 타격이 즉각 시작됩니다."
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 오투 진도 완료 후 누적 테스트 및 기출픽 배부가 즉각 시작됩니다."
       ],
       "examScope": {
         "physics": [
@@ -102,11 +102,12 @@
         { "id": 1, "date": "3/24", "day": "화", "content": "[개강] 오투 빈 곳 진도 보충 (1)", "homework": "오투 해당 단원 풀이", "type": "concept" },
         { "id": 2, "date": "3/26", "day": "목", "content": "[오투] 오투 빈 곳 진도 보충 (2)", "homework": "오투 해당 단원 풀이", "type": "concept" },
         { "id": 3, "date": "3/28", "day": "토", "content": "[오투] 오투 빈 곳 진도 보충 (3) 및 진도 완료\n📚 [배부] 기출픽 교재", "homework": "오투 오답 정리", "type": "concept" },
-        { "id": 4, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 진행\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 풀이", "type": "practice" },
-        { "id": 5, "date": "4/02", "day": "목", "content": "⚡ [기출픽] 소단원 2개 진행\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
-        { "id": 6, "date": "4/04", "day": "토", "content": "⚡ [기출픽] 소단원 2개 진행\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
-        { "id": 7, "date": "4/07", "day": "화", "content": "⚡ [기출픽] 소단원 2개 진행\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
-        { "id": 8, "date": "4/09", "day": "목", "content": "🏆 [TEST] 1차 기출픽 누적 점검 테스트\n(기출픽 전체 범위)", "homework": "테스트 오답 노트 작성", "type": "test" }
+        { "id": 4, "date": "3/31", "day": "화", "content": "🏆 [TEST] 오투 빈 곳 진도 누적 점검 테스트\n(오투 보충 진도 전체)", "homework": "테스트 오답 정리", "type": "test" },
+        { "id": 5, "date": "4/02", "day": "목", "content": "⚡ [기출픽] 소단원 2개 진행\n(우주 초기 원소 / 별의 진화)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 6, "date": "4/04", "day": "토", "content": "⚡ [기출픽] 소단원 2개 진행\n(지각·생명체 물질 / 물질의 전기적 특성)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 7, "date": "4/07", "day": "화", "content": "⚡ [기출픽] 소단원 3개 진행\n(시간과 공간 / 기본량과 단위 / 측정과 측정 표준)", "homework": "기출픽 3개 단원 풀이", "type": "practice" },
+        { "id": 8, "date": "4/09", "day": "목", "content": "⚡ [기출픽] 소단원 2개 진행\n(신호와 정보 / 중력의 작용)", "homework": "기출픽 2개 단원 풀이", "type": "practice" },
+        { "id": 9, "date": "4/11", "day": "토", "content": "🏆 [TEST] 1차 기출픽 누적 점검 테스트\n(기출픽 전체 범위)", "homework": "테스트 오답 노트 작성", "type": "test" }
       ],
       "students": ["(Target_Alpha)", "(Target_Beta)", "(Target_Gamma)"],
       "assignments": [
@@ -130,10 +131,10 @@
         "earth": ["(DATA PENDING)"]
       },
       "schedule": [
-        { "id": 1, "date": "3/23", "day": "월", "content": "[개강] 중3 과학 오리엔테이션 및 1단원 기본 개념 진도", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
-        { "id": 2, "date": "3/25", "day": "수", "content": "1단원 개념 완료 및 대표 유형 문제 풀이", "homework": "오투 해당 단원 풀이", "type": "concept" },
-        { "id": 3, "date": "3/27", "day": "금", "content": "2단원 기본 개념 진도", "homework": "개념 복습 프린트", "type": "concept" },
-        { "id": 4, "date": "3/30", "day": "월", "content": "2단원 개념 완료 및 공통 기출 유형 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
+        { "id": 1, "date": "3/23", "day": "월", "content": "[개강] 중3 과학 오리엔테이션\n소단원 2개 진도 진행", "homework": "기본 개념 복습 및 과제 프린트", "type": "concept" },
+        { "id": 2, "date": "3/25", "day": "수", "content": "[1교시] 1단원 진도 진행\n[2교시] 과제 검사 및 질의응답", "homework": "오투 해당 단원 풀이", "type": "concept" },
+        { "id": 3, "date": "3/27", "day": "금", "content": "[1교시] 1단원 진도 진행\n[2교시] 과제 검사 및 질의응답", "homework": "개념 복습 프린트", "type": "concept" },
+        { "id": 4, "date": "3/30", "day": "월", "content": "[1교시] 2단원 진도 진행\n[2교시] 과제 검사 및 공통 기출 점검", "homework": "오투 해당 단원 풀이", "type": "practice" },
         { "id": 5, "date": "4/01", "day": "수", "content": "🏆 1차 누적 점검 테스트 및 오답 클리닉", "homework": "오답 노트 작성", "type": "test" }
       ],
       "students": ["(대기중1)", "(대기중2)", "(대기중3)"],
