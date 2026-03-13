@@ -74,8 +74,6 @@
             background-size:10px 10px;
         }
 
-        .capture-mode { background-color:#f8fafc !important; }
-        
         /* Loading Spinner */
         .spinner {
             width: 40px; height: 40px;
@@ -85,6 +83,17 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 📸 캡처 모드 전용 스타일 (잘림 방지) */
+        .capture-mode { 
+            background-color: #f8fafc !important; 
+            width: max-content !important; /* 강제로 전체 너비로 확장 */
+            padding-right: 24px !important; /* 우측 여백 넉넉히 추가 */
+        }
+        .capture-scroll-visible {
+            overflow: visible !important; /* 스크롤바 없애고 내용물 다 꺼내기 */
+            width: max-content !important;
+        }
     </style>
 </head>
 <body>
@@ -102,25 +111,44 @@ function Dashboard({ appData }) {
 
     const currentData = appData.classes[selectedClassId];
 
-    // 이미지 캡처 기능
+    // 📸 이미지 캡처 기능 (잘림 방지 로직 적용)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
+        
+        // 내부의 스크롤이 있는 div를 찾습니다.
+        const scrollDiv = element.querySelector('.overflow-x-auto');
+        
+        // 1. 캡처 전, 스크롤을 풀고 강제로 너비를 최대로 늘립니다.
         element.classList.add('capture-mode');
-        window.html2canvas(element, { backgroundColor:'#f8fafc', scale:2, useCORS:true, logging:false })
-            .then(canvas => {
-                const link = document.createElement('a');
-                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.','');
-                link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                element.classList.remove('capture-mode');
-            })
-            .catch(err => {
-                console.error(err);
-                element.classList.remove('capture-mode');
-                alert("캡처에 실패했습니다.");
-            });
+        if(scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
+        
+        // 2. html2canvas 설정 (실제 펼쳐진 너비 인식)
+        window.html2canvas(element, { 
+            backgroundColor: '#f8fafc', 
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            windowWidth: element.scrollWidth + 50, // 캔버스 뷰포트를 강제로 넓힘
+            width: element.scrollWidth
+        })
+        .then(canvas => {
+            const link = document.createElement('a');
+            const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.','');
+            link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // 3. 캡처 완료 후 클래스 제거 (원래 화면으로 복구)
+            element.classList.remove('capture-mode');
+            if(scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
+        })
+        .catch(err => {
+            console.error(err);
+            element.classList.remove('capture-mode');
+            if(scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
+            alert("캡처에 실패했습니다.");
+        });
     };
 
     const getBadgeColor = (type) => {
