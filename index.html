@@ -533,30 +533,32 @@ function Dashboard({ appData }) {
                                 <span className="text-blue-500 mr-2 text-lg">📊</span> CREW PERFORMANCE METRICS
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                                {currentData.students.map(s => {
-                                    const { percentage, hasData } = calcStudentProgress(s, currentData.assignments || []);
-                                    return (
-                                        <div key={s} className="flex items-center gap-3 font-mono-tech">
-                                            <div className={`w-16 text-sm truncate font-bold ${isExempt(s)?'text-blue-600':'text-slate-600'}`}>{s}</div>
-                                            <div className="flex-1 h-3 bg-slate-200 border border-slate-300 relative overflow-hidden rounded-sm">
-                                                {hasData ? (
-                                                    <div
-                                                        className={`h-full transition-all duration-1000 ease-out ${percentage>=80?'bg-emerald-500':percentage>=50?'bg-amber-400':'bg-red-500'}`}
-                                                        style={{width:`${percentage}%`}}>
-                                                        <div className="absolute inset-0 tech-pattern opacity-50"></div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="h-full bg-slate-100 flex items-center justify-center text-[9px] text-slate-400 tracking-widest font-bold">
-                                                        {isExempt(s) ? 'HOLD' : 'NO DATA'}
-                                                    </div>
-                                                )}
+                                {[...currentData.students]
+                                    .map(s => ({ name: s, ...calcStudentProgress(s, currentData.assignments || []) }))
+                                    .sort((a, b) => b.percentage - a.percentage || (b.hasData === a.hasData ? a.name.localeCompare(b.name) : (b.hasData ? 1 : -1)))
+                                    .map(({ name: s, percentage, hasData }) => {
+                                        return (
+                                            <div key={s} className="flex items-center gap-3 font-mono-tech">
+                                                <div className={`w-16 text-sm truncate font-bold ${isExempt(s)?'text-blue-600':'text-slate-600'}`}>{s}</div>
+                                                <div className="flex-1 h-3 bg-slate-200 border border-slate-300 relative overflow-hidden rounded-sm">
+                                                    {hasData ? (
+                                                        <div
+                                                            className={`h-full transition-all duration-1000 ease-out ${percentage>=80?'bg-emerald-500':percentage>=50?'bg-amber-400':'bg-red-500'}`}
+                                                            style={{width:`${percentage}%`}}>
+                                                            <div className="absolute inset-0 tech-pattern opacity-50"></div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="h-full bg-slate-100 flex items-center justify-center text-[9px] text-slate-400 tracking-widest font-bold">
+                                                            {isExempt(s) ? 'HOLD' : 'NO DATA'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className={`w-10 text-right text-sm font-bold ${hasData?(percentage>=80?'text-emerald-600':percentage>=50?'text-amber-600':'text-red-600'):'text-slate-400'}`}>
+                                                    {hasData ? `${percentage}%` : 'N/A'}
+                                                </div>
                                             </div>
-                                            <div className={`w-10 text-right text-sm font-bold ${hasData?(percentage>=80?'text-emerald-600':percentage>=50?'text-amber-600':'text-red-600'):'text-slate-400'}`}>
-                                                {hasData ? `${percentage}%` : 'N/A'}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </div>
                     </div>
