@@ -106,10 +106,66 @@ const { useState, useEffect } = React;
 // 대시보드 컴포넌트 (데이터를 Props로 받아 렌더링)
 // ──────────────────────────────────────────────
 function Dashboard({ appData }) {
-    const [selectedClassId, setSelectedClassId] = useState(Object.keys(appData.classes)[0]);
+    // 풀 데이터(수정 가능하게 상태로 관리)
+    const [fullData, setFullData] = useState(appData);
+    const [selectedClassId, setSelectedClassId] = useState(Object.keys(fullData.classes)[0]);
     const [activeTab, setActiveTab] = useState('schedule');
+    
+    // 숨겨진 관리자(에딧) 모드
+    const [isEditMode, setIsEditMode] = useState(false);
+    
+    // 타겟팅 레이더 모드
+    const [isRadarMode, setIsRadarMode] = useState(false);
 
-    const currentData = appData.classes[selectedClassId];
+    const currentData = fullData.classes[selectedClassId];
+
+    // 비밀번호 입력 팝업 (관리자 모드 토글)
+    const toggleEditMode = () => {
+        if (isEditMode) {
+            setIsEditMode(false);
+            return;
+        }
+        const pwd = prompt("COMMAND CODE REQUIRED:");
+        // 선생님 요청: 비밀번호 2951 적용
+        if (pwd === "2951") {
+            setIsEditMode(true);
+        } else if (pwd !== null) {
+            alert("ACCESS DENIED.");
+        }
+    };
+
+    // 과제 상태 클릭 시 변경 로직
+    const handleStatusChange = (assignmentId, studentName) => {
+        if (!isEditMode) return;
+        
+        const assignmentIndex = currentData.assignments.findIndex(a => a.id === assignmentId);
+        if (assignmentIndex === -1) return;
+
+        const currentStatus = currentData.assignments[assignmentIndex].status?.[studentName] || '-';
+        // 클릭할 때마다 상태 사이클: 미제출(-) -> O -> △ -> X -> 면제(H) -> 다시 미제출(-)
+        const nextStatusMap = { '-': 'O', 'O': '△', '△': 'X', 'X': 'H', 'H': '-' };
+        const nextStatus = nextStatusMap[currentStatus];
+
+        // 원본 데이터 딥카피 후 업데이트
+        const newData = JSON.parse(JSON.stringify(fullData));
+        if (!newData.classes[selectedClassId].assignments[assignmentIndex].status) {
+            newData.classes[selectedClassId].assignments[assignmentIndex].status = {};
+        }
+        newData.classes[selectedClassId].assignments[assignmentIndex].status[studentName] = nextStatus;
+        
+        setFullData(newData);
+    };
+
+    // JSON 데이터 다운로드 기능 (수정 후 백업용)
+    const handleSaveJson = () => {
+        const dataStr = JSON.stringify(fullData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'data.json';
+        link.href = url;
+        link.click();
+    };
 
     // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending으로 뿌연 현상 완벽 해결)
     const handleDownloadImage = () => {
@@ -129,7 +185,6 @@ function Dashboard({ appData }) {
         allElements.forEach((el) => {
             const computedStyle = window.getComputedStyle(el);
             
-            // 원래 인라인 스타일 백업
             originalStyles.push({
                 el: el,
                 background: el.style.background,
@@ -138,11 +193,9 @@ function Dashboard({ appData }) {
                 webkitBackdropFilter: el.style.webkitBackdropFilter
             });
 
-            // 블러(Blur) 완벽 차단
             el.style.backdropFilter = 'none';
             el.style.webkitBackdropFilter = 'none';
 
-            // 투명도(rgba) 배경을 흰색 배경 기준의 완전 불투명(rgb)로 치환 (Alpha Blending)
             if (el.classList.contains('terran-panel')) {
                 el.style.background = '#ffffff';
                 el.style.backgroundColor = '#ffffff';
@@ -217,12 +270,14 @@ function Dashboard({ appData }) {
         }
     };
 
-    const renderStatus = (status) => {
-        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg">O</span>;
-        if (status === 'X')  return <span className="text-red-600 font-black text-lg">X</span>;
-        if (status === '△') return <span className="text-amber-500 font-black text-lg">△</span>;
-        if (status === 'H')  return <span className="text-blue-600 font-black text-lg">H</span>;
-        return <span className="text-slate-300 font-bold">-</span>;
+    const renderStatus = (status, isHighlighted = false) => {
+        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg select-none">O</span>;
+        if (status === 'X')  return <span className="text-red-600 font-black text-lg select-none">X</span>;
+        if (status === '△') return <span className={`font-black text-lg select-none ${isHighlighted ? 'text-red-600' : 'text-amber-500'}`}>△</span>;
+        if (status === 'H')  return <span className="text-blue-600 font-black text-lg select-none">H</span>;
+        
+        // 레이더 모드 시 미제출(-) 표시 강조
+        return <span className={`font-bold select-none ${isHighlighted ? 'text-red-600 text-xl font-black' : 'text-slate-300'}`}>-</span>;
     };
 
     const isExempt = (name) => {
@@ -286,23 +341,24 @@ function Dashboard({ appData }) {
     return (
         <div className="min-h-screen pb-20 relative z-10 fade-in">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
+            <header className={`bg-white border-b pt-10 pb-6 px-6 text-center relative z-20 shadow-sm transition-colors ${isEditMode ? 'border-red-400 bg-red-50/30' : 'border-slate-200'}`}>
                 <div className="max-w-4xl mx-auto relative">
-                    <h2 className="font-mono-tech text-blue-600 font-bold tracking-[0.3em] text-xs mb-3">
-                        [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
+                    <h2 className={`font-mono-tech font-bold tracking-[0.3em] text-xs mb-3 ${isEditMode ? 'text-red-500' : 'text-blue-600'}`}>
+                        [ SECURE NETWORK // JEIL ACADEMY COMMAND {isEditMode && ":: ADMIN OVERRIDE ENGAGED"} ]
                     </h2>
                     <h1 className="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
-                        {appData.mainTitle}
+                        {fullData.mainTitle}
                     </h1>
                     
                     <div className="flex flex-col items-center gap-3 mb-5 mt-2">
-                        <p className="font-mono-tech text-emerald-600 font-bold tracking-widest text-sm flex items-center gap-2">
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full cursor-blink inline-block"></span>
-                            &gt; explorer reporting!_
+                        {/* 숨겨진 관리자 모드 토글 버튼 */}
+                        <p onClick={toggleEditMode} className={`font-mono-tech font-bold tracking-widest text-sm flex items-center gap-2 cursor-pointer select-none transition-colors ${isEditMode ? 'text-red-600' : 'text-emerald-600 hover:text-emerald-500'}`}>
+                            <span className={`w-2 h-2 rounded-full cursor-blink inline-block ${isEditMode ? 'bg-red-500' : 'bg-emerald-500'}`}></span>
+                            &gt; explorer reporting!_ {isEditMode && "[EDIT MODE]"}
                         </p>
                     </div>
 
-                    {/* 유튜브 링크 */}
+                    {/* 상단 액션 버튼 영역 */}
                     <div className="flex flex-wrap justify-center items-center gap-3 mb-6 no-print">
                         <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -310,11 +366,22 @@ function Dashboard({ appData }) {
                             </svg>
                             [ VIDEO DATALINK ]
                         </a>
+                        
+                        {/* 관리자 모드일 때만 보이는 JSON 저장 버튼 */}
+                        {isEditMode && (
+                            <button onClick={handleSaveJson} className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-100 hover:text-emerald-800 transition-colors rounded font-bold animate-pulse shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                </svg>
+                                [ 💾 JSON 데이터 저장 ]
+                            </button>
+                        )}
                     </div>
 
                     {/* Class Tabs */}
                     <div className="flex flex-wrap justify-center gap-3 mt-4 no-print">
-                        {Object.entries(appData.classes).map(([id, cls]) => (
+                        {Object.entries(fullData.classes).map(([id, cls]) => (
                             <button key={id} onClick={() => { setSelectedClassId(id); setActiveTab('schedule'); }}
                                 className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase transition-all border rounded ${
                                     selectedClassId === id
@@ -441,12 +508,20 @@ function Dashboard({ appData }) {
                 {activeTab === 'assignments' && (
                     <div id="capture-area" className="terran-panel overflow-hidden fade-in flex flex-col pt-1">
                         <div className="p-4 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-white">
-                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
+                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase flex items-center">
                                 <span className="text-blue-500 mr-2">●</span>
                                 CREW TASK STATUS (TOTAL: {currentData.students.length})
+                                {isEditMode && <span className="ml-3 px-2 py-0.5 bg-red-100 text-red-600 text-[10px] rounded animate-pulse">ADMIN EDIT ENABLED</span>}
                             </h3>
                             <div className="flex items-center gap-3">
-                                <div className="flex space-x-3 text-[10px] font-mono-tech font-bold bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
+                                {/* 타겟팅 레이더 버튼 추가 */}
+                                <button onClick={() => setIsRadarMode(!isRadarMode)}
+                                    className={`no-print flex items-center gap-1.5 px-3 py-1.5 font-mono-tech text-xs tracking-widest font-bold rounded border transition-all ${isRadarMode ? 'bg-red-500 text-white border-red-600 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
+                                    <span className="text-sm">🎯</span>
+                                    {isRadarMode ? 'RADAR: ON' : 'RADAR: OFF'}
+                                </button>
+
+                                <div className="hidden md:flex space-x-3 text-[10px] font-mono-tech font-bold bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
                                     <span className="text-emerald-600">O:완료</span>
                                     <span className="text-amber-500">△:미흡</span>
                                     <span className="text-blue-600">H:HOLD</span>
@@ -515,11 +590,22 @@ function Dashboard({ appData }) {
                                                         </div>
                                                     )}
                                                 </td>
-                                                {currentData.students.map((s, i) => (
-                                                    <td key={i} className={`py-3 px-2 text-center border-l ${isEmergency ? 'border-red-100' : 'border-slate-50'} ${isExempt(s)?'bg-blue-50/40':''}`}>
-                                                        {renderStatus(a.status?.[s] || '-')}
-                                                    </td>
-                                                ))}
+                                                {currentData.students.map((s, i) => {
+                                                    const cellStatus = a.status?.[s] || '-';
+                                                    
+                                                    // 레이더 모드 시각 효과 계산
+                                                    const isMissed = !isFuture && (cellStatus === '-' || cellStatus === '△');
+                                                    const applyRadarDim = isRadarMode && !isMissed;
+                                                    const applyRadarHighlight = isRadarMode && isMissed;
+
+                                                    return (
+                                                        <td key={i} 
+                                                            onClick={() => handleStatusChange(a.id, s)}
+                                                            className={`py-3 px-2 text-center border-l ${isEmergency ? 'border-red-100' : 'border-slate-50'} ${isExempt(s)?'bg-blue-50/40':''} ${isEditMode ? 'cursor-pointer hover:bg-blue-100 transition-colors' : ''} ${applyRadarDim ? 'opacity-20' : 'opacity-100'} ${applyRadarHighlight ? 'bg-red-50 ring-1 ring-inset ring-red-400' : ''} transition-all duration-300`}>
+                                                            {renderStatus(cellStatus, applyRadarHighlight)}
+                                                        </td>
+                                                    );
+                                                })}
                                             </tr>
                                         );
                                     })}
