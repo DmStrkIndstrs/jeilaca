@@ -165,6 +165,34 @@ function Dashboard({ appData, onSaveData }) {
         onSaveData(newData);
     };
 
+    // ➕ 새로운 과제 추가 로직
+    const handleAddAssignment = () => {
+        if (!isEditMode) return;
+
+        const title = prompt("새로운 과제명을 입력하세요 (예: 기출픽 1단원):");
+        if (!title) return; // 취소 누르거나 빈칸이면 중단
+
+        const dueDate = prompt("마감일을 입력하세요 (예: 3/24 (화)):");
+        if (!dueDate) return;
+
+        const newData = JSON.parse(JSON.stringify(appData));
+        const assignments = newData.classes[selectedClassId].assignments;
+        
+        // 기존 과제 중 가장 큰 ID 찾아서 +1 (겹치지 않게)
+        const newId = assignments.length > 0 ? Math.max(...assignments.map(a => a.id)) + 1 : 1;
+
+        // 새 과제 추가 (기본 상태는 모두 빈칸 '-')
+        assignments.push({
+            id: newId,
+            title: title,
+            dueDate: dueDate,
+            status: {} 
+        });
+
+        // 클라우드 즉시 저장
+        onSaveData(newData);
+    };
+
     // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
@@ -488,6 +516,15 @@ function Dashboard({ appData, onSaveData }) {
                                     <span className="text-blue-600">H:HOLD</span>
                                     <span className="text-slate-400">-:미제출</span>
                                 </div>
+                                
+                                {/* 과제 추가 버튼 (관리자 모드에서만 보임) */}
+                                {isEditMode && (
+                                    <button onClick={handleAddAssignment}
+                                        className="no-print flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white font-mono-tech text-xs tracking-widest hover:bg-blue-700 transition-colors font-bold rounded shadow-sm">
+                                        <span className="text-sm leading-none">+</span> [ NEW TASK ]
+                                    </button>
+                                )}
+
                                 <button onClick={handleDownloadImage}
                                     className="no-print flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors font-bold rounded">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
