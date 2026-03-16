@@ -13,8 +13,18 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- html2canvas for Image Capture -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts: Rajdhani & Share Tech Mono & Noto Sans KR -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK Modules (Real-time DB) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // React에서 쓸 수 있도록 전역 객체에 주입
+        window.FirebaseAPI = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, setDoc, onSnapshot };
+    </script>
 
     <style>
         :root {
@@ -103,12 +113,10 @@
 const { useState, useEffect } = React;
 
 // ──────────────────────────────────────────────
-// 대시보드 컴포넌트 (데이터를 Props로 받아 렌더링)
+// 대시보드 컴포넌트 (UI 렌더링 및 클릭 이벤트)
 // ──────────────────────────────────────────────
-function Dashboard({ appData }) {
-    // 풀 데이터(수정 가능하게 상태로 관리)
-    const [fullData, setFullData] = useState(appData);
-    const [selectedClassId, setSelectedClassId] = useState(Object.keys(fullData.classes)[0]);
+function Dashboard({ appData, onSaveData }) {
+    const [selectedClassId, setSelectedClassId] = useState(Object.keys(appData.classes)[0]);
     const [activeTab, setActiveTab] = useState('schedule');
     
     // 숨겨진 관리자(에딧) 모드
@@ -117,7 +125,7 @@ function Dashboard({ appData }) {
     // 타겟팅 레이더 모드
     const [isRadarMode, setIsRadarMode] = useState(false);
 
-    const currentData = fullData.classes[selectedClassId];
+    const currentData = appData.classes[selectedClassId];
 
     // 비밀번호 입력 팝업 (관리자 모드 토글)
     const toggleEditMode = () => {
@@ -126,7 +134,7 @@ function Dashboard({ appData }) {
             return;
         }
         const pwd = prompt("COMMAND CODE REQUIRED:");
-        // 선생님 요청: 비밀번호 2951 적용
+        // 선생님 지정 비밀번호 2951
         if (pwd === "2951") {
             setIsEditMode(true);
         } else if (pwd !== null) {
@@ -134,9 +142,9 @@ function Dashboard({ appData }) {
         }
     };
 
-    // 과제 상태 클릭 시 변경 로직
+    // 과제 상태 클릭 시 실시간 클라우드 저장 로직
     const handleStatusChange = (assignmentId, studentName) => {
-        if (!isEditMode) return;
+        if (!isEditMode) return; // 관리자 모드 아니면 작동 안함 (학생들 터치 방지)
         
         const assignmentIndex = currentData.assignments.findIndex(a => a.id === assignmentId);
         if (assignmentIndex === -1) return;
@@ -147,50 +155,33 @@ function Dashboard({ appData }) {
         const nextStatus = nextStatusMap[currentStatus];
 
         // 원본 데이터 딥카피 후 업데이트
-        const newData = JSON.parse(JSON.stringify(fullData));
+        const newData = JSON.parse(JSON.stringify(appData));
         if (!newData.classes[selectedClassId].assignments[assignmentIndex].status) {
             newData.classes[selectedClassId].assignments[assignmentIndex].status = {};
         }
         newData.classes[selectedClassId].assignments[assignmentIndex].status[studentName] = nextStatus;
         
-        setFullData(newData);
+        // ☁️ 즉시 클라우드로 전송!
+        onSaveData(newData);
     };
 
-    // JSON 데이터 다운로드 기능 (수정 후 백업용)
-    const handleSaveJson = () => {
-        const dataStr = JSON.stringify(fullData, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = 'data.json';
-        link.href = url;
-        link.click();
-    };
-
-    // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending으로 뿌연 현상 완벽 해결)
+    // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending)
     const handleDownloadImage = () => {
         const element = document.getElementById('capture-area');
         if (!element) return;
 
         const scrollDiv = element.querySelector('.overflow-x-auto');
-
-        // 1. 캡처 영역 레이아웃 확장 (잘림 방지)
         element.classList.add('capture-mode');
         if (scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
 
-        // 2. DOM 인라인 스타일 직접 조작 및 원본 백업
         const originalStyles = [];
         const allElements = [element, ...element.querySelectorAll('*')];
 
         allElements.forEach((el) => {
             const computedStyle = window.getComputedStyle(el);
-            
             originalStyles.push({
-                el: el,
-                background: el.style.background,
-                backgroundColor: el.style.backgroundColor,
-                backdropFilter: el.style.backdropFilter,
-                webkitBackdropFilter: el.style.webkitBackdropFilter
+                el: el, background: el.style.background, backgroundColor: el.style.backgroundColor,
+                backdropFilter: el.style.backdropFilter, webkitBackdropFilter: el.style.webkitBackdropFilter
             });
 
             el.style.backdropFilter = 'none';
@@ -204,11 +195,7 @@ function Dashboard({ appData }) {
                 if (bg && bg.startsWith('rgba')) {
                     const match = bg.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
                     if (match) {
-                        const r = parseInt(match[1], 10);
-                        const g = parseInt(match[2], 10);
-                        const b = parseInt(match[3], 10);
-                        const a = parseFloat(match[4]);
-                        
+                        const r = parseInt(match[1], 10), g = parseInt(match[2], 10), b = parseInt(match[3], 10), a = parseFloat(match[4]);
                         if (a === 0) {
                             el.style.backgroundColor = 'transparent';
                         } else if (a < 1) {
@@ -220,17 +207,8 @@ function Dashboard({ appData }) {
             }
         });
 
-        // 3. 브라우저 렌더링을 기다린 후 html2canvas 실행
         setTimeout(() => {
-            window.html2canvas(element, {
-                backgroundColor: '#ffffff',
-                scale: 3,
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                windowWidth: element.scrollWidth + 50,
-                width: element.scrollWidth
-            })
+            window.html2canvas(element, { backgroundColor: '#ffffff', scale: 3, useCORS: true, allowTaint: true, logging: false, windowWidth: element.scrollWidth + 50, width: element.scrollWidth })
             .then(canvas => {
                 const link = document.createElement('a');
                 const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
@@ -238,20 +216,13 @@ function Dashboard({ appData }) {
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             })
-            .catch(err => {
-                console.error(err);
-                alert("캡처에 실패했습니다.");
-            })
+            .catch(err => { console.error(err); alert("캡처에 실패했습니다."); })
             .finally(() => {
-                // 4. 캡처 종료 후 복구
                 element.classList.remove('capture-mode');
                 if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
-                
                 originalStyles.forEach(item => {
-                    item.el.style.background = item.background;
-                    item.el.style.backgroundColor = item.backgroundColor;
-                    item.el.style.backdropFilter = item.backdropFilter;
-                    item.el.style.webkitBackdropFilter = item.webkitBackdropFilter;
+                    item.el.style.background = item.background; item.el.style.backgroundColor = item.backgroundColor;
+                    item.el.style.backdropFilter = item.backdropFilter; item.el.style.webkitBackdropFilter = item.webkitBackdropFilter;
                 });
             });
         }, 150);
@@ -271,40 +242,34 @@ function Dashboard({ appData }) {
     };
 
     const renderStatus = (status, isHighlighted = false) => {
-        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg select-none">O</span>;
-        if (status === 'X')  return <span className="text-red-600 font-black text-lg select-none">X</span>;
-        if (status === '△') return <span className={`font-black text-lg select-none ${isHighlighted ? 'text-red-600' : 'text-amber-500'}`}>△</span>;
-        if (status === 'H')  return <span className="text-blue-600 font-black text-lg select-none">H</span>;
-        
-        // 레이더 모드 시 미제출(-) 표시 강조
-        return <span className={`font-bold select-none ${isHighlighted ? 'text-red-600 text-xl font-black' : 'text-slate-300'}`}>-</span>;
+        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg select-none pointer-events-none">O</span>;
+        if (status === 'X')  return <span className="text-red-600 font-black text-lg select-none pointer-events-none">X</span>;
+        if (status === '△') return <span className={`font-black text-lg select-none pointer-events-none ${isHighlighted ? 'text-red-600' : 'text-amber-500'}`}>△</span>;
+        if (status === 'H')  return <span className="text-blue-600 font-black text-lg select-none pointer-events-none">H</span>;
+        return <span className={`font-bold select-none pointer-events-none ${isHighlighted ? 'text-red-600 text-xl font-black' : 'text-slate-300'}`}>-</span>;
     };
 
     const isExempt = (name) => {
         return currentData.assignments.every(a => (a.status?.[name] === 'H' || a.status?.[name] === undefined));
     };
 
-    // 오늘 날짜 기준으로 마감일이 도래했거나 지났는지 판별하는 함수 (그래프 계산용)
     const isPastDueFunc = (dueDateStr) => {
         if (!dueDateStr) return true;
         const match = dueDateStr.match(/(\d+)\/(\d+)/);
         if (!match) return true;
         const today = new Date();
         today.setHours(0,0,0,0);
-        const currentYear = today.getFullYear();
-        const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
+        const dueDate = new Date(today.getFullYear(), parseInt(match[1], 10) - 1, parseInt(match[2], 10));
         return dueDate <= today;
     };
 
-    // 마감일이 '완전히' 지났는지 확인하는 함수 (🚨비상 경고용)
     const isExpiredFunc = (dueDateStr) => {
         if (!dueDateStr) return false;
         const match = dueDateStr.match(/(\d+)\/(\d+)/);
         if (!match) return false;
         const today = new Date();
         today.setHours(0,0,0,0);
-        const currentYear = today.getFullYear();
-        const dueDate = new Date(currentYear, parseInt(match[1], 10) - 1, parseInt(match[2], 10));
+        const dueDate = new Date(today.getFullYear(), parseInt(match[1], 10) - 1, parseInt(match[2], 10));
         return dueDate < today;
     };
 
@@ -323,7 +288,6 @@ function Dashboard({ appData }) {
         let total = 0, score = 0;
         assignments.forEach(a => {
             if (!isPastDueFunc(a.dueDate)) return;
-
             const active = Object.values(a.status || {}).some(v => v === 'O' || v === 'X' || v === '△');
             if (active) {
                 const s = a.status?.[name];
@@ -347,7 +311,7 @@ function Dashboard({ appData }) {
                         [ SECURE NETWORK // JEIL ACADEMY COMMAND {isEditMode && ":: ADMIN OVERRIDE ENGAGED"} ]
                     </h2>
                     <h1 className="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
-                        {fullData.mainTitle}
+                        {appData.mainTitle}
                     </h1>
                     
                     <div className="flex flex-col items-center gap-3 mb-5 mt-2">
@@ -367,21 +331,18 @@ function Dashboard({ appData }) {
                             [ VIDEO DATALINK ]
                         </a>
                         
-                        {/* 관리자 모드일 때만 보이는 JSON 저장 버튼 */}
+                        {/* 클라우드 동기화 상태 표시기 */}
                         {isEditMode && (
-                            <button onClick={handleSaveJson} className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-100 hover:text-emerald-800 transition-colors rounded font-bold animate-pulse shadow-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                                </svg>
-                                [ 💾 JSON 데이터 저장 ]
-                            </button>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest rounded font-bold shadow-sm select-none">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                [ ☁️ LIVE SYNC ACTIVE ]
+                            </div>
                         )}
                     </div>
 
                     {/* Class Tabs */}
                     <div className="flex flex-wrap justify-center gap-3 mt-4 no-print">
-                        {Object.entries(fullData.classes).map(([id, cls]) => (
+                        {Object.entries(appData.classes).map(([id, cls]) => (
                             <button key={id} onClick={() => { setSelectedClassId(id); setActiveTab('schedule'); }}
                                 className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase transition-all border rounded ${
                                     selectedClassId === id
@@ -514,7 +475,7 @@ function Dashboard({ appData }) {
                                 {isEditMode && <span className="ml-3 px-2 py-0.5 bg-red-100 text-red-600 text-[10px] rounded animate-pulse">ADMIN EDIT ENABLED</span>}
                             </h3>
                             <div className="flex items-center gap-3">
-                                {/* 타겟팅 레이더 버튼 추가 */}
+                                {/* 타겟팅 레이더 버튼 */}
                                 <button onClick={() => setIsRadarMode(!isRadarMode)}
                                     className={`no-print flex items-center gap-1.5 px-3 py-1.5 font-mono-tech text-xs tracking-widest font-bold rounded border transition-all ${isRadarMode ? 'bg-red-500 text-white border-red-600 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
                                     <span className="text-sm">🎯</span>
@@ -539,7 +500,7 @@ function Dashboard({ appData }) {
                         </div>
 
                         <div className="overflow-x-auto custom-scrollbar flex-1 bg-white">
-                            <table className="w-full text-left border-collapse min-w-[1000px]">
+                            <table className="w-full text-left border-collapse min-w-[1000px] select-none">
                                 <thead>
                                     <tr className="bg-slate-100 text-slate-600 text-xs font-mono-tech tracking-widest border-b border-slate-200">
                                         <th className="py-3 px-6 text-center w-12">ID</th>
@@ -558,8 +519,6 @@ function Dashboard({ appData }) {
                                     )}
                                     {(currentData.assignments || []).map((a, idx) => {
                                         const { percentage, isFuture } = calcProgress(a.status, a.dueDate);
-                                        
-                                        // 마감일이 지났고 100%가 아니면 비상 경고 활성화
                                         const isEmergency = isExpiredFunc(a.dueDate) && percentage < 100;
 
                                         return (
@@ -592,8 +551,6 @@ function Dashboard({ appData }) {
                                                 </td>
                                                 {currentData.students.map((s, i) => {
                                                     const cellStatus = a.status?.[s] || '-';
-                                                    
-                                                    // 레이더 모드 시각 효과 계산
                                                     const isMissed = !isFuture && (cellStatus === '-' || cellStatus === '△');
                                                     const applyRadarDim = isRadarMode && !isMissed;
                                                     const applyRadarHighlight = isRadarMode && isMissed;
@@ -662,37 +619,185 @@ function Dashboard({ appData }) {
 }
 
 // ──────────────────────────────────────────────
-// Root App (JSON Fetch Logic)
+// Root App (Firestore 실시간 연동 로직)
 // ──────────────────────────────────────────────
+
+// 초기 데이터 셋팅 (만약 클라우드에 데이터가 비어있을 때 최초 1회 심어주는 데이터입니다)
+const INITIAL_DATA = {
+  "mainTitle": "휘T SCIENCE VESSEL",
+  "classes": {
+    "kumho": {
+      "name": "SECTOR: KUMHO_1",
+      "title": "금호고 1학년 과학 중간고사 대비반",
+      "subtitle": "STATUS: 1등급 목표 4회독 프로토콜 가동 중",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 기출픽/마더텅 활용 <strong>소단원별 집중 타격</strong>이 진행됩니다.",
+        "🚀 <span class='text-blue-600 font-bold'>[MODE.SWITCH]</span> <strong>기출픽 단계</strong>: 휘T가 대표문제를 직접 풀어주는 강의식 진행.<br>&nbsp;&nbsp;&nbsp;<strong>마더텅 단계</strong>: 개별 과제 검사 및 1:1 약점 보완(클리닉) 방식으로 전환됩니다.",
+        "<span class='text-purple-600 font-bold'>[STUDY.RULE]</span> <strong>기출문제는 책에 직접 풀지 않고 '노트'에 풉니다.</strong> 채점 후 틀린 문제만 책에 체크하세요!",
+        "<span class='text-red-600 font-bold'>[CRITICAL.RULE]</span> <strong>과제 이행이 한 명이라도 부족할 시 주말 보충 심화반이 개설됩니다.</strong> (전원 완료 시 추가 문제 부여)<br>&nbsp;&nbsp;&nbsp;🚨 <strong>경고:</strong> 문제 찍어오기 적발 시, <strong>단 한 주도 빠지지 않고 모든 주차 주말 보충 심화 강제 소환!</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.TEST]</span> 3/19(목) 단위변환훈련 테스트 진행! (기준: 46개 이상 합격 / 45개 이하 정답자 <strong>무한 재시험</strong>)",
+        "<span class='text-red-600 font-bold'>[WARN.EVAL]</span> 최소수준성취평가 3/24(화) 제출 필수! (신규생은 3/17 배부)"
+      ],
+      "examScope": {
+        "physics": [ "II-2-2. 물질의 전기적 특성", "III-2-1. 중력의 작용" ],
+        "chemistry": [ "I-1-1. 시간과 공간", "I-1-2. 기본량과 단위", "I-2-1. 측정과 측정 표준", "I-2-2. 신호와 정보" ],
+        "biology": [ "II-2-1. 지각과 생명체를 구성하는 물질" ],
+        "earth": [ "II-1-1. 우주 초기에 생성된 원소", "II-1-2. 별의 진화와 원소의 생성" ]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/3", "day": "화", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 2, "date": "3/5", "day": "목", "content": "✅ [종료] [1·2교시] 화학 파트 / 지구 파트 기본 진도", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 3, "date": "3/10", "day": "화", "content": "✅ [종료] [1·2교시] 지각 구성 물질 (~규산염 광물까지)\n(※ 최소수준성취평가 배부)", "homework": "오투 해당 단원 문제 풀이", "type": "completed" },
+        { "id": 4, "date": "3/12", "day": "목", "content": "✅ [종료] [1교시] 생명체 구성 물질 (개념 진도)\n[2교시] 과제 검사 및 질의응답", "homework": "평가문제집 및 오투 풀이", "type": "completed" },
+        { "id": 5, "date": "3/17", "day": "화", "content": "[1교시] 물질의 전기적 특성 (개념 진도)\n[2교시] 기존생: 문제풀이 / 신입생: 1단원 개념\n📝 (단위변환 문제 & 신입생 성취평가 배부)", "homework": "평가문제집 및 오투 풀이", "type": "concept" },
+        { "id": 6, "date": "3/19", "day": "목", "content": "[1교시] 중력의 작용 (개념 진도)\n[2교시] 기존생: 과제검사 / 신입생: 우주 초기 원소\n🚨 단위변환 TEST (45개 이하 무한 재시험)", "homework": "단위변환 오답 노트", "type": "concept" },
+        { "id": 7, "date": "3/24", "day": "화", "content": "🏆 [TEST] 1차 누적 점검 테스트 (비상문제모음)\n[범위: 시간과공간~신호와정보, 우주초기원소, 지각과생명체, 전기적특성]\n(※ 최소수준성취평가 제출 마감)\n📚 [배부] 기출픽 교재", "homework": "테스트 오답 정리", "type": "test" },
+        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [기출픽] 소단원 3개 (대표문제 직접 풀이)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "기출픽 3개 단원 문제 풀이", "type": "practice" },
+        { "id": 11, "date": "4/2", "day": "목", "content": "⚡ [기출픽] 소단원 2개 (대표문제 직접 풀이)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "기출픽 2개 단원 문제 풀이", "type": "practice" },
+        { "id": 12, "date": "4/4", "day": "토", "content": "🏆 [TEST] 2차 기출픽 누적 테스트 (미래엔/천재)\n(기출픽 전체 범위 누적 점검)", "homework": "테스트 오답 노트 작성", "type": "test" },
+        { "id": 13, "date": "4/7", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-1-1. 시간과 공간 / I-1-2. 기본량과 단위)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 14, "date": "4/9", "day": "목", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(I-2-1. 측정과 측정 표준 / I-2-2. 신호와 정보)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [마더텅] 소단원 3개 (개별검사 진행)\n(우주 초기 원소 / 별의 진화 / 지각·생명체 물질)", "homework": "마더텅 3개 단원 문제 풀이", "type": "deep" },
+        { "id": 16, "date": "4/14", "day": "화", "content": "🔥 [마더텅] 소단원 2개 (개별검사 진행)\n(II-2-2. 물질의 전기적 특성 / III-2-1. 중력의 작용)", "homework": "마더텅 2개 단원 문제 풀이", "type": "deep" },
+        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 3차 마더텅 누적 실전 테스트\n(마더텅 전체 범위 누적 점검)\n📚 [배부] 피날레 교재 (암기자료 + 기출모음)", "homework": "테스트 오답 및 피날레 예습", "type": "test" },
+        { "id": 18, "date": "4/18", "day": "토", "content": "⚡ [실전대비] 인근 학교 기출 실전 분석\n(피날레 기출모음 집중 풀이 훈련)", "homework": "기출노트에 풀고 오답만 책에 체크", "type": "ebs" },
+        { "id": 19, "date": "4/21", "day": "화", "content": "⚡ [파이널] 금호고 맞춤 실전 모의고사\n(실전 시간 배분 훈련)", "homework": "모의고사 오답 분석", "type": "final" },
+        { "id": 20, "date": "4/23", "day": "목", "content": "⚡ [파이널] 1:1 약점 보완 및 최종 교재 점검\n(지금까지 틀렸던 문제 누적 점검)", "homework": "개별 취약 파트 복습", "type": "final" },
+        { "id": 21, "date": "4/25", "day": "토", "content": "⚡ [파이널] 시험 전 필수 핵심 암기 사항 체크\n(백지 테스트 진행)", "homework": "마무리 총정리 암기", "type": "final" },
+        { "id": 22, "date": "직보", "day": "-", "content": "🎯 [직보] 최종 누적 오답 및 필수 암기 사항 직보", "homework": "1학기 중간고사 1등급!", "type": "final" }
+      ],
+      "students": ["고성준", "김종윤", "신수민", "오서연", "이승재", "이재윤", "정현경", "진민욱", "한정빈", "김건우", "박시우", "양우진"],
+      "assignments": [
+        { "id": 1, "title": "오투 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 2, "title": "오투 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 3, "title": "오투 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "O", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 4, "title": "최소성취수준평가", "dueDate": "3/24 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "-", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "-", "진민욱": "-", "한정빈": "-", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 5, "title": "평가문제집 1단원", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 6, "title": "평가문제집 2-1-1", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 7, "title": "평가문제집 2-1-2", "dueDate": "3/10 (화)", "status": { "고성준": "O", "김종윤": "-", "신수민": "O", "오서연": "O", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "O", "김건우": "H", "박시우": "H", "양우진": "H" } },
+        { "id": 8, "title": "오투 II-2-1. 지각과 생명체...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "O", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "O", "양우진": "H" } },
+        { "id": 9, "title": "평가문제집 II-2-1. 지각...", "dueDate": "3/17 (화)", "status": { "고성준": "-", "김종윤": "-", "신수민": "O", "오서연": "-", "이승재": "-", "이재윤": "-", "정현경": "O", "진민욱": "O", "한정빈": "-", "김건우": "-", "박시우": "-", "양우진": "H" } }
+      ]
+    },
+    "jayang": {
+      "name": "SECTOR: JAYANG_SUNGSU",
+      "title": "자양/성수고 연합 방어선 (1학기 내신 대비)",
+      "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
+      "notices": [
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동. (화/목/토 진행)"
+      ],
+      "examScope": { "physics": [], "chemistry": [], "biology": [], "earth": [] },
+      "schedule": [],
+      "students": ["(Target_Alpha)"],
+      "assignments": []
+    },
+    "middle3": {
+      "name": "SECTOR: MID_YEAR3",
+      "title": "중3 과학 내신 연합 특강 (동마·한대부·마장중)",
+      "subtitle": "STATUS: 3/23(월) 개강! 월/수/금 중등 최상위권 도약 프로토콜",
+      "notices": [],
+      "examScope": { "physics": [], "chemistry": [], "biology": [], "earth": [] },
+      "schedule": [],
+      "students": ["(대기중1)"],
+      "assignments": []
+    }
+  }
+};
+
 function App() {
     const [appData, setAppData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [user, setUser] = useState(null);
+    const [db, setDb] = useState(null);
+    const [appId, setAppId] = useState('');
 
+    // 1. Firebase 및 Auth 초기화
     useEffect(() => {
-        fetch('data.json?t=' + new Date().getTime())
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('데이터 파일을 불러오는 데 실패했습니다.');
+        const checkFirebase = setInterval(() => {
+            if (window.FirebaseAPI) {
+                clearInterval(checkFirebase);
+                initFirebase();
+            }
+        }, 100);
+
+        const initFirebase = async () => {
+            try {
+                const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
+                const app = window.FirebaseAPI.initializeApp(firebaseConfig);
+                const auth = window.FirebaseAPI.getAuth(app);
+                const firestoreDb = window.FirebaseAPI.getFirestore(app);
+                setDb(firestoreDb);
+                setAppId(typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id');
+
+                if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+                    await window.FirebaseAPI.signInWithCustomToken(auth, window.__initial_auth_token);
+                } else {
+                    await window.FirebaseAPI.signInAnonymously(auth);
                 }
-                return response.json();
-            })
-            .then(data => {
-                setAppData(data);
+
+                window.FirebaseAPI.onAuthStateChanged(auth, (usr) => {
+                    setUser(usr);
+                });
+            } catch (err) {
+                console.error("Firebase init error:", err);
+                // Firebase 연결 실패 시 로컬 오프라인 모드로 실행
+                setAppData(INITIAL_DATA);
                 setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setError('데이터를 불러오지 못했습니다. (data.json 파일 확인)');
-                setLoading(false);
-            });
+            }
+        };
+        return () => clearInterval(checkFirebase);
     }, []);
+
+    // 2. 실시간 데이터 리스너 (Live Sync)
+    useEffect(() => {
+        if (!user || !db || !appId) return;
+
+        // 클라우드 저장 경로 규칙
+        const docRef = window.FirebaseAPI.doc(db, 'artifacts', appId, 'public', 'data', 'science_dashboard', 'main');
+
+        const unsubscribe = window.FirebaseAPI.onSnapshot(docRef, async (docSnap) => {
+            if (docSnap.exists()) {
+                setAppData(docSnap.data());
+                setLoading(false);
+            } else {
+                // 클라우드가 비어있다면 초기 데이터(INITIAL_DATA)를 1회 심어줍니다.
+                try {
+                    await window.FirebaseAPI.setDoc(docRef, INITIAL_DATA);
+                } catch (e) {
+                    console.error("Error seeding data:", e);
+                    setAppData(INITIAL_DATA);
+                    setLoading(false);
+                }
+            }
+        }, (err) => {
+            console.error("Snapshot error:", err);
+            setAppData(INITIAL_DATA);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [user, db, appId]);
+
+    // 3. 클라우드에 직접 쏘는 함수 (클릭 시 실행)
+    const handleSaveData = async (newData) => {
+        if (!user || !db || !appId) return;
+        const docRef = window.FirebaseAPI.doc(db, 'artifacts', appId, 'public', 'data', 'science_dashboard', 'main');
+        try {
+            await window.FirebaseAPI.setDoc(docRef, newData);
+        } catch(e) {
+            console.error("Save failed:", e);
+            alert("클라우드 저장 실패! 권한이나 네트워크를 확인하세요.");
+        }
+    };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center text-slate-600 font-mono-tech fade-in">
                 <div className="spinner mb-4"></div>
-                <p className="tracking-widest animate-pulse font-bold text-sm">FETCHING DATA...</p>
+                <p className="tracking-widest animate-pulse font-bold text-sm">CONNECTING TO SECURE CLOUD...</p>
             </div>
         );
     }
@@ -706,7 +811,7 @@ function App() {
         );
     }
 
-    return <Dashboard appData={appData} />;
+    return <Dashboard appData={appData} onSaveData={handleSaveData} />;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
