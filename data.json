@@ -9,7 +9,7 @@
         "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> <strong>매주 목요일은 진도 점검 및 개별 과제 검사, 암기 테스트의 날입니다.</strong>",
         "<span class='text-purple-600 font-bold'>[수준별 과제 3-Track]</span><br>&nbsp;&nbsp;&nbsp;🔥 <strong>오투 + 기출픽 병행:</strong> 종윤, 우진<br>&nbsp;&nbsp;&nbsp;🌱 <strong>오투 집중 (개념 보완):</strong> 승재, 건우, 시우<br>&nbsp;&nbsp;&nbsp;⚡ <strong>기출픽 집중 (실전 타격):</strong> 나머지 7명",
         "<span class='text-amber-500 font-bold'>[개념 보완 그룹 가동]</span> <strong>건우, 시우, 우진, 승재, 종윤 (5명):</strong> 매주 <strong>목요일</strong>마다 그 주에 나갈 <strong>'오투' 진도를 미리 예습(풀이)하여 사전 검사</strong>받습니다.",
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 시간 관계상 마더텅은 생략하고 <strong>'기출픽'</strong>에 모든 화력을 집중합니다. 매주 목요일은 테스트, 나머지 요일은 <strong>하루 2개 단원씩</strong> 압축 타격합니다."
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 4/11(토)부터 <strong>'마더텅'</strong>이 배부됩니다. 본 수업은 <strong>매시간 암기테스트 2회 통과 시에만 실전 모의고사 응시가 가능</strong>하며, 미통과 시 통과할 때까지 무한 암기 재시험이 진행됩니다."
       ],
       "examScope": {
         "physics": [
@@ -45,13 +45,13 @@
         { "id": 11, "date": "4/2", "day": "목", "content": "🏆 [TEST] '01~10단원' 암기테스트 및 개별 과제검사\n(※ 목요 정기 테스트 진행 / 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
         { "id": 12, "date": "4/4", "day": "토", "content": "⚡ [진도] 11 생명체를 구성하는 물질의 규칙성 / 12 물질의 전기적 성질\n(※ 기출/유형 풀이 및 개별 개념 보완 병행)", "homework": "그룹별 맞춤 과제", "type": "practice" },
         { "id": 13, "date": "4/7", "day": "화", "content": "⚡ [진도] 17 중력과 역학 시스템 / 18 중력을 받는 물체의 운동\n(※ 기출픽 진도 전면 종료!)", "homework": "그룹별 맞춤 과제", "type": "practice" },
-        { "id": 14, "date": "4/9", "day": "목", "content": "🏆 [TEST] '11~18단원' 암기테스트 및 개별 과제검사\n(※ 파이널 모드 돌입 / 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
-        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [클리닉] 전범위 누적 오답 1:1 집중 타격\n(※ 기출픽 킬러 문항 집중 분석)", "homework": "개별 취약 파트 복습", "type": "deep" },
-        { "id": 16, "date": "4/14", "day": "화", "content": "🎯 [파이널] 금호고 맞춤 실전 모의고사 1회차", "homework": "모의고사 오답 분석", "type": "final" },
-        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 전범위 누적 암기테스트 및 최종 과제검사\n(※ 직보 전 마지막 전체 약점 점검)", "homework": "누적 오답 집중 분석", "type": "test" },
-        { "id": 18, "date": "4/18", "day": "토", "content": "🎯 [파이널] 금호고 맞춤 실전 모의고사 2회차", "homework": "모의고사 오답 분석", "type": "final" },
-        { "id": 19, "date": "4/21", "day": "화", "content": "🎯 [파이널] 실전 모의고사 3회차 및 최종 암기 점검", "homework": "최종 점검", "type": "final" },
-        { "id": 20, "date": "4/23", "day": "목", "content": "🎯 [직보] 핵심 백지 테스트 및 파이널 교재 마무리", "homework": "중간고사 1등급!", "type": "final" }
+        { "id": 14, "date": "4/9", "day": "목", "content": "🏆 [TEST] '11~18단원' 암기테스트 및 개별 과제검사\n(※ 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
+        { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [클리닉] 전범위 누적 오답 1:1 집중 타격\n(※ 마더텅 교재 배부 및 파이널 돌입)", "homework": "마더텅 01, 02단원 풀이", "type": "deep" },
+        { "id": 16, "date": "4/14", "day": "화", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 1회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 03, 04단원 풀이", "type": "final" },
+        { "id": 17, "date": "4/16", "day": "목", "content": "🏆 [TEST] 누적 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 2회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 05, 10단원 풀이", "type": "test" },
+        { "id": 18, "date": "4/18", "day": "토", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 3회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 11, 12단원 풀이", "type": "final" },
+        { "id": 19, "date": "4/21", "day": "화", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 4회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 17, 18단원 풀이", "type": "final" },
+        { "id": 20, "date": "4/23", "day": "목", "content": "🎯 [직보] 실전 모의고사 5회차 및 마더텅 최종 점검\n(※ 직전 핵심 백지 테스트)", "homework": "중간고사 1등급!", "type": "final" }
       ],
       "students": ["고성준", "김종윤", "신수민", "오서연", "이승재", "이재윤", "정현경", "진민욱", "한정빈", "김건우", "박시우", "양우진"],
       "tests": [
