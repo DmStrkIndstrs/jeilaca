@@ -4,11 +4,11 @@
     "kumho": {
       "name": "SECTOR: KUMHO_1",
       "title": "금호고 1학년 과학 중간고사 대비반",
-      "subtitle": "STATUS: 수준별 맞춤 과제 가동 / 1일 2단원 압축 타격",
+      "subtitle": "STATUS: 전원 기출픽 동시 타격 / 1일 2단원 압축 진행",
       "notices": [
         "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> <strong>매주 목요일은 진도 점검 및 개별 과제 검사, 암기 테스트의 날입니다.</strong>",
-        "<span class='text-purple-600 font-bold'>[수준별 과제 3-Track]</span><br>&nbsp;&nbsp;&nbsp;🔥 <strong>오투 + 기출픽 병행:</strong> 종윤, 우진<br>&nbsp;&nbsp;&nbsp;🌱 <strong>오투 집중 (개념 보완):</strong> 승재, 건우, 시우<br>&nbsp;&nbsp;&nbsp;⚡ <strong>기출픽 집중 (실전 타격):</strong> 나머지 7명",
-        "<span class='text-amber-500 font-bold'>[개념 보완 그룹 가동]</span> <strong>건우, 시우, 우진, 승재, 종윤 (5명):</strong> 매주 <strong>목요일</strong>마다 그 주에 나갈 <strong>'오투' 진도를 미리 예습(풀이)하여 사전 검사</strong>받습니다.",
+        "<span class='text-emerald-600 font-bold'>[ONE TEAM, ONE GOAL]</span> <strong>누구나 다 할 수 있습니다!</strong> 수준별 분리 없이 전원 동일하게 <strong>'기출픽'</strong> 과제를 수행하며, 부족한 부분은 클리닉과 질문으로 완벽하게 채웁니다.",
+        "<span class='text-amber-500 font-bold'>[개념 예습 그룹]</span> <strong>건우, 시우, 승재, 종윤:</strong> 매일 수업(진도 나가는 날)마다 해당 단원의 <strong>'오투 핵심체크' 부분을 미리 풀고 예습</strong>하여 검사받습니다.",
         "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 4/11(토)부터 <strong>'마더텅'</strong>이 배부됩니다. 본 수업은 <strong>매시간 암기테스트 2회 통과 시에만 실전 모의고사 응시가 가능</strong>하며, 미통과 시 통과할 때까지 무한 암기 재시험이 진행됩니다."
       ],
       "examScope": {
@@ -39,12 +39,12 @@
         { "id": 5, "date": "3/17", "day": "화", "content": "✅ [종료] 물질의 전기적 특성 (진도 완료!)", "homework": "오투 풀이", "type": "completed" },
         { "id": 6, "date": "3/19", "day": "목", "content": "✅ [종료] 단위변환 테스트 & 중력의 작용 진도 완료", "homework": "단위변환 오답 및 오투 풀이", "type": "completed" },
         { "id": 7, "date": "3/24", "day": "화", "content": "🏆 [TEST] 단위변환 재시험 & 중력에 의한 물체의 운동 테스트\n🔥 [클리닉] 1:1 개별 클리닉 (밀린 과제 및 약점 타격)", "homework": "테스트 오답 노트", "type": "test" },
-        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [진도] 01 과학의 기본량 / 02 측정 표준과 정보\n(※ 기출/유형 풀이 및 개별 개념 보완 병행)", "homework": "그룹별 맞춤 과제", "type": "practice" },
-        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [진도] 03 우주 초기에 생성된 원소 / 04 별의 진화와 원소의 생성\n(※ 기출/유형 풀이 및 개별 개념 보완 병행)", "homework": "그룹별 맞춤 과제", "type": "practice" },
-        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [진도] 05 태양계와 지구의 형성 / 10 지각을 구성하는 물질의 규칙성\n(※ 기출/유형 풀이 및 개별 개념 보완 병행)", "homework": "그룹별 맞춤 과제", "type": "practice" },
+        { "id": 8, "date": "3/26", "day": "목", "content": "⚡ [진도] 01 과학의 기본량 / 02 측정 표준과 정보\n(※ 전원 기출픽 / 건·시·승·종: 오투 핵심체크 예습 검사)", "homework": "기출픽 01, 02단원 풀이", "type": "practice" },
+        { "id": 9, "date": "3/28", "day": "토", "content": "⚡ [진도] 03 우주 초기에 생성된 원소 / 04 별의 진화와 원소의 생성\n(※ 전원 기출픽 / 건·시·승·종: 오투 핵심체크 예습 검사)", "homework": "기출픽 03, 04단원 풀이", "type": "practice" },
+        { "id": 10, "date": "3/31", "day": "화", "content": "⚡ [진도] 05 태양계와 지구의 형성 / 10 지각을 구성하는 물질의 규칙성\n(※ 전원 기출픽 / 건·시·승·종: 오투 핵심체크 예습 검사)", "homework": "기출픽 05, 10단원 풀이", "type": "practice" },
         { "id": 11, "date": "4/2", "day": "목", "content": "🏆 [TEST] '01~10단원' 암기테스트 및 개별 과제검사\n(※ 목요 정기 테스트 진행 / 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
-        { "id": 12, "date": "4/4", "day": "토", "content": "⚡ [진도] 11 생명체를 구성하는 물질의 규칙성 / 12 물질의 전기적 성질\n(※ 기출/유형 풀이 및 개별 개념 보완 병행)", "homework": "그룹별 맞춤 과제", "type": "practice" },
-        { "id": 13, "date": "4/7", "day": "화", "content": "⚡ [진도] 17 중력과 역학 시스템 / 18 중력을 받는 물체의 운동\n(※ 기출픽 진도 전면 종료!)", "homework": "그룹별 맞춤 과제", "type": "practice" },
+        { "id": 12, "date": "4/4", "day": "토", "content": "⚡ [진도] 11 생명체를 구성하는 물질의 규칙성 / 12 물질의 전기적 성질\n(※ 전원 기출픽 / 건·시·승·종: 오투 핵심체크 예습 검사)", "homework": "기출픽 11, 12단원 풀이", "type": "practice" },
+        { "id": 13, "date": "4/7", "day": "화", "content": "⚡ [진도] 17 중력과 역학 시스템 / 18 중력을 받는 물체의 운동\n(※ 기출픽 진도 종료 / 건·시·승·종: 오투 핵심체크 예습 검사)", "homework": "기출픽 17, 18단원 풀이", "type": "practice" },
         { "id": 14, "date": "4/9", "day": "목", "content": "🏆 [TEST] '11~18단원' 암기테스트 및 개별 과제검사\n(※ 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
         { "id": 15, "date": "4/11", "day": "토", "content": "🔥 [클리닉] 전범위 누적 오답 1:1 집중 타격\n(※ 마더텅 교재 배부 및 파이널 돌입)", "homework": "마더텅 01, 02단원 풀이", "type": "deep" },
         { "id": 16, "date": "4/14", "day": "화", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 1회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 03, 04단원 풀이", "type": "final" },
