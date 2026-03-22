@@ -124,13 +124,44 @@
     "middle3": {
       "name": "SECTOR: MID_YEAR3",
       "title": "중3 과학 내신 연합 특강 (무학·광희중)",
-      "subtitle": "STATUS: 3/23(월) 개강! 월/수/금 중등 최상위권 도약 프로토콜",
+      "subtitle": "STATUS: 3/23(월) 개강! 1교시 문풀 + 2교시 진도 시스템 가동",
       "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 대상 학교가 무학중, 광희중 합반으로 확정되었습니다."
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 대상 학교가 무학중, 광희중 합반으로 확정되었습니다.",
+        "<span class='text-emerald-600 font-bold'>[수업 진행 방식]</span> 첫날(3/23) 2개 단원 진도 후, 매 수업 <strong>[1교시] 전 시간 교재 문제풀이 및 오답 피드백 + [2교시] 다음 단원 신규 진도</strong>로 철저하게 복습과 진도를 병행합니다."
       ],
-      "examScope": { "physics": [], "chemistry": [], "biology": [], "earth": [] },
-      "schedule": [],
+      "examScope": {
+        "physics": [
+          "1-1",
+          "1-2",
+          "1-3"
+        ],
+        "chemistry": [
+          "2-1",
+          "2-2",
+          "2-3",
+          "2-4"
+        ],
+        "biology": [],
+        "earth": []
+      },
+      "schedule": [
+        { "id": 1, "date": "3/23", "day": "월", "content": "⚡ [진도] 1-1, 1-2 (첫날 2단원 압축 진도)", "homework": "1-1, 1-2 교재 문제 풀이", "type": "practice" },
+        { "id": 2, "date": "3/25", "day": "수", "content": "🔥 [1교시] 1-1, 1-2 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 1-3", "homework": "1-3 교재 문제 풀이", "type": "practice" },
+        { "id": 3, "date": "3/27", "day": "금", "content": "🔥 [1교시] 1-3 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-1", "homework": "2-1 교재 문제 풀이", "type": "practice" },
+        { "id": 4, "date": "3/30", "day": "월", "content": "🔥 [1교시] 2-1 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-2", "homework": "2-2 교재 문제 풀이", "type": "practice" },
+        { "id": 5, "date": "4/1", "day": "수", "content": "🔥 [1교시] 2-2 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-3", "homework": "2-3 교재 문제 풀이", "type": "practice" },
+        { "id": 6, "date": "4/3", "day": "금", "content": "🔥 [1교시] 2-3 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-4", "homework": "2-4 교재 문제 풀이", "type": "practice" },
+        { "id": 7, "date": "4/6", "day": "월", "content": "🔥 [1교시] 2-4 문제풀이 및 오답 피드백\n⚡ [2교시] 전 단원(1-1~2-4) 핵심 요약 및 누적 점검", "homework": "단원 평가 대비 복습", "type": "deep" },
+        { "id": 8, "date": "4/8", "day": "수", "content": "🏆 [TEST] 1단원(1-1~1-3) 실전 모의고사 및 클리닉", "homework": "1단원 오답 노트", "type": "test" },
+        { "id": 9, "date": "4/10", "day": "금", "content": "🏆 [TEST] 2단원(2-1~2-4) 실전 모의고사 및 클리닉", "homework": "2단원 오답 노트", "type": "test" },
+        { "id": 10, "date": "4/13", "day": "월", "content": "🎯 [파이널] 학교별 기출 모의고사 1회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 11, "date": "4/15", "day": "수", "content": "🎯 [파이널] 학교별 기출 모의고사 2회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 12, "date": "4/17", "day": "금", "content": "🎯 [파이널] 학교별 기출 모의고사 3회차", "homework": "최종 약점 보완", "type": "final" },
+        { "id": 13, "date": "4/20", "day": "월", "content": "🏆 [직보 대비] 최종 누적 오답 및 출제 예상 문제 타격", "homework": "최종 점검", "type": "test" },
+        { "id": 14, "date": "4/22", "day": "수", "content": "🎯 [직보] 무학중/광희중 핵심 백지 테스트 및 파이널", "homework": "중간고사 100점!", "type": "final" }
+      ],
       "students": ["(대기중1)"],
+      "tests": [],
       "assignments": []
     }
   }
