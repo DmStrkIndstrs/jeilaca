@@ -112,13 +112,51 @@
     "jayang": {
       "name": "SECTOR: JAYANG_SUNGSU",
       "title": "자양/성수고 연합 방어선 (1학기 내신 대비)",
-      "subtitle": "STATUS: 3/24(화) 개강! 화/목/토 집중 공략 프로토콜",
+      "subtitle": "STATUS: 3/24(화) 개강! 금호고 진도 100% 동기화",
       "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 자양고와 성수고의 공통 출제 범위를 묶어 효율적 개념 완성 프로세스 가동."
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 3/24(화) 개강일에는 <strong>'중력에 의한 물체의 운동' 실력 진단 테스트</strong>가 진행되며, 이후 금호고반과 완전히 동일한 커리큘럼(기출픽 → 마더텅)으로 수업이 진행됩니다.",
+        "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> <strong>매주 목요일은 진도 점검 및 개별 과제 검사, 암기 테스트의 날입니다.</strong>",
+        "<span class='text-emerald-600 font-bold'>[ONE TEAM, ONE GOAL]</span> 전원 동일하게 <strong>'기출픽'</strong> 과제를 수행하며, 부족한 부분은 클리닉과 질문으로 완벽하게 채웁니다.",
+        "<span class='text-amber-600 font-bold'>[FINAL.MODE]</span> 4/11(토)부터 <strong>'마더텅'</strong>이 배부됩니다. 매시간 <strong>암기테스트 2회 통과 시에만 실전 모의고사 응시가 가능</strong>합니다."
       ],
-      "examScope": { "physics": [], "chemistry": [], "biology": [], "earth": [] },
-      "schedule": [],
+      "examScope": {
+        "physics": [
+          "12. 물질의 전기적 성질",
+          "17. 중력과 역학 시스템",
+          "18. 중력을 받는 물체의 운동"
+        ],
+        "chemistry": [
+          "01. 과학의 기본량",
+          "02. 측정 표준과 정보",
+          "03. 우주 초기에 생성된 원소",
+          "04. 별의 진화와 원소의 생성",
+          "05. 태양계와 지구의 형성"
+        ],
+        "biology": [
+          "11. 생명체를 구성하는 물질의 규칙성"
+        ],
+        "earth": [
+          "10. 지각을 구성하는 물질의 규칙성"
+        ]
+      },
+      "schedule": [
+        { "id": 1, "date": "3/24", "day": "화", "content": "🏆 [TEST] 실력 진단 테스트 (중력에 의한 물체의 운동)\n📚 기출픽 교재 배부 및 오리엔테이션", "homework": "기출픽 01, 02단원 예습", "type": "test" },
+        { "id": 2, "date": "3/26", "day": "목", "content": "⚡ [진도] 01 과학의 기본량 / 02 측정 표준과 정보\n(※ 전원 기출픽 진행 및 질문 답변)", "homework": "기출픽 01, 02단원 풀이", "type": "practice" },
+        { "id": 3, "date": "3/28", "day": "토", "content": "⚡ [진도] 03 우주 초기에 생성된 원소 / 04 별의 진화와 원소의 생성\n(※ 전원 기출픽 진행 및 질문 답변)", "homework": "기출픽 03, 04단원 풀이", "type": "practice" },
+        { "id": 4, "date": "3/31", "day": "화", "content": "⚡ [진도] 05 태양계와 지구의 형성 / 10 지각을 구성하는 물질의 규칙성\n(※ 전원 기출픽 진행 및 질문 답변)", "homework": "기출픽 05, 10단원 풀이", "type": "practice" },
+        { "id": 5, "date": "4/2", "day": "목", "content": "🏆 [TEST] '01~10단원' 암기테스트 및 개별 과제검사\n(※ 목요 정기 테스트 진행 / 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
+        { "id": 6, "date": "4/4", "day": "토", "content": "⚡ [진도] 11 생명체를 구성하는 물질의 규칙성 / 12 물질의 전기적 성질\n(※ 전원 기출픽 진행 및 질문 답변)", "homework": "기출픽 11, 12단원 풀이", "type": "practice" },
+        { "id": 7, "date": "4/7", "day": "화", "content": "⚡ [진도] 17 중력과 역학 시스템 / 18 중력을 받는 물체의 운동\n(※ 기출픽 진도 전면 종료!)", "homework": "기출픽 17, 18단원 풀이", "type": "practice" },
+        { "id": 8, "date": "4/9", "day": "목", "content": "🏆 [TEST] '11~18단원' 암기테스트 및 개별 과제검사\n(※ 진도 없음)", "homework": "테스트 오답 노트", "type": "test" },
+        { "id": 9, "date": "4/11", "day": "토", "content": "🔥 [클리닉] 전범위 누적 오답 1:1 집중 타격\n(※ 마더텅 교재 배부 및 파이널 돌입)", "homework": "마더텅 01, 02단원 풀이", "type": "deep" },
+        { "id": 10, "date": "4/14", "day": "화", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 1회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 03, 04단원 풀이", "type": "final" },
+        { "id": 11, "date": "4/16", "day": "목", "content": "🏆 [TEST] 누적 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 2회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 05, 10단원 풀이", "type": "test" },
+        { "id": 12, "date": "4/18", "day": "토", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 3회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 11, 12단원 풀이", "type": "final" },
+        { "id": 13, "date": "4/21", "day": "화", "content": "🏆 [TEST] 핵심 암기테스트 2회 진행 (통과 시 모의고사 응시)\n🎯 [파이널] 실전 모의고사 4회차\n🔥 [클리닉] 마더텅 과제 질의응답", "homework": "마더텅 17, 18단원 풀이", "type": "final" },
+        { "id": 14, "date": "4/23", "day": "목", "content": "🎯 [직보] 실전 모의고사 5회차 및 마더텅 최종 점검\n(※ 직전 핵심 백지 테스트)", "homework": "중간고사 1등급!", "type": "final" }
+      ],
       "students": ["(Target_Alpha)"],
+      "tests": [],
       "assignments": []
     },
     "middle3": {
