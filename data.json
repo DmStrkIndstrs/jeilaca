@@ -6,7 +6,7 @@
       "title": "금호고 1학년 과학 중간고사 대비반",
       "subtitle": "STATUS: 전원 기출픽 동시 타격 / 단원별 맞춤 진도 조절",
       "notices": [
-        "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> <strong>지정된 테스트 날짜(4/7, 4/14)에는 진도 점검 및 개별 과제 검사, 실전테스트가 진행됩니다.</strong>",
+        "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> <strong>지정된 목요일 테스트 날짜에는 진도 점검 및 개별 과제 검사, 실전테스트가 진행됩니다.</strong>",
         "<span class='text-emerald-600 font-bold'>[ONE TEAM, ONE GOAL]</span> <strong>누구나 다 할 수 있습니다!</strong> 수준별 분리 없이 전원 동일하게 <strong>'기출픽'</strong> 과제를 수행하며, 부족한 부분은 클리닉과 질문으로 완벽하게 채웁니다.",
         "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 스케줄표에 표시된 <strong>[이날까지 해야할 과제]</strong>를 반드시 완료해 와야 하며, 수업 시간에는 <strong>해당단원 암기테스트 및 과제 질의응답</strong>이 진행됩니다."
       ],
@@ -123,24 +123,24 @@
         "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> 매 수업마다 전 시간에 배부된 <strong>'훈련문제'를 활용한 확인 테스트</strong>가 진행됩니다."
       ],
       "examScope": {
-        "physics": ["1-1", "1-2", "1-3"],
-        "chemistry": ["2-1", "2-2", "2-3", "2-4"],
+        "physics": ["3-1"],
+        "chemistry": ["1-1", "1-2", "1-3"],
         "biology": [],
-        "earth": []
+        "earth": ["2-1"]
       },
       "schedule": [
         { "id": 1, "date": "3/23", "day": "월", "content": "✅ [종료] 2-1 (훈련자료 배부)", "homework": "2-1 훈련자료 풀이 및 복습", "type": "completed" },
         { "id": 2, "date": "3/25", "day": "수", "content": "✅ [종료] 2-1 훈련문제 및 1-1 진도", "homework": "1-1 훈련자료 풀이 및 복습", "type": "completed" },
         { "id": 3, "date": "3/27", "day": "금", "content": "🏆 [TEST] 1-1 훈련문제\n🔥 [1교시] 1-1 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 1-2", "homework": "1-2 훈련자료 풀이 및 복습", "type": "practice" },
         { "id": 4, "date": "3/30", "day": "월", "content": "🏆 [TEST] 1-2 훈련문제\n🔥 [1교시] 1-2 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 1-3", "homework": "1-3 훈련자료 풀이 및 복습", "type": "practice" },
-        { "id": 5, "date": "4/1", "day": "수", "content": "🏆 [TEST] 1-3 훈련문제\n🔥 [1교시] 1-3 오답 피드백\n🏆 [2교시] 1단원 전체 + 2-1 누적 테스트", "homework": "누적 테스트 오답 노트", "type": "test" },
-        { "id": 6, "date": "4/3", "day": "금", "content": "🔥 [1교시] 누적 테스트 오답 클리닉\n⚡ [2교시] [진도] 2-2 (훈련자료 배부)", "homework": "2-2 훈련자료 풀이 및 복습", "type": "practice" },
-        { "id": 7, "date": "4/6", "day": "월", "content": "🏆 [TEST] 2-2 훈련문제\n🔥 [1교시] 2-2 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-3", "homework": "2-3 훈련자료 풀이 및 복습", "type": "practice" },
-        { "id": 8, "date": "4/8", "day": "수", "content": "🏆 [TEST] 2-3 훈련문제\n🔥 [1교시] 2-3 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 2-4", "homework": "2-4 훈련자료 풀이 및 복습", "type": "practice" },
-        { "id": 9, "date": "4/10", "day": "금", "content": "🏆 [TEST] 2-4 훈련문제\n🔥 [1교시] 2-4 문제풀이 및 오답 피드백\n🏆 [2교시] 2단원(2-2~2-4) 누적 테스트", "homework": "2단원 오답 노트", "type": "test" },
-        { "id": 10, "date": "4/13", "day": "월", "content": "🎯 [파이널] 학교별 기출 모의고사 1회차", "homework": "기출 오답 분석", "type": "final" },
-        { "id": 11, "date": "4/15", "day": "수", "content": "🎯 [파이널] 학교별 기출 모의고사 2회차", "homework": "기출 오답 분석", "type": "final" },
-        { "id": 12, "date": "4/17", "day": "금", "content": "🎯 [파이널] 학교별 기출 모의고사 3회차", "homework": "최종 약점 보완", "type": "final" },
+        { "id": 5, "date": "4/1", "day": "수", "content": "🏆 [TEST] 1-3 훈련문제\n🔥 [1교시] 1-3 문제풀이 및 오답 피드백\n⚡ [2교시] [진도] 3-1", "homework": "3-1 훈련자료 풀이 및 복습", "type": "practice" },
+        { "id": 6, "date": "4/3", "day": "금", "content": "🏆 [1차 테스트] 전 범위(1-1~3-1) 실전 모의고사\n🔥 [클리닉] 1차 테스트 오답 피드백", "homework": "1차 테스트 오답 노트", "type": "test" },
+        { "id": 7, "date": "4/6", "day": "월", "content": "🏆 [TEST] 3-1 훈련문제\n🔥 [1교시] 3-1 문제풀이 및 오답 피드백\n⚡ [2교시] 전 단원 핵심 요약 및 누적 점검", "homework": "전 단원 복습 및 취약점 보완", "type": "deep" },
+        { "id": 8, "date": "4/8", "day": "수", "content": "🎯 [파이널] 학교별 기출 모의고사 1회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 9, "date": "4/10", "day": "금", "content": "🎯 [파이널] 학교별 기출 모의고사 2회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 10, "date": "4/13", "day": "월", "content": "🎯 [파이널] 학교별 기출 모의고사 3회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 11, "date": "4/15", "day": "수", "content": "🎯 [파이널] 실전 모의고사 4회차", "homework": "기출 오답 분석", "type": "final" },
+        { "id": 12, "date": "4/17", "day": "금", "content": "🎯 [파이널] 실전 모의고사 5회차", "homework": "최종 약점 보완", "type": "final" },
         { "id": 13, "date": "4/20", "day": "월", "content": "🏆 [직보 대비] 최종 누적 오답 및 출제 예상 문제 타격", "homework": "최종 점검", "type": "test" },
         { "id": 14, "date": "4/22", "day": "수", "content": "🎯 [직보] 무학중/광희중 핵심 백지 테스트 및 파이널", "homework": "중간고사 100점!", "type": "final" }
       ],
@@ -160,3 +160,5 @@
     }
   }
 }
+
+
