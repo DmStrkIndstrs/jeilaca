@@ -1,4 +1,3 @@
-
 {
   "mainTitle": "휘T SCIENCE VESSEL",
   "classes": {
@@ -115,9 +114,9 @@
       "title": "중3 과학 내신 연합 특강 (무학·광희중)",
       "subtitle": "STATUS: 3/23(월) 개강! 모든 개념 진도 종료 및 파이널 돌입",
       "notices": [
-        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 대상 학교가 무학중, 광희중 합반으로 확정되었습니다.",
+        "<span class='text-blue-600 font-bold'>[SYS.UPDATE]</span> 무학중 직보 수업은 <strong>4/22(수)</strong>, 광희중 직보 수업은 <strong>4/29(수)</strong>에 진행됩니다.",
         "<span class='text-emerald-600 font-bold'>[개념 진도 종료]</span> 4/1(수)부로 모든 단원의 개념 설명이 완료되었습니다. 이후 수업은 <strong>실전 기출테스트 및 종합 문제풀이 + 개별 오답 클리닉</strong>으로 진행됩니다.",
-        "<span class='text-red-600 font-bold'>[WARN.CHECK]</span> 1차 기출테스트가 종료되었습니다. 이번 주(수, 금)는 <strong>전범위 1:1 암기 및 문제풀이 점검</strong>이 진행되며, 다음 주 월요일(4/13)에 <strong>2차 기출테스트</strong>를 봅니다."
+        "<span class='text-red-600 font-bold'>[FINAL.MODE]</span> 남은 파이널 기간 동안 <strong>[기출테스트]와 [암기테스트]가 매 수업 교차 진행</strong>됩니다. (※ 기출테스트 <strong>80점 이하 학생은 익일 의무 보충</strong> 진행)"
       ],
       "examScope": {
         "physics": ["3-1. 자유낙하 (광희중 전용)"],
@@ -135,11 +134,14 @@
         { "id": 7, "date": "4/6", "day": "월", "content": "✅ [종료] 학교별 기출 실전테스트 1회차", "homework": "기출 1회차 오답 정리", "type": "completed" },
         { "id": 8, "date": "4/8", "day": "수", "content": "✅ [종료] 전범위 1:1 암기 및 문제풀이 테스트", "homework": "테스트 오답 및 취약점 보완", "type": "completed" },
         { "id": 9, "date": "4/10", "day": "금", "content": "✅ [종료] 전범위 1:1 암기 및 문제풀이 테스트", "homework": "테스트 오답 및 2차 기출 대비", "type": "completed" },
-        { "id": 10, "date": "4/13", "day": "월", "content": "🏆 [TEST] 학교별 기출 실전테스트 2회차", "homework": "기출 2회차 오답 분석", "type": "test" },
-        { "id": 11, "date": "4/15", "day": "수", "content": "🎯 [파이널] 학교별 기출 실전테스트 3회차", "homework": "기출 3회차 오답 분석", "type": "final" },
-        { "id": 12, "date": "4/17", "day": "금", "content": "🎯 [파이널] 학교별 기출 실전테스트 4회차", "homework": "최종 약점 보완", "type": "final" },
-        { "id": 13, "date": "4/20", "day": "월", "content": "🏆 [직보 대비] 최종 누적 오답 및 출제 예상 문제 타격", "homework": "핵심 개념 최종 암기", "type": "test" },
-        { "id": 14, "date": "4/22", "day": "수", "content": "🎯 [직보] 무학중/광희중 핵심 백지 테스트 및 파이널", "homework": "중간고사 100점!", "type": "final" }
+        { "id": 10, "date": "4/13", "day": "월", "content": "✅ [종료] 전범위 1:1 암기 및 문제풀이 점검", "homework": "테스트 오답 정리", "type": "completed" },
+        { "id": 11, "date": "4/15", "day": "수", "content": "🏆 [TEST] 학교별 기출 실전테스트 2회차\n(※ 80점 이하 익일 의무 보충)", "homework": "기출 2회차 오답 분석", "type": "test" },
+        { "id": 12, "date": "4/17", "day": "금", "content": "🔥 [클리닉] 전범위 핵심 암기테스트 및 개별 보완\n(※ 취약 유형 밀착 점검)", "homework": "암기테스트 오답 정리", "type": "deep" },
+        { "id": 13, "date": "4/20", "day": "월", "content": "🏆 [TEST] 학교별 기출 실전테스트 3회차\n(※ 80점 이하 익일 의무 보충)", "homework": "기출 3회차 오답 분석", "type": "test" },
+        { "id": 14, "date": "4/22", "day": "수", "content": "🎯 [직보] 무학중 1학기 중간고사 직전 보충\n🔥 [클리닉] 광희중 전범위 핵심 암기테스트", "homework": "무학중 1등급! / 광희중 오답", "type": "final" },
+        { "id": 15, "date": "4/24", "day": "금", "content": "🏆 [TEST] 광희중 기출 실전테스트 4회차\n(※ 80점 이하 익일 의무 보충)", "homework": "기출 4회차 오답 분석", "type": "test" },
+        { "id": 16, "date": "4/27", "day": "월", "content": "🔥 [클리닉] 광희중 전범위 최종 암기테스트\n(※ 취약 유형 밀착 점검)", "homework": "최종 약점 보완", "type": "deep" },
+        { "id": 17, "date": "4/29", "day": "수", "content": "🎯 [직보] 광희중 1학기 중간고사 직전 보충\n(※ 4/30 광희중 시험 실시)", "homework": "광희중 1등급!", "type": "final" }
       ],
       "students": ["조윤재", "최윤슬", "김예은", "양세한", "김건우", "김민성", "장호현", "김민솔", "김서영", "도한서", "송현재", "이서진", "조이룸", "윤수호"],
       "tests": [],
