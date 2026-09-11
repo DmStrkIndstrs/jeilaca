@@ -150,8 +150,18 @@
         font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:#0369a1;
         margin: 22px 0 10px; padding-bottom:6px; border-bottom:2px solid #bae6fd;
     }
+    .missing-teacher-group { margin-bottom:20px; }
+    .missing-teacher-title {
+        font-family:'Rajdhani',sans-serif; font-weight:800; font-size:17px; color:#334155;
+        margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid #e2e8f0;
+        display:flex; align-items:baseline; gap:8px;
+    }
+    .missing-teacher-title .teacher { color:#0284c7; font-family:'Share Tech Mono',monospace; font-size:19px; }
+    .missing-teacher-title .missing-count {
+        font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; color:#94a3b8;
+    }
     .missing-item {
-        border:1px solid var(--border); border-radius:8px; background:#fff; padding:12px 16px; margin-bottom:8px;
+        border:1px solid var(--border); border-radius:8px; background:#fff; padding:12px 16px; margin-bottom:8px; margin-left:8px;
     }
     .missing-item.sev-none { border-left:4px solid #ef4444; }
     .missing-item.sev-partial { border-left:4px solid #f59e0b; }
@@ -450,8 +460,24 @@ async function loadProgressTab(tabKey) {
    대부분 반은 월수금 또는 화목토 고정 요일로 수업하므로, 이 시트에 쌓인 지난 주차들의
    실제 기록 요일을 모아 "평소 수업 요일"을 스스로 추정하고, 최신 주차에서 그 요일이
    통째로 비어있으면 (수업은 있었는데 기록을 안 한 것으로 보고) 잡아낸다. */
+function parseWeekEndDate(label) {
+    const m = label.match(/(\d+)\s*\/\s*(\d+)\s*[~\-]\s*(\d+)\s*\/\s*(\d+)/);
+    if (!m) return null;
+    const startMonth = parseInt(m[1], 10);
+    const endMonth = parseInt(m[3], 10), endDay = parseInt(m[4], 10);
+    let year = new Date().getFullYear();
+    if (endMonth < startMonth) year += 1; // week crosses a year boundary (e.g. 12/29~1/4)
+    const d = new Date(year, endMonth - 1, endDay, 23, 59, 59);
+    return isNaN(d.getTime()) ? null : d;
+}
+
 function computeMissing(weeks) {
-    const weekLabels = Object.keys(weeks);
+    const now = new Date();
+    // 아직 끝나지 않은(미래) 주차는 "기록 안 됨"이 아니라 그냥 "아직 진행 전"이므로 제외
+    const weekLabels = Object.keys(weeks).filter(w => {
+        const end = parseWeekEndDate(w);
+        return !end || end <= now;
+    });
     if (!weekLabels.length) return { latestWeek: null, results: [] };
     const latestWeek = weekLabels[weekLabels.length - 1];
 
@@ -514,23 +540,36 @@ function computeMissing(weeks) {
 function renderMissingList(bodyEl, weeks) {
     const { latestWeek, results } = computeMissing(weeks);
     if (!latestWeek) {
-        bodyEl.innerHTML = `<div class="missing-empty-ok">데이터 없음</div>`;
+        bodyEl.innerHTML = `<div class="missing-empty-ok">아직 시작되지 않은 주차뿐입니다 (데이터 없음)</div>`;
         return;
     }
     if (!results.length) {
         bodyEl.innerHTML = `<div class="missing-empty-ok">✅ ${escapeHtml(latestWeek)} 주 — 모든 기록이 완료되었습니다!</div>`;
         return;
     }
-    bodyEl.innerHTML = `<p class="font-mono-tech text-xs text-slate-400 mb-2">${escapeHtml(latestWeek)} 주 기준</p>` +
-        results.map(r => `
-            <div class="missing-item sev-${r.severity}">
-                <div class="missing-title">
-                    ${r.severity === 'none' ? '🔴' : '🟡'} ${escapeHtml(r.grade)} · ${escapeHtml(r.className)} ·
-                    <span class="teacher">${escapeHtml(r.teacher)}</span> ${escapeHtml(r.subject)}
-                </div>
-                <div class="missing-detail">${escapeHtml(r.detail)}</div>
-            </div>
-        `).join('');
+    const byTeacher = {};
+    results.forEach(r => {
+        const key = r.teacher || '(미상)';
+        (byTeacher[key] || (byTeacher[key] = [])).push(r);
+    });
+    const teachers = Object.keys(byTeacher).sort((a, b) => byTeacher[b].length - byTeacher[a].length);
+
+    bodyEl.innerHTML = `<p class="font-mono-tech text-xs text-slate-400 mb-3">${escapeHtml(latestWeek)} 주 기준</p>` +
+        teachers.map(teacher => {
+            const items = byTeacher[teacher];
+            return `
+                <div class="missing-teacher-group">
+                    <h3 class="missing-teacher-title"><span class="teacher">${escapeHtml(teacher)}</span> 선생님 <span class="missing-count">${items.length}건</span></h3>
+                    ${items.map(r => `
+                        <div class="missing-item sev-${r.severity}">
+                            <div class="missing-title">
+                                ${r.severity === 'none' ? '🔴' : '🟡'} ${escapeHtml(r.grade)} · ${escapeHtml(r.className)} · ${escapeHtml(r.subject)}
+                            </div>
+                            <div class="missing-detail">${escapeHtml(r.detail)}</div>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }).join('');
 }
 
 async function loadMissingTab() {
