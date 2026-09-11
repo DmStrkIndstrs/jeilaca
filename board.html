@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>휘T Science Vessel - Data Board</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f0f4f8;
+        --panel: rgba(255,255,255,0.97);
+        --border: #cbd5e1;
+        --accent: #0284c7;
+        --text: #1e293b;
+        --grid: rgba(14,116,144,0.05);
+    }
+    body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        background-image:
+            linear-gradient(var(--grid) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 30px 30px;
+        min-height: 100vh;
+    }
+    h1,h2,h3,h4,.font-hud { font-family: 'Rajdhani', sans-serif; }
+    .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+
+    .terran-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        backdrop-filter: blur(8px);
+        position: relative;
+    }
+    .terran-panel::before {
+        content:''; position:absolute; top:-1px; left:-1px; width:12px; height:12px;
+        border-top:3px solid var(--accent); border-left:3px solid var(--accent);
+    }
+    .terran-panel::after {
+        content:''; position:absolute; bottom:-1px; right:-1px; width:12px; height:12px;
+        border-bottom:3px solid var(--accent); border-right:3px solid var(--accent);
+    }
+
+    .cursor-blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.35s ease-out both; }
+
+    .custom-scrollbar::-webkit-scrollbar { height:8px; width:8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background:#e2e8f0; border-radius:4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#64748b; }
+
+    .spinner {
+        width: 40px; height: 40px;
+        border: 4px solid rgba(2, 132, 199, 0.2);
+        border-top-color: #0284c7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    table.board-table { border-collapse: collapse; width: max-content; min-width: 100%; }
+    table.board-table th, table.board-table td {
+        border: 1px solid #e2e8f0;
+        padding: 6px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+        text-align: center;
+    }
+    table.board-table thead th {
+        position: sticky; top: 0; z-index: 5;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: 'Share Tech Mono', monospace;
+        letter-spacing: 0.05em;
+    }
+    table.board-table tbody td:first-child, table.board-table tbody th:first-child {
+        position: sticky; left: 0; z-index: 3;
+        background: #f8fafc;
+        text-align: left;
+        font-weight: 700;
+        color: #334155;
+    }
+    table.board-table tbody tr:nth-child(even) td { background-color: #f8fafc; }
+    table.board-table tbody tr:nth-child(even) td:first-child { background-color: #f1f5f9; }
+
+    .cell-done   { background: #d1fae5 !important; color: #065f46; font-weight: 900; }
+    .cell-alert  { background: #fee2e2 !important; color: #991b1b; font-weight: 700; }
+    .cell-warn   { background: #fef3c7 !important; color: #92400e; font-weight: 700; }
+    .cell-retest { background: #ede9fe !important; color: #5b21b6; font-weight: 700; }
+    .cell-note   { background: #e0f2fe !important; color: #075985; font-weight: 700; }
+    .cell-score  { color: #0284c7; font-weight: 800; font-family: 'Share Tech Mono', monospace; }
+    .cell-empty  { color: #cbd5e1; }
+    .cell-divider { background: transparent; border-left: 2px dashed #cbd5e1 !important; border-right: 2px dashed #cbd5e1 !important; width: 6px; padding: 0 !important; }
+
+    .legend-chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:4px; font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; }
+</style>
+</head>
+<body>
+<div id="root" class="min-h-screen pb-20 relative z-10">
+    <header class="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
+        <div class="max-w-5xl mx-auto relative">
+            <h2 class="font-mono-tech font-bold tracking-[0.3em] text-xs mb-3 text-blue-600">
+                [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
+            </h2>
+            <h1 class="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
+                DATA BOARD
+            </h1>
+            <p class="font-mono-tech font-bold tracking-widest text-sm flex items-center justify-center gap-2 mb-6 mt-2 text-emerald-600">
+                <span class="w-2 h-2 rounded-full cursor-blink inline-block bg-emerald-500"></span>
+                &gt; live sync from google sheets_
+            </p>
+            <div class="flex flex-wrap justify-center items-center gap-3">
+                <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors rounded font-bold">
+                    [ ← COMMAND CENTER ]
+                </a>
+                <button id="refreshBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-600 hover:text-white transition-colors rounded font-bold">
+                    [ ⟳ REFRESH ]
+                </button>
+                <span id="lastSync" class="font-mono-tech text-[11px] text-slate-400"></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20 space-y-8">
+
+        <div class="terran-panel p-5">
+            <h3 class="font-mono-tech font-bold text-xs text-blue-700 uppercase tracking-widest mb-3">Legend</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="legend-chip cell-done">ㅇ 완료</span>
+                <span class="legend-chip cell-alert">결시/오답</span>
+                <span class="legend-chip cell-warn">배부/보충</span>
+                <span class="legend-chip cell-retest">재시</span>
+                <span class="legend-chip cell-note">암기</span>
+                <span class="legend-chip cell-score">숫자 = 점수</span>
+            </div>
+        </div>
+
+        <div id="sheets"></div>
+    </main>
+
+    <footer class="mt-12 text-center text-slate-400 text-xs font-mono-tech pb-8 relative z-20 font-bold">
+        <p class="flex justify-center items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse inline-block"></span>
+            SYSTEMS ONLINE. ALL COMMS OPEN.
+        </p>
+    </footer>
+</div>
+
+<script>
+const SHEET_ID = "11OQpv0Wqd9AXvgePv5oRoLbu1xOSw3yd5JWv-QPPdwI";
+const SHEETS = [
+    { gid: "1842895088", name: "월수 지학1 과제 진행상황" },
+    { gid: "1893351772", name: "지학테스트" },
+    { gid: "483654984",  name: "월수금 무학/한대 중1" },
+    { gid: "147709761",  name: "화목토 마장/한대 중2" },
+    { gid: "1153350532", name: "화목토 동마/행당 중1" },
+    { gid: "1523289867", name: "화목토 성수금호" }
+];
+
+function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+            if (c === '"') {
+                if (text[i + 1] === '"') { field += '"'; i++; }
+                else inQuotes = false;
+            } else field += c;
+        } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\r') { /* skip */ }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+            else field += c;
+        }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+}
+
+function trimGrid(rows) {
+    let lastRow = -1;
+    rows.forEach((r, i) => { if (r.some(c => c && c.trim() !== '')) lastRow = i; });
+    rows = rows.slice(0, lastRow + 1);
+
+    let lastCol = -1;
+    rows.forEach(r => r.forEach((c, j) => { if (c && c.trim() !== '') lastCol = Math.max(lastCol, j); }));
+    rows = rows.map(r => {
+        const copy = r.slice(0, lastCol + 1);
+        while (copy.length < lastCol + 1) copy.push('');
+        return copy;
+    });
+    return rows;
+}
+
+function findHeaderRowIndex(rows) {
+    const nameLike = /^[가-힣]{2,5}$/;
+    let bestIdx = 0, bestScore = -1;
+    const scanLimit = Math.min(rows.length, 15);
+    for (let i = 0; i < scanLimit; i++) {
+        const score = rows[i].filter(c => nameLike.test((c || '').trim())).length;
+        if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+    return bestScore >= 2 ? bestIdx : 0;
+}
+
+function classifyCell(raw) {
+    const v = (raw || '').trim();
+    if (v === '') return { cls: 'cell-empty', text: '-' };
+    if (v === 'ㅇ' || v.toLowerCase() === 'o') return { cls: 'cell-done', text: 'ㅇ' };
+    if (v.includes('결시') || v.includes('오답')) return { cls: 'cell-alert', text: v };
+    if (v.includes('배부') || v.includes('보충')) return { cls: 'cell-warn', text: v };
+    if (v.includes('재시')) return { cls: 'cell-retest', text: v };
+    if (v.includes('암기')) return { cls: 'cell-note', text: v };
+    if (/^\d+(\.\d+)?$/.test(v)) return { cls: 'cell-score', text: v };
+    return { cls: '', text: v };
+}
+
+function renderSheet(container, meta, rows) {
+    rows = trimGrid(rows);
+    if (!rows.length) {
+        container.innerHTML = `<div class="terran-panel p-6 text-center text-slate-400 font-mono-tech text-sm">NO DATA</div>`;
+        return;
+    }
+
+    const headerIdx = findHeaderRowIndex(rows);
+    const noticeRows = rows.slice(0, headerIdx).filter(r => r.some(c => c && c.trim() !== ''));
+    const tableRows = rows.slice(headerIdx);
+
+    const panel = document.createElement('div');
+    panel.className = 'terran-panel overflow-hidden fade-in';
+
+    const head = document.createElement('div');
+    head.className = 'p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2';
+    head.innerHTML = `
+        <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
+            <span class="text-blue-500 mr-2">●</span>${meta.name}
+        </h3>
+        <span class="font-mono-tech text-[10px] text-slate-400">SECTOR // GID:${meta.gid}</span>
+    `;
+    panel.appendChild(head);
+
+    if (noticeRows.length) {
+        const noticeBox = document.createElement('div');
+        noticeBox.className = 'px-6 py-4 bg-blue-50/50 border-b border-slate-200 space-y-1.5';
+        noticeRows.forEach(r => {
+            const line = r.map(c => (c || '').trim()).filter(Boolean).join('  ·  ');
+            if (!line) return;
+            const p = document.createElement('p');
+            p.className = 'font-mono-tech text-xs text-blue-800 leading-relaxed flex items-start';
+            p.innerHTML = `<span class="mr-2 text-blue-500 select-none">&gt;</span><span>${line}</span>`;
+            noticeBox.appendChild(p);
+        });
+        panel.appendChild(noticeBox);
+    }
+
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'overflow-auto custom-scrollbar';
+    scrollWrap.style.maxHeight = '520px';
+
+    const table = document.createElement('table');
+    table.className = 'board-table';
+
+    const thead = document.createElement('thead');
+    const headTr = document.createElement('tr');
+    tableRows[0].forEach(c => {
+        const th = document.createElement('th');
+        const v = (c || '').trim();
+        th.textContent = v === '' ? '' : v;
+        if (v === '') th.classList.add('cell-divider');
+        headTr.appendChild(th);
+    });
+    thead.appendChild(headTr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    tableRows.slice(1).forEach(r => {
+        const tr = document.createElement('tr');
+        r.forEach((c, colIdx) => {
+            const isAllColEmpty = tableRows.every(row => !(row[colIdx] || '').trim());
+            const td = document.createElement('td');
+            if (isAllColEmpty) {
+                td.classList.add('cell-divider');
+            } else {
+                const { cls, text } = classifyCell(c);
+                if (cls) td.classList.add(cls);
+                td.textContent = text;
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    scrollWrap.appendChild(table);
+    panel.appendChild(scrollWrap);
+    container.appendChild(panel);
+}
+
+async function loadSheet(meta) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${meta.gid}&t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    return parseCSV(text);
+}
+
+async function loadAll() {
+    const container = document.getElementById('sheets');
+    container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-slate-500 font-mono-tech">
+            <div class="spinner mb-4"></div>
+            <p class="tracking-widest animate-pulse font-bold text-sm">SYNCING WITH GOOGLE SHEETS...</p>
+        </div>`;
+
+    const results = await Promise.allSettled(SHEETS.map(loadSheet));
+    container.innerHTML = '';
+    container.className = 'space-y-8';
+
+    results.forEach((r, i) => {
+        const meta = SHEETS[i];
+        const box = document.createElement('div');
+        container.appendChild(box);
+        if (r.status === 'fulfilled') {
+            renderSheet(box, meta, r.value);
+        } else {
+            box.innerHTML = `
+                <div class="terran-panel p-6">
+                    <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase mb-2">
+                        <span class="text-red-500 mr-2">●</span>${meta.name}
+                    </h3>
+                    <p class="text-red-600 font-mono-tech text-xs font-bold">⚠ 데이터를 불러오지 못했습니다: ${r.reason}</p>
+                </div>`;
+        }
+    });
+
+    document.getElementById('lastSync').textContent =
+        '> last sync: ' + new Date().toLocaleTimeString('ko-KR');
+}
+
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+loadAll();
+setInterval(loadAll, 5 * 60 * 1000);
+</script>
+</body>
+</html>
