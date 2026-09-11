@@ -1,625 +1,362 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>휘T Science Vessel - Command Center</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- html2canvas for Image Capture -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>휘T Science Vessel - Command Center</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f0f4f8;
+        --panel: rgba(255,255,255,0.97);
+        --border: #cbd5e1;
+        --accent: #0284c7;
+        --text: #1e293b;
+        --grid: rgba(14,116,144,0.05);
+    }
+    body {
+        font-family: 'Noto Sans KR', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        background-image:
+            linear-gradient(var(--grid) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+        background-size: 30px 30px;
+        min-height: 100vh;
+    }
+    h1,h2,h3,h4,.font-hud { font-family: 'Rajdhani', sans-serif; }
+    .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
 
-    <style>
-        :root {
-            --bg: #f0f4f8;
-            --panel: rgba(255,255,255,0.97);
-            --border: #cbd5e1;
-            --accent: #0284c7;
-            --text: #1e293b;
-            --grid: rgba(14,116,144,0.05);
-        }
+    .terran-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        backdrop-filter: blur(8px);
+        position: relative;
+    }
+    .terran-panel::before {
+        content:''; position:absolute; top:-1px; left:-1px; width:12px; height:12px;
+        border-top:3px solid var(--accent); border-left:3px solid var(--accent);
+    }
+    .terran-panel::after {
+        content:''; position:absolute; bottom:-1px; right:-1px; width:12px; height:12px;
+        border-bottom:3px solid var(--accent); border-right:3px solid var(--accent);
+    }
 
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            background-image:
-                linear-gradient(var(--grid) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-            background-size: 30px 30px;
-            min-height: 100vh;
-        }
+    .cursor-blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-        h1,h2,h3,h4,.font-hud { font-family: 'Rajdhani', sans-serif; }
-        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn 0.35s ease-out both; }
 
-        .terran-panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            backdrop-filter: blur(8px);
-            position: relative;
-        }
-        .terran-panel::before {
-            content:''; position:absolute; top:-1px; left:-1px; width:12px; height:12px;
-            border-top:3px solid var(--accent); border-left:3px solid var(--accent);
-        }
-        .terran-panel::after {
-            content:''; position:absolute; bottom:-1px; right:-1px; width:12px; height:12px;
-            border-bottom:3px solid var(--accent); border-right:3px solid var(--accent);
-        }
+    .custom-scrollbar::-webkit-scrollbar { height:8px; width:8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background:#e2e8f0; border-radius:4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#64748b; }
 
-        .terran-row-hover:hover { background-color:#f1f5f9; transition:all 0.2s; }
+    .spinner {
+        width: 40px; height: 40px;
+        border: 4px solid rgba(2, 132, 199, 0.2);
+        border-top-color: #0284c7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .cursor-blink { animation: blink 1s step-end infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    table.board-table { border-collapse: collapse; width: max-content; min-width: 100%; }
+    table.board-table th, table.board-table td {
+        border: 1px solid #e2e8f0;
+        padding: 6px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+        text-align: center;
+    }
+    table.board-table thead th {
+        position: sticky; top: 0; z-index: 5;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: 'Share Tech Mono', monospace;
+        letter-spacing: 0.05em;
+    }
+    table.board-table tbody td:first-child, table.board-table tbody th:first-child {
+        position: sticky; left: 0; z-index: 3;
+        background: #f8fafc;
+        text-align: left;
+        font-weight: 700;
+        color: #334155;
+    }
+    table.board-table tbody tr:nth-child(even) td { background-color: #f8fafc; }
+    table.board-table tbody tr:nth-child(even) td:first-child { background-color: #f1f5f9; }
 
-        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-        .fade-in { animation: fadeIn 0.35s ease-out both; }
+    .cell-done   { background: #d1fae5 !important; color: #065f46; font-weight: 900; }
+    .cell-alert  { background: #fee2e2 !important; color: #991b1b; font-weight: 700; }
+    .cell-warn   { background: #fef3c7 !important; color: #92400e; font-weight: 700; }
+    .cell-retest { background: #ede9fe !important; color: #5b21b6; font-weight: 700; }
+    .cell-note   { background: #e0f2fe !important; color: #075985; font-weight: 700; }
+    .cell-score  { color: #0284c7; font-weight: 800; font-family: 'Share Tech Mono', monospace; }
+    .cell-empty  { color: #cbd5e1; }
+    .cell-divider { background: transparent; border-left: 2px dashed #cbd5e1 !important; border-right: 2px dashed #cbd5e1 !important; width: 6px; padding: 0 !important; }
 
-        .custom-scrollbar::-webkit-scrollbar { height:8px; width:8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background:#e2e8f0; border-radius:4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#64748b; }
-
-        .tech-pattern {
-            background-image:linear-gradient(-45deg,rgba(255,255,255,0.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.3) 75%,transparent 75%,transparent);
-            background-size:10px 10px;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(2, 132, 199, 0.2);
-            border-top-color: #0284c7;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* 📸 캡처 모드 전용 스타일 */
-        .capture-mode { 
-            width: max-content !important; 
-            padding: 24px !important; 
-            box-shadow: none !important;
-        }
-        .capture-scroll-visible {
-            overflow: visible !important; 
-            width: max-content !important;
-        }
-    </style>
+    .legend-chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:4px; font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; }
+</style>
 </head>
 <body>
-<div id="root"></div>
-
-<script type="text/babel">
-const { useState, useEffect } = React;
-
-// ──────────────────────────────────────────────
-// 대시보드 컴포넌트 (UI 렌더링)
-// ──────────────────────────────────────────────
-function Dashboard({ appData }) {
-    const [selectedClassId, setSelectedClassId] = useState(Object.keys(appData.classes)[0]);
-    const [activeTab, setActiveTab] = useState('schedule');
-    
-    // 타겟팅 레이더 모드
-    const [isRadarMode, setIsRadarMode] = useState(false);
-
-    const currentData = appData.classes[selectedClassId];
-
-    // 📸 이미지 캡처 기능 (DOM 인라인 조작 + Alpha Blending)
-    const handleDownloadImage = () => {
-        const element = document.getElementById('capture-area');
-        if (!element) return;
-
-        const scrollDiv = element.querySelector('.overflow-x-auto');
-        element.classList.add('capture-mode');
-        if (scrollDiv) scrollDiv.classList.add('capture-scroll-visible');
-
-        const originalStyles = [];
-        const allElements = [element, ...element.querySelectorAll('*')];
-
-        allElements.forEach((el) => {
-            const computedStyle = window.getComputedStyle(el);
-            originalStyles.push({
-                el: el, background: el.style.background, backgroundColor: el.style.backgroundColor,
-                backdropFilter: el.style.backdropFilter, webkitBackdropFilter: el.style.webkitBackdropFilter
-            });
-
-            el.style.backdropFilter = 'none';
-            el.style.webkitBackdropFilter = 'none';
-
-            if (el.classList.contains('terran-panel')) {
-                el.style.background = '#ffffff';
-                el.style.backgroundColor = '#ffffff';
-            } else {
-                const bg = computedStyle.backgroundColor;
-                if (bg && bg.startsWith('rgba')) {
-                    const match = bg.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
-                    if (match) {
-                        const r = parseInt(match[1], 10), g = parseInt(match[2], 10), b = parseInt(match[3], 10), a = parseFloat(match[4]);
-                        if (a === 0) {
-                            el.style.backgroundColor = 'transparent';
-                        } else if (a < 1) {
-                            const blend = (colorChannel) => Math.round(colorChannel * a + 255 * (1 - a));
-                            el.style.backgroundColor = `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
-                        }
-                    }
-                }
-            }
-        });
-
-        setTimeout(() => {
-            window.html2canvas(element, { backgroundColor: '#ffffff', scale: 3, useCORS: true, allowTaint: true, logging: false, windowWidth: element.scrollWidth + 50, width: element.scrollWidth })
-            .then(canvas => {
-                const link = document.createElement('a');
-                const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g, '-').replace('.', '');
-                link.download = `CREW_REPORT_${selectedClassId.toUpperCase()}_${today}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            })
-            .catch(err => { console.error(err); alert("캡처에 실패했습니다."); })
-            .finally(() => {
-                element.classList.remove('capture-mode');
-                if (scrollDiv) scrollDiv.classList.remove('capture-scroll-visible');
-                originalStyles.forEach(item => {
-                    item.el.style.background = item.background; item.el.style.backgroundColor = item.backgroundColor;
-                    item.el.style.backdropFilter = item.backdropFilter; item.el.style.webkitBackdropFilter = item.webkitBackdropFilter;
-                });
-            });
-        }, 150);
-    };
-
-    const getBadgeColor = (type) => {
-        switch(type) {
-            case 'concept':  return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-            case 'practice': return 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'deep':     return 'bg-purple-100 text-purple-800 border-purple-200';
-            case 'ebs':      return 'bg-amber-100 text-amber-800 border-amber-200';
-            case 'test':     return 'bg-red-100 text-red-800 border-red-200 font-bold';
-            case 'final':    return 'bg-slate-800 text-white border-slate-900';
-            case 'completed': return 'bg-slate-200 text-slate-500 border-slate-300';
-            default:         return 'bg-slate-100 text-slate-800 border-slate-200';
-        }
-    };
-
-    const renderStatus = (status, isHighlighted = false) => {
-        if (status === 'O')  return <span className="text-emerald-600 font-black text-lg select-none">O</span>;
-        if (status === 'X')  return <span className="text-red-600 font-black text-lg select-none">X</span>;
-        if (status === '△') return <span className={`font-black text-lg select-none ${isHighlighted ? 'text-red-600' : 'text-amber-500'}`}>△</span>;
-        if (status === 'H')  return <span className="text-blue-600 font-black text-lg select-none">H</span>;
-        return <span className={`font-bold select-none ${isHighlighted ? 'text-red-600 text-xl font-black' : 'text-slate-300'}`}>-</span>;
-    };
-
-    const isExempt = (name) => {
-        return currentData.assignments.every(a => (a.status?.[name] === 'H' || a.status?.[name] === undefined));
-    };
-
-    const isPastDueFunc = (dueDateStr) => {
-        if (!dueDateStr) return true;
-        const match = dueDateStr.match(/(\d+)\/(\d+)/);
-        if (!match) return true;
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const dueDate = new Date(today.getFullYear(), parseInt(match[1], 10) - 1, parseInt(match[2], 10));
-        return dueDate <= today;
-    };
-
-    const isExpiredFunc = (dueDateStr) => {
-        if (!dueDateStr) return false;
-        const match = dueDateStr.match(/(\d+)\/(\d+)/);
-        if (!match) return false;
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const dueDate = new Date(today.getFullYear(), parseInt(match[1], 10) - 1, parseInt(match[2], 10));
-        return dueDate < today;
-    };
-
-    const calcProgress = (statusObj, dueDateStr) => {
-        if (!statusObj) return { percentage: 0, isFuture: !isPastDueFunc(dueDateStr) };
-        if (!isPastDueFunc(dueDateStr)) return { percentage: 0, isFuture: true };
-
-        const vals = Object.values(statusObj).filter(s => s !== 'H');
-        const total = vals.length;
-        if (!total) return { percentage: 0, isFuture: false };
-        const score = vals.filter(s => s === 'O').length + vals.filter(s => s === '△').length * 0.5;
-        return { percentage: Math.round((score / total) * 100), isFuture: false };
-    };
-
-    const calcStudentProgress = (name, assignments) => {
-        let total = 0, score = 0;
-        assignments.forEach(a => {
-            if (!isPastDueFunc(a.dueDate)) return;
-            const active = Object.values(a.status || {}).some(v => v === 'O' || v === 'X' || v === '△');
-            if (active) {
-                const s = a.status?.[name];
-                if (s !== 'H') {
-                    total++;
-                    if (s === 'O') score += 1;
-                    if (s === '△') score += 0.5;
-                }
-            }
-        });
-        if (!total) return { percentage: 0, hasData: false };
-        return { percentage: Math.round((score / total) * 100), hasData: true };
-    };
-
-    return (
-        <div className="min-h-screen pb-20 relative z-10 fade-in">
-            {/* Header */}
-            <header className="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
-                <div className="max-w-4xl mx-auto relative">
-                    <h2 className="font-mono-tech font-bold tracking-[0.3em] text-xs mb-3 text-blue-600">
-                        [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
-                    </h2>
-                    <h1 className="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
-                        {appData.mainTitle}
-                    </h1>
-                    
-                    <div className="flex flex-col items-center gap-3 mb-5 mt-2">
-                        <p className="font-mono-tech font-bold tracking-widest text-sm flex items-center gap-2 text-emerald-600">
-                            <span className="w-2 h-2 rounded-full cursor-blink inline-block bg-emerald-500"></span>
-                            &gt; explorer reporting!_
-                        </p>
-                    </div>
-
-                    {/* 상단 액션 버튼 영역 */}
-                    <div className="flex flex-wrap justify-center items-center gap-3 mb-6 no-print">
-                        {/* 자료실 이동 버튼 */}
-                        <a href="archive.html" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors rounded font-bold">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M0 2a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293L8.414 1.414a1 1 0 0 0 .707.293H14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2z"/>
-                            </svg>
-                            [ DATA ARCHIVE ]
-                        </a>
-                        <a href="board.html" className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-600 hover:text-white transition-colors rounded font-bold">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm2 1v2h12V3H2zm0 4v2h5V7H2zm0 4v2h5v-2H2zm7-4v6h5V7H9z"/>
-                            </svg>
-                            [ DATA BOARD ]
-                        </a>
-                        <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
-                            </svg>
-                            [ VIDEO DATALINK ]
-                        </a>
-                    </div>
-
-                    {/* Class Tabs */}
-                    <div className="flex flex-wrap justify-center gap-3 mt-4 no-print">
-                        {Object.entries(appData.classes).map(([id, cls]) => (
-                            <button key={id} onClick={() => { setSelectedClassId(id); setActiveTab('schedule'); }}
-                                className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase transition-all border rounded ${
-                                    selectedClassId === id
-                                    ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                                    : 'bg-white border-slate-300 text-slate-500 hover:text-blue-600 hover:border-blue-300'
-                                }`}>
-                                {cls.name}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-5xl mx-auto px-4 mt-8 relative z-20">
-
-                {/* Title Block */}
-                <div className="terran-panel p-6 md:p-8 mb-6 text-center">
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2 font-hud tracking-wide">{currentData.title}</h2>
-                    <p className="text-slate-500 font-mono-tech text-sm">{currentData.subtitle}</p>
-                </div>
-
-                {/* Notices */}
-                <div className="terran-panel p-6 md:p-8 mb-6">
-                    <h3 className="text-lg font-mono-tech font-bold mb-4 flex items-center text-blue-700 uppercase tracking-widest border-b border-slate-200 pb-2">
-                        <span className="text-blue-500 mr-2 text-xl">■</span>
-                        System Log & Directives
-                    </h3>
-                    <div className="space-y-3 font-mono-tech text-sm">
-                        {(currentData.notices || []).map((notice, i) => (
-                            <p key={i} className="text-slate-700 leading-relaxed flex items-start">
-                                <span className="mr-3 text-blue-500 select-none">&gt;</span>
-                                <span dangerouslySetInnerHTML={{__html: notice}}></span>
-                            </p>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Exam Scope */}
-                <div className="terran-panel p-6 md:p-8 mb-8">
-                    <h3 className="text-lg font-mono-tech font-bold mb-5 flex items-center text-blue-700 uppercase tracking-widest border-b border-slate-200 pb-2">
-                        <span className="text-blue-500 mr-2 text-xl">■</span>
-                        Target Coordinates (Exam Scope)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[['physics','[A] PHYSICS'],['chemistry','[B] CHEMISTRY'],['biology','[C] BIOLOGY'],['earth','[D] EARTH SCI']].map(([key, label]) => (
-                            <div key={key} className="bg-slate-50 border border-slate-200 p-4 hover:border-blue-400 transition-colors group rounded-sm">
-                                <h4 className="font-mono-tech font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 flex justify-between items-center group-hover:text-blue-600">
-                                    <span>{label}</span>
-                                    <span className="text-[10px] bg-white text-slate-500 px-2 py-0.5 rounded border border-slate-200">
-                                        {(currentData.examScope?.[key] || []).length} LOC
-                                    </span>
-                                </h4>
-                                <ul className="text-xs font-mono-tech text-slate-600 space-y-2">
-                                    {(currentData.examScope?.[key] || []).map((item, i) => (
-                                        <li key={i} className="leading-relaxed break-keep pr-1">+ {item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Sub Tabs */}
-                <div className="flex justify-center mb-4 space-x-2 no-print">
-                    {[['schedule','[1] TIME_TABLE'],['assignments','[2] CREW_TRACKER']].map(([tab, label]) => (
-                        <button key={tab} onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-2.5 font-mono-tech font-bold text-sm tracking-wider uppercase border transition-all duration-200 rounded-t-md ${
-                                activeTab === tab
-                                ? 'bg-white border-slate-300 border-b-white text-blue-600 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]'
-                                : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-white hover:text-blue-500'
-                            }`}
-                            style={activeTab === tab ? { marginBottom:'-1px', zIndex:10, position:'relative' } : {}}>
-                            {label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Schedule Tab */}
-                {activeTab === 'schedule' && (
-                    <div className="terran-panel overflow-hidden fade-in">
-                        <div className="p-4 bg-slate-50 border-b border-slate-200">
-                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
-                                <span className="text-blue-500 mr-2">●</span> OPERATION SCHEDULE
-                            </h3>
-                        </div>
-                        <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full text-left border-collapse min-w-[800px]">
-                                <thead>
-                                    <tr className="bg-slate-100 text-slate-600 text-xs font-mono-tech tracking-widest border-b border-slate-200">
-                                        <th className="py-3 px-6 text-center w-16">SEQ</th>
-                                        <th className="py-3 px-4 w-24">DATE</th>
-                                        <th className="py-3 px-6">MISSION_OBJECTIVE</th>
-                                        <th className="py-3 px-6 w-1/4 text-center">REQUIRED_ACTION</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm font-sans">
-                                    {(currentData.schedule || []).map((row) => (
-                                        <tr key={row.id} className={`terran-row-hover group ${row.type === 'completed' ? 'opacity-60 bg-slate-50' : ''}`}>
-                                            <td className="py-4 px-6 text-center">
-                                                <span className={`inline-block px-2 py-0.5 rounded font-mono-tech font-bold border ${getBadgeColor(row.type)}`}>
-                                                    #{String(row.id).padStart(2,'0')}
-                                                </span>
-                                            </td>
-                                            <td className="py-4 px-4 font-mono-tech text-slate-500 font-bold">
-                                                {row.date} <span className="text-[10px] text-slate-400 font-normal">({row.day})</span>
-                                            </td>
-                                            <td className={`py-4 px-6 whitespace-pre-line leading-relaxed ${row.type==='test'?'text-red-600 font-bold':row.type==='final'?'text-slate-900 font-bold':row.type==='completed'?'text-slate-500':'text-slate-700'}`}>
-                                                {row.content}
-                                            </td>
-                                            <td className="py-4 px-6 text-center">
-                                                <span className={`bg-white font-mono-tech text-xs font-bold px-3 py-1.5 rounded border border-slate-200 block w-full transition-colors ${row.type === 'completed' ? 'text-slate-400' : 'text-slate-600 group-hover:border-blue-300 group-hover:text-blue-700'}`}>
-                                                    {row.homework}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
-                {/* Assignments Tab */}
-                {activeTab === 'assignments' && (
-                    <div id="capture-area" className="terran-panel overflow-hidden fade-in flex flex-col pt-1">
-                        <div className="p-4 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-white">
-                            <h3 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase flex items-center">
-                                <span className="text-blue-500 mr-2">●</span>
-                                CREW TASK STATUS (TOTAL: {currentData.students.length})
-                            </h3>
-                            <div className="flex items-center gap-3">
-                                {/* 타겟팅 레이더 버튼 */}
-                                <button onClick={() => setIsRadarMode(!isRadarMode)}
-                                    className={`no-print flex items-center gap-1.5 px-3 py-1.5 font-mono-tech text-xs tracking-widest font-bold rounded border transition-all ${isRadarMode ? 'bg-red-500 text-white border-red-600 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
-                                    <span className="text-sm">🎯</span>
-                                    {isRadarMode ? 'RADAR: ON' : 'RADAR: OFF'}
-                                </button>
-
-                                <div className="hidden md:flex space-x-3 text-[10px] font-mono-tech font-bold bg-slate-50 px-3 py-1.5 rounded border border-slate-200">
-                                    <span className="text-emerald-600">O:완료</span>
-                                    <span className="text-amber-500">△:미흡</span>
-                                    <span className="text-blue-600">H:HOLD</span>
-                                    <span className="text-slate-400">-:미제출</span>
-                                </div>
-                                
-                                <button onClick={handleDownloadImage}
-                                    className="no-print flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors font-bold rounded">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                                        <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
-                                    </svg>
-                                    [ CAPTURE ]
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="overflow-x-auto custom-scrollbar flex-1 bg-white">
-                            <table className="w-full text-left border-collapse min-w-[1000px] select-none">
-                                <thead>
-                                    <tr className="bg-slate-100 text-slate-600 text-xs font-mono-tech tracking-widest border-b border-slate-200">
-                                        <th className="py-3 px-6 text-center w-12">ID</th>
-                                        <th className="py-3 px-4 min-w-[200px]">TASK / DUE</th>
-                                        <th className="py-3 px-4 text-center border-l border-slate-200">CMPLTN_%</th>
-                                        {currentData.students.map((s, i) => (
-                                            <th key={i} className={`py-3 px-2 text-center min-w-[60px] ${isExempt(s) ? 'text-blue-600' : 'text-slate-600'}`}>
-                                                {s}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {(currentData.assignments || []).length === 0 && (
-                                        <tr><td colSpan={3+currentData.students.length} className="text-center py-10 font-mono-tech text-slate-400">NO DATA</td></tr>
-                                    )}
-                                    {(currentData.assignments || []).map((a, idx) => {
-                                        const { percentage, isFuture } = calcProgress(a.status, a.dueDate);
-                                        const isEmergency = isExpiredFunc(a.dueDate) && percentage < 100;
-
-                                        return (
-                                            <tr key={a.id} className={`terran-row-hover text-sm font-sans transition-colors ${isEmergency ? 'bg-red-50/80' : ''}`}>
-                                                <td className={`py-3 px-6 text-center font-mono-tech font-bold ${isEmergency ? 'text-red-500' : 'text-slate-400'}`}>
-                                                    {String(idx+1).padStart(2,'0')}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className={`font-bold flex flex-wrap items-center gap-1.5 ${isEmergency ? 'text-red-700' : 'text-slate-700'}`}>
-                                                        <span className="break-all leading-snug">{a.title}</span>
-                                                        {isEmergency && <span className="shrink-0 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded font-black tracking-widest animate-pulse shadow-sm">🚨비상!</span>}
-                                                    </div>
-                                                    <div className={`text-[10px] font-mono-tech mt-1 font-bold ${isEmergency ? 'text-red-500' : 'text-slate-500'}`}>
-                                                        <span className={`${isEmergency ? 'text-red-500' : 'text-blue-500'} mr-1`}>&gt;</span>{a.dueDate}
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-4 border-l border-slate-100 text-center">
-                                                    {isFuture ? (
-                                                        <span className="text-[10px] font-mono-tech font-bold text-slate-400 tracking-widest">TBD</span>
-                                                    ) : (
-                                                        <div className="flex flex-col items-center">
-                                                            <span className={`text-xs font-mono-tech font-bold ${percentage>=80?'text-emerald-600':percentage>0?'text-blue-600':'text-slate-400'}`}>
-                                                                {percentage}%
-                                                            </span>
-                                                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mt-1 overflow-hidden">
-                                                                <div className={`h-full ${percentage>=80?'bg-emerald-500':'bg-blue-500'}`} style={{width:`${percentage}%`}}></div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                {currentData.students.map((s, i) => {
-                                                    const cellStatus = a.status?.[s] || '-';
-                                                    const isMissed = !isFuture && (cellStatus === '-' || cellStatus === '△');
-                                                    const applyRadarDim = isRadarMode && !isMissed;
-                                                    const applyRadarHighlight = isRadarMode && isMissed;
-
-                                                    return (
-                                                        <td key={i} 
-                                                            className={`py-3 px-2 text-center border-l ${isEmergency ? 'border-red-100' : 'border-slate-50'} ${isExempt(s)?'bg-blue-50/40':''} ${applyRadarDim ? 'opacity-20' : 'opacity-100'} ${applyRadarHighlight ? 'bg-red-50 ring-1 ring-inset ring-red-400' : ''} transition-all duration-300`}>
-                                                            {renderStatus(cellStatus, applyRadarHighlight)}
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Performance Metrics */}
-                        <div className="p-6 bg-slate-50 border-t border-slate-200">
-                            <h4 className="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase mb-5 flex items-center">
-                                <span className="text-blue-500 mr-2 text-lg">📊</span> CREW PERFORMANCE METRICS
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                                {[...currentData.students]
-                                    .map(s => ({ name: s, ...calcStudentProgress(s, currentData.assignments || []) }))
-                                    .sort((a, b) => b.percentage - a.percentage || (b.hasData === a.hasData ? a.name.localeCompare(b.name) : (b.hasData ? 1 : -1)))
-                                    .map(({ name: s, percentage, hasData }) => {
-                                        return (
-                                            <div key={s} className="flex items-center gap-3 font-mono-tech">
-                                                <div className={`w-16 text-sm truncate font-bold ${isExempt(s)?'text-blue-600':'text-slate-600'}`}>{s}</div>
-                                                <div className="flex-1 h-3 bg-slate-200 border border-slate-300 relative overflow-hidden rounded-sm">
-                                                    {hasData ? (
-                                                        <div
-                                                            className={`h-full transition-all duration-1000 ease-out ${percentage>=80?'bg-emerald-500':percentage>=50?'bg-amber-400':'bg-red-500'}`}
-                                                            style={{width:`${percentage}%`}}>
-                                                            <div className="absolute inset-0 tech-pattern opacity-50"></div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="h-full bg-slate-100 flex items-center justify-center text-[9px] text-slate-400 tracking-widest font-bold">
-                                                            {isExempt(s) ? 'HOLD' : 'NO DATA'}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className={`w-10 text-right text-sm font-bold ${hasData?(percentage>=80?'text-emerald-600':percentage>=50?'text-amber-600':'text-red-600'):'text-slate-400'}`}>
-                                                    {hasData ? `${percentage}%` : 'N/A'}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </main>
-
-            <footer className="mt-12 text-center text-slate-400 text-xs font-mono-tech pb-8 relative z-20 font-bold">
-                <p className="flex justify-center items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse inline-block"></span>
-                    SYSTEMS ONLINE. ALL COMMS OPEN.
-                </p>
-            </footer>
+<div id="root" class="min-h-screen pb-20 relative z-10">
+    <header class="bg-white border-b border-slate-200 pt-10 pb-6 px-6 text-center relative z-20 shadow-sm">
+        <div class="max-w-5xl mx-auto relative">
+            <h2 class="font-mono-tech font-bold tracking-[0.3em] text-xs mb-3 text-blue-600">
+                [ SECURE NETWORK // JEIL ACADEMY COMMAND ]
+            </h2>
+            <h1 class="font-hud text-4xl md:text-5xl font-black mb-1 tracking-wider text-slate-800">
+                휘T SCIENCE VESSEL
+            </h1>
+            <p class="font-mono-tech font-bold tracking-widest text-sm flex items-center justify-center gap-2 mb-6 mt-2 text-emerald-600">
+                <span class="w-2 h-2 rounded-full cursor-blink inline-block bg-emerald-500"></span>
+                &gt; live sync from google sheets_
+            </p>
+            <div class="flex flex-wrap justify-center items-center gap-3">
+                <a href="archive.html" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-600 font-mono-tech text-xs tracking-widest hover:bg-blue-600 hover:text-white transition-colors rounded font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M0 2a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293L8.414 1.414a1 1 0 0 0 .707.293H14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2z"/>
+                    </svg>
+                    [ DATA ARCHIVE ]
+                </a>
+                <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                    </svg>
+                    [ VIDEO DATALINK ]
+                </a>
+                <button id="refreshBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-600 hover:text-white transition-colors rounded font-bold">
+                    [ ⟳ REFRESH ]
+                </button>
+                <span id="lastSync" class="font-mono-tech text-[11px] text-slate-400"></span>
+            </div>
         </div>
-    );
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20 space-y-8">
+
+        <div class="terran-panel p-5">
+            <h3 class="font-mono-tech font-bold text-xs text-blue-700 uppercase tracking-widest mb-3">Legend</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="legend-chip cell-done">ㅇ 완료</span>
+                <span class="legend-chip cell-alert">결시/오답</span>
+                <span class="legend-chip cell-warn">배부/보충</span>
+                <span class="legend-chip cell-retest">재시</span>
+                <span class="legend-chip cell-note">암기</span>
+                <span class="legend-chip cell-score">숫자 = 점수</span>
+            </div>
+        </div>
+
+        <div id="sheets"></div>
+    </main>
+
+    <footer class="mt-12 text-center text-slate-400 text-xs font-mono-tech pb-8 relative z-20 font-bold">
+        <p class="flex justify-center items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse inline-block"></span>
+            SYSTEMS ONLINE. ALL COMMS OPEN.
+        </p>
+    </footer>
+</div>
+
+<script>
+const SHEET_ID = "11OQpv0Wqd9AXvgePv5oRoLbu1xOSw3yd5JWv-QPPdwI";
+const SHEETS = [
+    { gid: "1842895088", name: "월수 지학1 과제 진행상황" },
+    { gid: "1893351772", name: "지학테스트" },
+    { gid: "483654984",  name: "월수금 무학/한대 중1" },
+    { gid: "147709761",  name: "화목토 마장/한대 중2" },
+    { gid: "1153350532", name: "화목토 동마/행당 중1" },
+    { gid: "1523289867", name: "화목토 성수금호" }
+];
+
+function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+            if (c === '"') {
+                if (text[i + 1] === '"') { field += '"'; i++; }
+                else inQuotes = false;
+            } else field += c;
+        } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\r') { /* skip */ }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+            else field += c;
+        }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
 }
 
-// ──────────────────────────────────────────────
-// Root App (JSON Fetch Logic - 원래대로 롤백 완료)
-// ──────────────────────────────────────────────
-function App() {
-    const [appData, setAppData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+function trimGrid(rows) {
+    let lastRow = -1;
+    rows.forEach((r, i) => { if (r.some(c => c && c.trim() !== '')) lastRow = i; });
+    rows = rows.slice(0, lastRow + 1);
 
-    useEffect(() => {
-        fetch('data.json?t=' + new Date().getTime())
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('데이터 파일을 불러오는 데 실패했습니다.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setAppData(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setError('데이터를 불러오지 못했습니다. (data.json 파일 확인)');
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center text-slate-600 font-mono-tech fade-in">
-                <div className="spinner mb-4"></div>
-                <p className="tracking-widest animate-pulse font-bold text-sm">FETCHING DATA...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen bg-[#f0f4f8] flex flex-col items-center justify-center text-red-600 font-mono-tech">
-                <p className="text-4xl mb-4">⚠️</p>
-                <p className="font-bold tracking-widest">{error}</p>
-            </div>
-        );
-    }
-
-    return <Dashboard appData={appData} />;
+    let lastCol = -1;
+    rows.forEach(r => r.forEach((c, j) => { if (c && c.trim() !== '') lastCol = Math.max(lastCol, j); }));
+    rows = rows.map(r => {
+        const copy = r.slice(0, lastCol + 1);
+        while (copy.length < lastCol + 1) copy.push('');
+        return copy;
+    });
+    return rows;
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+function findHeaderRowIndex(rows) {
+    const nameLike = /^[가-힣]{2,5}$/;
+    let bestIdx = 0, bestScore = -1;
+    const scanLimit = Math.min(rows.length, 15);
+    for (let i = 0; i < scanLimit; i++) {
+        const score = rows[i].filter(c => nameLike.test((c || '').trim())).length;
+        if (score > bestScore) { bestScore = score; bestIdx = i; }
+    }
+    return bestScore >= 2 ? bestIdx : 0;
+}
+
+function classifyCell(raw) {
+    const v = (raw || '').trim();
+    if (v === '') return { cls: 'cell-empty', text: '-' };
+    if (v === 'ㅇ' || v.toLowerCase() === 'o') return { cls: 'cell-done', text: 'ㅇ' };
+    if (v.includes('결시') || v.includes('오답')) return { cls: 'cell-alert', text: v };
+    if (v.includes('배부') || v.includes('보충')) return { cls: 'cell-warn', text: v };
+    if (v.includes('재시')) return { cls: 'cell-retest', text: v };
+    if (v.includes('암기')) return { cls: 'cell-note', text: v };
+    if (/^\d+(\.\d+)?$/.test(v)) return { cls: 'cell-score', text: v };
+    return { cls: '', text: v };
+}
+
+function renderSheet(container, meta, rows) {
+    rows = trimGrid(rows);
+    if (!rows.length) {
+        container.innerHTML = `<div class="terran-panel p-6 text-center text-slate-400 font-mono-tech text-sm">NO DATA</div>`;
+        return;
+    }
+
+    const headerIdx = findHeaderRowIndex(rows);
+    const noticeRows = rows.slice(0, headerIdx).filter(r => r.some(c => c && c.trim() !== ''));
+    const tableRows = rows.slice(headerIdx);
+
+    const panel = document.createElement('div');
+    panel.className = 'terran-panel overflow-hidden fade-in';
+
+    const head = document.createElement('div');
+    head.className = 'p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2';
+    head.innerHTML = `
+        <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
+            <span class="text-blue-500 mr-2">●</span>${meta.name}
+        </h3>
+        <span class="font-mono-tech text-[10px] text-slate-400">SECTOR // GID:${meta.gid}</span>
+    `;
+    panel.appendChild(head);
+
+    if (noticeRows.length) {
+        const noticeBox = document.createElement('div');
+        noticeBox.className = 'px-6 py-4 bg-blue-50/50 border-b border-slate-200 space-y-1.5';
+        noticeRows.forEach(r => {
+            const line = r.map(c => (c || '').trim()).filter(Boolean).join('  ·  ');
+            if (!line) return;
+            const p = document.createElement('p');
+            p.className = 'font-mono-tech text-xs text-blue-800 leading-relaxed flex items-start';
+            p.innerHTML = `<span class="mr-2 text-blue-500 select-none">&gt;</span><span>${line}</span>`;
+            noticeBox.appendChild(p);
+        });
+        panel.appendChild(noticeBox);
+    }
+
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'overflow-auto custom-scrollbar';
+    scrollWrap.style.maxHeight = '520px';
+
+    const table = document.createElement('table');
+    table.className = 'board-table';
+
+    const thead = document.createElement('thead');
+    const headTr = document.createElement('tr');
+    tableRows[0].forEach(c => {
+        const th = document.createElement('th');
+        const v = (c || '').trim();
+        th.textContent = v === '' ? '' : v;
+        if (v === '') th.classList.add('cell-divider');
+        headTr.appendChild(th);
+    });
+    thead.appendChild(headTr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    tableRows.slice(1).forEach(r => {
+        const tr = document.createElement('tr');
+        r.forEach((c, colIdx) => {
+            const isAllColEmpty = tableRows.every(row => !(row[colIdx] || '').trim());
+            const td = document.createElement('td');
+            if (isAllColEmpty) {
+                td.classList.add('cell-divider');
+            } else {
+                const { cls, text } = classifyCell(c);
+                if (cls) td.classList.add(cls);
+                td.textContent = text;
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    scrollWrap.appendChild(table);
+    panel.appendChild(scrollWrap);
+    container.appendChild(panel);
+}
+
+async function loadSheet(meta) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${meta.gid}&t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    return parseCSV(text);
+}
+
+async function loadAll() {
+    const container = document.getElementById('sheets');
+    container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-slate-500 font-mono-tech">
+            <div class="spinner mb-4"></div>
+            <p class="tracking-widest animate-pulse font-bold text-sm">SYNCING WITH GOOGLE SHEETS...</p>
+        </div>`;
+
+    const results = await Promise.allSettled(SHEETS.map(loadSheet));
+    container.innerHTML = '';
+    container.className = 'space-y-8';
+
+    results.forEach((r, i) => {
+        const meta = SHEETS[i];
+        const box = document.createElement('div');
+        container.appendChild(box);
+        if (r.status === 'fulfilled') {
+            renderSheet(box, meta, r.value);
+        } else {
+            box.innerHTML = `
+                <div class="terran-panel p-6">
+                    <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase mb-2">
+                        <span class="text-red-500 mr-2">●</span>${meta.name}
+                    </h3>
+                    <p class="text-red-600 font-mono-tech text-xs font-bold">⚠ 데이터를 불러오지 못했습니다: ${r.reason}</p>
+                </div>`;
+        }
+    });
+
+    document.getElementById('lastSync').textContent =
+        '> last sync: ' + new Date().toLocaleTimeString('ko-KR');
+}
+
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+loadAll();
+setInterval(loadAll, 5 * 60 * 1000);
 </script>
 </body>
 </html>
