@@ -64,41 +64,74 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    table.board-table { border-collapse: collapse; width: max-content; min-width: 100%; }
-    table.board-table th, table.board-table td {
-        border: 1px solid #e2e8f0;
-        padding: 6px 10px;
-        font-size: 12px;
-        white-space: nowrap;
-        text-align: center;
-    }
-    table.board-table thead th {
-        position: sticky; top: 0; z-index: 5;
-        background: #0f172a;
-        color: #e2e8f0;
-        font-family: 'Share Tech Mono', monospace;
-        letter-spacing: 0.05em;
-    }
-    table.board-table tbody td:first-child, table.board-table tbody th:first-child {
-        position: sticky; left: 0; z-index: 3;
-        background: #f8fafc;
-        text-align: left;
-        font-weight: 700;
-        color: #334155;
-    }
-    table.board-table tbody tr:nth-child(even) td { background-color: #f8fafc; }
-    table.board-table tbody tr:nth-child(even) td:first-child { background-color: #f1f5f9; }
 
-    .cell-done   { background: #d1fae5 !important; color: #065f46; font-weight: 900; }
-    .cell-alert  { background: #fee2e2 !important; color: #991b1b; font-weight: 700; }
-    .cell-warn   { background: #fef3c7 !important; color: #92400e; font-weight: 700; }
-    .cell-retest { background: #ede9fe !important; color: #5b21b6; font-weight: 700; }
-    .cell-note   { background: #e0f2fe !important; color: #075985; font-weight: 700; }
-    .cell-score  { color: #0284c7; font-weight: 800; font-family: 'Share Tech Mono', monospace; }
-    .cell-empty  { color: #cbd5e1; }
-    .cell-divider { background: transparent; border-left: 2px dashed #cbd5e1 !important; border-right: 2px dashed #cbd5e1 !important; width: 6px; padding: 0 !important; }
+    /* Top-level tabs */
+    .main-tab {
+        padding: 10px 20px; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:13px;
+        letter-spacing:0.05em; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#64748b;
+        transition: all .15s;
+    }
+    .main-tab.active { background:#0284c7; border-color:#0284c7; color:#fff; box-shadow:0 2px 6px rgba(2,132,199,.35); }
+    .main-tab:not(.active):hover { color:#0284c7; border-color:#93c5fd; }
+    .tab-panel[hidden] { display:none; }
 
-    .legend-chip { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:4px; font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:700; }
+    /* Progress board (진도표) */
+    .prog-search {
+        width:100%; padding:10px 14px; border:2px solid #cbd5e1; border-radius:6px;
+        font-family:'Noto Sans KR',sans-serif; font-size:14px; background:#f8fafc; color:#1e293b;
+    }
+    .prog-search:focus { outline:none; border-color:#0284c7; background:#fff; }
+
+    details.prog-week { border:1px solid var(--border); border-radius:8px; background:var(--panel); overflow:hidden; }
+    details.prog-week > summary {
+        cursor:pointer; list-style:none; padding:14px 20px; background:#0f172a; color:#e2e8f0;
+        font-family:'Share Tech Mono',monospace; font-weight:700; letter-spacing:0.08em; font-size:13px;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    details.prog-week > summary::-webkit-details-marker { display:none; }
+    details.prog-week > summary::after { content:'▾'; transition:transform .2s; }
+    details.prog-week[open] > summary::after { transform:rotate(180deg); }
+    .prog-week-body { padding:18px; }
+
+    .prog-grade-title {
+        font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:#0369a1;
+        margin: 22px 0 10px; padding-bottom:6px; border-bottom:2px solid #bae6fd;
+    }
+    .prog-grade-title:first-child { margin-top:0; }
+
+    .prog-class-card {
+        border:1px solid var(--border); border-radius:8px; background:#fff; margin-bottom:14px; overflow:hidden;
+    }
+    .prog-class-header {
+        background:#eff6ff; padding:8px 16px; font-family:'Share Tech Mono',monospace; font-weight:700;
+        font-size:13px; color:#1d4ed8; border-bottom:1px solid #dbeafe;
+    }
+    .prog-subject {
+        border-top:1px dashed #e2e8f0;
+    }
+    .prog-subject:first-child { border-top:none; }
+    .prog-subject-header {
+        padding:8px 16px; font-size:13px; font-weight:700; color:#334155; background:#f8fafc;
+        display:flex; gap:8px; align-items:baseline;
+    }
+    .prog-subject-header .teacher { color:#0284c7; font-family:'Share Tech Mono',monospace; }
+    table.prog-table { width:100%; border-collapse:collapse; table-layout:fixed; }
+    table.prog-table th {
+        background:#f1f5f9; color:#475569; font-size:11px; font-family:'Share Tech Mono',monospace;
+        padding:6px 10px; border:1px solid #e2e8f0; width:60px; text-align:center;
+    }
+    table.prog-table td {
+        border:1px solid #e2e8f0; padding:8px 10px; font-size:12.5px; line-height:1.5; vertical-align:top;
+        white-space:pre-wrap; word-break:break-word; min-width:150px;
+    }
+    table.prog-table td.row-label {
+        background:#f8fafc; font-weight:700; font-family:'Share Tech Mono',monospace; font-size:11px;
+        color:#64748b; text-align:center; width:56px; white-space:nowrap; vertical-align:middle;
+    }
+    table.prog-table td.row-eps { color:#7c3aed; }
+    table.prog-table td.empty-cell { color:#cbd5e1; text-align:center; }
+
+    .prog-class-card.filtered-out { display:none; }
 </style>
 </head>
 <body>
@@ -115,7 +148,7 @@
                 <span class="w-2 h-2 rounded-full cursor-blink inline-block bg-emerald-500"></span>
                 &gt; live sync from google sheets_
             </p>
-            <div class="flex flex-wrap justify-center items-center gap-3">
+            <div class="flex flex-wrap justify-center items-center gap-3 mb-6">
                 <a href="https://youtube.com/@need_back_up?si=SWO08JmRh3W3SZAh" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 text-red-600 font-mono-tech text-xs tracking-widest hover:bg-red-100 hover:text-red-700 transition-colors rounded font-bold">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.052-.072 1.953l-.008.105-.022.26-.01.104c-.048.519-.119 1.023-.22 1.402a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
@@ -127,24 +160,27 @@
                 </button>
                 <span id="lastSync" class="font-mono-tech text-[11px] text-slate-400"></span>
             </div>
+            <div class="flex flex-wrap justify-center gap-2" role="tablist">
+                <button class="main-tab active" data-tab="prog-mid">[ 1 ] 중등 진도표</button>
+                <button class="main-tab" data-tab="prog-high">[ 2 ] 고등 진도표</button>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20 space-y-8">
+    <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20">
 
-        <div class="terran-panel p-5">
-            <h3 class="font-mono-tech font-bold text-xs text-blue-700 uppercase tracking-widest mb-3">Legend</h3>
-            <div class="flex flex-wrap gap-2">
-                <span class="legend-chip cell-done">ㅇ 완료</span>
-                <span class="legend-chip cell-alert">결시/오답</span>
-                <span class="legend-chip cell-warn">배부/보충</span>
-                <span class="legend-chip cell-retest">재시</span>
-                <span class="legend-chip cell-note">암기</span>
-                <span class="legend-chip cell-score">숫자 = 점수</span>
-            </div>
+        <!-- TAB 1: 중등 진도표 -->
+        <div id="tab-prog-mid" class="tab-panel space-y-4">
+            <input type="text" class="prog-search" data-target="prog-mid-body" placeholder="🔎 반 / 선생님 / 과목 / 내용으로 검색 (예: 잠, 김연준, 영어)">
+            <div id="prog-mid-body" class="space-y-4"></div>
         </div>
 
-        <div id="sheets"></div>
+        <!-- TAB 2: 고등 진도표 -->
+        <div id="tab-prog-high" class="tab-panel space-y-4" hidden>
+            <input type="text" class="prog-search" data-target="prog-high-body" placeholder="🔎 반 / 선생님 / 과목 / 내용으로 검색 (예: 성동S, 구, 국어)">
+            <div id="prog-high-body" class="space-y-4"></div>
+        </div>
+
     </main>
 
     <footer class="mt-12 text-center text-slate-400 text-xs font-mono-tech pb-8 relative z-20 font-bold">
@@ -156,16 +192,7 @@
 </div>
 
 <script>
-const SHEET_ID = "11OQpv0Wqd9AXvgePv5oRoLbu1xOSw3yd5JWv-QPPdwI";
-const SHEETS = [
-    { gid: "1842895088", name: "월수 지학1 과제 진행상황" },
-    { gid: "1893351772", name: "지학테스트" },
-    { gid: "483654984",  name: "월수금 무학/한대 중1" },
-    { gid: "147709761",  name: "화목토 마장/한대 중2" },
-    { gid: "1153350532", name: "화목토 동마/행당 중1" },
-    { gid: "1523289867", name: "화목토 성수금호" }
-];
-
+/* ───────────────────────── CSV helpers ───────────────────────── */
 function parseCSV(text) {
     const rows = [];
     let row = [], field = '', inQuotes = false;
@@ -188,162 +215,221 @@ function parseCSV(text) {
     return rows;
 }
 
-function trimGrid(rows) {
-    let lastRow = -1;
-    rows.forEach((r, i) => { if (r.some(c => c && c.trim() !== '')) lastRow = i; });
-    rows = rows.slice(0, lastRow + 1);
-
-    let lastCol = -1;
-    rows.forEach(r => r.forEach((c, j) => { if (c && c.trim() !== '') lastCol = Math.max(lastCol, j); }));
-    rows = rows.map(r => {
-        const copy = r.slice(0, lastCol + 1);
-        while (copy.length < lastCol + 1) copy.push('');
-        return copy;
-    });
-    return rows;
+async function fetchCSV(sheetId, gid) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return parseCSV(await res.text());
 }
 
-function findHeaderRowIndex(rows) {
-    const nameLike = /^[가-힣]{2,5}$/;
-    let bestIdx = 0, bestScore = -1;
-    const scanLimit = Math.min(rows.length, 15);
-    for (let i = 0; i < scanLimit; i++) {
-        const score = rows[i].filter(c => nameLike.test((c || '').trim())).length;
-        if (score > bestScore) { bestScore = score; bestIdx = i; }
+/* ───────────────────────── 진도표 (progress log) ───────────────────────── */
+const PROGRESS_SHEETS = {
+    'prog-mid':  { sheetId: '1lMg29yBF5H1npC0afxubHsfnjxdjA6jl_IBK39eLp6s', gid: '836088315', bodyId: 'prog-mid-body' },
+    'prog-high': { sheetId: '1Mqldv3QQZ1c5CaR6n9onFKTE8iTbyuyHlgKEBAzsBqo', gid: '71261527',  bodyId: 'prog-high-body' }
+};
+const DAY_NAMES = ['월', '화', '수', '목', '금', '토', '일'];
+const DAY_COL_START = 6; // column index of '월' in the sheet
+
+function parseProgressRows(rows) {
+    // weeks: ordered object { weekLabel: { grades: { gradeLabel: { classLabel: [subjectEntry, ...] } } } }
+    const weeks = {};
+    let curWeek = '', curGrade = '', curClass = '';
+    let currentEntry = null;
+
+    for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r || r.every(c => !c || !c.trim())) continue;
+
+        const rawWeek = (r[0] || '').trim();
+        const rawGrade = (r[1] || '').trim();
+        const rawClass = (r[2] || '').trim();
+        const rawTeacher = (r[3] || '').trim();
+        const rawSubject = (r[4] || '').trim();
+        const rowType = (r[5] || '').trim();
+        if (!rowType) continue;
+
+        if (rawWeek) curWeek = rawWeek;
+        if (rawGrade) curGrade = rawGrade;
+        if (rawClass) curClass = rawClass;
+
+        if (!curWeek || !curGrade || !curClass) continue;
+
+        if (!weeks[curWeek]) weeks[curWeek] = {};
+        if (!weeks[curWeek][curGrade]) weeks[curWeek][curGrade] = {};
+        if (!weeks[curWeek][curGrade][curClass]) weeks[curWeek][curGrade][curClass] = [];
+        const classArr = weeks[curWeek][curGrade][curClass];
+
+        if (rawTeacher || rawSubject) {
+            currentEntry = { teacher: rawTeacher, subject: rawSubject, data: {} };
+            classArr.push(currentEntry);
+        }
+        if (!currentEntry) continue;
+
+        if (!currentEntry.data[rowType]) currentEntry.data[rowType] = {};
+        for (let d = 0; d < DAY_NAMES.length; d++) {
+            const val = (r[DAY_COL_START + d] || '').trim();
+            if (val) currentEntry.data[rowType][DAY_NAMES[d]] = val;
+        }
     }
-    return bestScore >= 2 ? bestIdx : 0;
+    return weeks;
 }
 
-function classifyCell(raw) {
-    const v = (raw || '').trim();
-    if (v === '') return { cls: 'cell-empty', text: '-' };
-    if (v === 'ㅇ' || v.toLowerCase() === 'o') return { cls: 'cell-done', text: 'ㅇ' };
-    if (v.includes('결시') || v.includes('오답')) return { cls: 'cell-alert', text: v };
-    if (v.includes('배부') || v.includes('보충')) return { cls: 'cell-warn', text: v };
-    if (v.includes('재시')) return { cls: 'cell-retest', text: v };
-    if (v.includes('암기')) return { cls: 'cell-note', text: v };
-    if (/^\d+(\.\d+)?$/.test(v)) return { cls: 'cell-score', text: v };
-    return { cls: '', text: v };
+function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 }
 
-function renderSheet(container, meta, rows) {
-    rows = trimGrid(rows);
-    if (!rows.length) {
-        container.innerHTML = `<div class="terran-panel p-6 text-center text-slate-400 font-mono-tech text-sm">NO DATA</div>`;
+const ROW_TYPE_LABEL = { '진도': '진도', '과제': '과제', 'eps': 'EPS' };
+
+function renderSubjectTable(entry) {
+    const rowTypes = Object.keys(entry.data).filter(rt => rt in ROW_TYPE_LABEL || true);
+    const orderedTypes = ['진도', '과제', 'eps'].filter(t => entry.data[t]);
+    Object.keys(entry.data).forEach(t => { if (!orderedTypes.includes(t)) orderedTypes.push(t); });
+
+    const usedDays = DAY_NAMES.filter(d => orderedTypes.some(t => entry.data[t][d]));
+    if (!usedDays.length) return '';
+
+    let html = `<table class="prog-table"><thead><tr><th></th>`;
+    usedDays.forEach(d => { html += `<th>${d}</th>`; });
+    html += `</tr></thead><tbody>`;
+    orderedTypes.forEach(t => {
+        html += `<tr><td class="row-label${t === 'eps' ? ' row-eps' : ''}">${ROW_TYPE_LABEL[t] || escapeHtml(t)}</td>`;
+        usedDays.forEach(d => {
+            const val = entry.data[t][d];
+            html += val ? `<td>${escapeHtml(val)}</td>` : `<td class="empty-cell">-</td>`;
+        });
+        html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    return html;
+}
+
+function renderProgressBoard(bodyEl, weeks) {
+    bodyEl.innerHTML = '';
+    const weekLabels = Object.keys(weeks);
+    if (!weekLabels.length) {
+        bodyEl.innerHTML = `<div class="terran-panel p-6 text-center text-slate-400 font-mono-tech text-sm">NO DATA</div>`;
         return;
     }
 
-    const headerIdx = findHeaderRowIndex(rows);
-    const noticeRows = rows.slice(0, headerIdx).filter(r => r.some(c => c && c.trim() !== ''));
-    const tableRows = rows.slice(headerIdx);
+    weekLabels.forEach((week, wIdx) => {
+        const details = document.createElement('details');
+        details.className = 'prog-week fade-in';
+        if (wIdx === weekLabels.length - 1) details.open = true; // latest week open by default
 
-    const panel = document.createElement('div');
-    panel.className = 'terran-panel overflow-hidden fade-in';
+        const summary = document.createElement('summary');
+        summary.innerHTML = `<span>📅 ${escapeHtml(week)} 주간 진도표</span><span></span>`;
+        details.appendChild(summary);
 
-    const head = document.createElement('div');
-    head.className = 'p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2';
-    head.innerHTML = `
-        <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase">
-            <span class="text-blue-500 mr-2">●</span>${meta.name}
-        </h3>
-        <span class="font-mono-tech text-[10px] text-slate-400">SECTOR // GID:${meta.gid}</span>
-    `;
-    panel.appendChild(head);
+        const body = document.createElement('div');
+        body.className = 'prog-week-body';
 
-    if (noticeRows.length) {
-        const noticeBox = document.createElement('div');
-        noticeBox.className = 'px-6 py-4 bg-blue-50/50 border-b border-slate-200 space-y-1.5';
-        noticeRows.forEach(r => {
-            const line = r.map(c => (c || '').trim()).filter(Boolean).join('  ·  ');
-            if (!line) return;
-            const p = document.createElement('p');
-            p.className = 'font-mono-tech text-xs text-blue-800 leading-relaxed flex items-start';
-            p.innerHTML = `<span class="mr-2 text-blue-500 select-none">&gt;</span><span>${line}</span>`;
-            noticeBox.appendChild(p);
+        const grades = weeks[week];
+        Object.keys(grades).forEach(grade => {
+            const gradeGroup = document.createElement('div');
+            gradeGroup.className = 'prog-grade-group';
+
+            const gTitle = document.createElement('div');
+            gTitle.className = 'prog-grade-title';
+            gTitle.textContent = grade;
+            gradeGroup.appendChild(gTitle);
+
+            const classes = grades[grade];
+            Object.keys(classes).forEach(className => {
+                const entries = classes[className];
+                const tablesHtml = entries.map(e => {
+                    const tableHtml = renderSubjectTable(e);
+                    if (!tableHtml) return '';
+                    return `
+                        <div class="prog-subject">
+                            <div class="prog-subject-header">
+                                <span class="teacher">${escapeHtml(e.teacher)}</span>
+                                <span>${escapeHtml(e.subject)}</span>
+                            </div>
+                            ${tableHtml}
+                        </div>`;
+                }).filter(Boolean).join('');
+                if (!tablesHtml) return;
+
+                const card = document.createElement('div');
+                card.className = 'prog-class-card';
+                card.innerHTML = `
+                    <div class="prog-class-header">🏷 ${escapeHtml(className)}</div>
+                    ${tablesHtml}
+                `;
+                gradeGroup.appendChild(card);
+            });
+
+            body.appendChild(gradeGroup);
         });
-        panel.appendChild(noticeBox);
-    }
 
-    const scrollWrap = document.createElement('div');
-    scrollWrap.className = 'overflow-auto custom-scrollbar';
-    scrollWrap.style.maxHeight = '520px';
-
-    const table = document.createElement('table');
-    table.className = 'board-table';
-
-    const thead = document.createElement('thead');
-    const headTr = document.createElement('tr');
-    tableRows[0].forEach(c => {
-        const th = document.createElement('th');
-        const v = (c || '').trim();
-        th.textContent = v === '' ? '' : v;
-        if (v === '') th.classList.add('cell-divider');
-        headTr.appendChild(th);
+        details.appendChild(body);
+        bodyEl.appendChild(details);
     });
-    thead.appendChild(headTr);
-    table.appendChild(thead);
-
-    const tbody = document.createElement('tbody');
-    tableRows.slice(1).forEach(r => {
-        const tr = document.createElement('tr');
-        r.forEach((c, colIdx) => {
-            const isAllColEmpty = tableRows.every(row => !(row[colIdx] || '').trim());
-            const td = document.createElement('td');
-            if (isAllColEmpty) {
-                td.classList.add('cell-divider');
-            } else {
-                const { cls, text } = classifyCell(c);
-                if (cls) td.classList.add(cls);
-                td.textContent = text;
-            }
-            tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-
-    scrollWrap.appendChild(table);
-    panel.appendChild(scrollWrap);
-    container.appendChild(panel);
 }
 
-async function loadSheet(meta) {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${meta.gid}&t=${Date.now()}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    return parseCSV(text);
-}
-
-async function loadAll() {
-    const container = document.getElementById('sheets');
-    container.innerHTML = `
+async function loadProgressTab(tabKey) {
+    const cfg = PROGRESS_SHEETS[tabKey];
+    const bodyEl = document.getElementById(cfg.bodyId);
+    bodyEl.innerHTML = `
         <div class="flex flex-col items-center justify-center py-20 text-slate-500 font-mono-tech">
             <div class="spinner mb-4"></div>
             <p class="tracking-widest animate-pulse font-bold text-sm">SYNCING WITH GOOGLE SHEETS...</p>
         </div>`;
+    try {
+        const rows = await fetchCSV(cfg.sheetId, cfg.gid);
+        const weeks = parseProgressRows(rows);
+        renderProgressBoard(bodyEl, weeks);
+    } catch (err) {
+        bodyEl.innerHTML = `<div class="terran-panel p-6 text-red-600 font-mono-tech text-xs font-bold">⚠ 데이터를 불러오지 못했습니다: ${err}</div>`;
+    }
+}
 
-    const results = await Promise.allSettled(SHEETS.map(loadSheet));
-    container.innerHTML = '';
-    container.className = 'space-y-8';
+/* ───────────────────────── Search filter (진도표 tabs) ───────────────────────── */
+document.querySelectorAll('.prog-search').forEach(input => {
+    input.addEventListener('input', () => {
+        const target = document.getElementById(input.dataset.target);
+        const q = input.value.trim().toLowerCase();
+        target.querySelectorAll('.prog-class-card').forEach(card => {
+            const match = !q || card.textContent.toLowerCase().includes(q);
+            card.classList.toggle('filtered-out', !match);
+        });
+        target.querySelectorAll('.prog-grade-group').forEach(group => {
+            const anyVisible = !!group.querySelector('.prog-class-card:not(.filtered-out)');
+            group.style.display = (q && !anyVisible) ? 'none' : '';
+        });
+        target.querySelectorAll('.prog-week').forEach(week => {
+            const anyVisible = !!week.querySelector('.prog-class-card:not(.filtered-out)');
+            week.style.display = (q && !anyVisible) ? 'none' : '';
+            if (q && anyVisible) week.open = true;
+        });
+    });
+});
 
-    results.forEach((r, i) => {
-        const meta = SHEETS[i];
-        const box = document.createElement('div');
-        container.appendChild(box);
-        if (r.status === 'fulfilled') {
-            renderSheet(box, meta, r.value);
-        } else {
-            box.innerHTML = `
-                <div class="terran-panel p-6">
-                    <h3 class="font-mono-tech font-bold text-slate-700 text-sm tracking-widest uppercase mb-2">
-                        <span class="text-red-500 mr-2">●</span>${meta.name}
-                    </h3>
-                    <p class="text-red-600 font-mono-tech text-xs font-bold">⚠ 데이터를 불러오지 못했습니다: ${r.reason}</p>
-                </div>`;
+/* ───────────────────────── Tab switching ───────────────────────── */
+const TAB_LOADERS = {
+    'prog-mid': () => loadProgressTab('prog-mid'),
+    'prog-high': () => loadProgressTab('prog-high')
+};
+const loadedTabs = new Set();
+
+document.querySelectorAll('.main-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const key = btn.dataset.tab;
+        document.querySelectorAll('.main-tab').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('.tab-panel').forEach(p => p.hidden = true);
+        document.getElementById('tab-' + key).hidden = false;
+        if (!loadedTabs.has(key)) {
+            loadedTabs.add(key);
+            TAB_LOADERS[key]();
         }
     });
+});
 
+async function loadAll() {
+    loadedTabs.clear();
+    const activeKey = document.querySelector('.main-tab.active').dataset.tab;
+    loadedTabs.add(activeKey);
+    await TAB_LOADERS[activeKey]();
     document.getElementById('lastSync').textContent =
         '> last sync: ' + new Date().toLocaleTimeString('ko-KR');
 }
