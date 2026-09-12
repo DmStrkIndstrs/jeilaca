@@ -180,6 +180,35 @@
         text-align:center;
     }
     .teacher-banner a { color:#0284c7; text-decoration:underline; }
+
+    /* Quick entry (빠른 입력) */
+    .qe-class-btn {
+        display:block; width:100%; text-align:left; padding:10px 16px; margin-bottom:8px;
+        border:1px solid var(--border); border-radius:8px; background:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:13px; color:#334155; cursor:pointer; transition:.15s;
+    }
+    .qe-class-btn:hover { border-color:#93c5fd; }
+    .qe-class-btn.active { border-color:#0284c7; background:#eff6ff; color:#0284c7; font-weight:700; }
+    .qe-class-tag {
+        display:inline-block; padding:1px 8px; margin-right:8px; border-radius:4px; font-size:10px;
+        font-weight:700; background:#e0f2fe; color:#0369a1;
+    }
+    .qe-pill {
+        padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#64748b; cursor:pointer;
+    }
+    .qe-pill.active { background:#0284c7; border-color:#0284c7; color:#fff; }
+    .qe-textarea {
+        width:100%; min-height:110px; padding:12px; border:2px solid #cbd5e1; border-radius:6px;
+        font-family:'Noto Sans KR',sans-serif; font-size:14px; resize:vertical; background:#f8fafc; color:#1e293b;
+    }
+    .qe-textarea:focus { outline:none; border-color:#0284c7; background:#fff; }
+    .qe-save-btn {
+        padding:10px 24px; background:#0284c7; color:#fff; font-family:'Share Tech Mono',monospace;
+        font-weight:700; font-size:13px; border:none; border-radius:6px; cursor:pointer; letter-spacing:0.05em;
+    }
+    .qe-save-btn:hover { background:#0369a1; }
+    .qe-save-btn:disabled { opacity:.5; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -206,6 +235,7 @@
                 <button class="main-tab active" data-tab="prog-mid">[ 1 ] 중등 진도표</button>
                 <button class="main-tab" data-tab="prog-high">[ 2 ] 고등 진도표</button>
                 <button class="main-tab" data-tab="missing">[ 3 ] 미기록 현황</button>
+                <button class="main-tab" data-tab="quickentry">[ 4 ] 빠른 입력</button>
             </div>
         </div>
     </header>
@@ -243,6 +273,17 @@
                 <h2 class="missing-section-title">📗 고등</h2>
                 <div id="missing-high-body" class="space-y-3"></div>
             </div>
+        </div>
+
+        <!-- TAB 4: 빠른 입력 -->
+        <div id="tab-quickentry" class="tab-panel space-y-4" hidden>
+            <div class="terran-panel p-5">
+                <label class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">선생님 코드</label>
+                <input type="text" id="qeTeacherInput" class="prog-search" placeholder="예: 환, 표, 최... (시간표 괄호 안 코드)">
+                <p class="font-mono-tech text-[11px] text-slate-400 mt-2">최신 주차 기준으로 이 코드가 맡은 수업만 찾아드립니다.</p>
+            </div>
+            <div id="qeClassList" class="space-y-2"></div>
+            <div id="qeFormArea"></div>
         </div>
 
     </main>
@@ -471,13 +512,17 @@ function parseWeekEndDate(label) {
     return isNaN(d.getTime()) ? null : d;
 }
 
-function computeMissing(weeks) {
+function getQualifyingWeeks(weeks) {
+    // 아직 끝나지 않은(미래) 주차는 제외하고, 이미 시작된/끝난 주차만 남긴다
     const now = new Date();
-    // 아직 끝나지 않은(미래) 주차는 "기록 안 됨"이 아니라 그냥 "아직 진행 전"이므로 제외
-    const weekLabels = Object.keys(weeks).filter(w => {
+    return Object.keys(weeks).filter(w => {
         const end = parseWeekEndDate(w);
         return !end || end <= now;
     });
+}
+
+function computeMissing(weeks) {
+    const weekLabels = getQualifyingWeeks(weeks);
     if (!weekLabels.length) return { latestWeek: null, results: [] };
     const latestWeek = weekLabels[weekLabels.length - 1];
 
@@ -589,6 +634,194 @@ async function loadMissingTab() {
     else highBody.innerHTML = `<div class="text-red-600 font-mono-tech text-xs">⚠ 로드 실패: ${highRows.reason}</div>`;
 }
 
+/* ───────────────────────── TAB 4: 빠른 입력 (quick entry → writes to the sheet) ───────────────────────── */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLsn3HpjYLRTqdpSc5RSkI4l788gxpcKYfDnD2HpvuX-oC4lNVLIWpQk5JUm0hiaKz/exec';
+let QE_DATA = null; // { mid: weeks, high: weeks }
+let qeSelectedRowType = null;
+let qeSelectedDay = null;
+
+async function loadQuickEntryData(force) {
+    if (QE_DATA && !force) return QE_DATA;
+    const [midRows, highRows] = await Promise.all([
+        fetchCSV(PROGRESS_SHEETS['prog-mid'].sheetId, PROGRESS_SHEETS['prog-mid'].gid),
+        fetchCSV(PROGRESS_SHEETS['prog-high'].sheetId, PROGRESS_SHEETS['prog-high'].gid)
+    ]);
+    QE_DATA = { mid: parseProgressRows(midRows), high: parseProgressRows(highRows) };
+    return QE_DATA;
+}
+
+function findTeacherClasses(code) {
+    const items = [];
+    ['mid', 'high'].forEach(target => {
+        const weeks = QE_DATA[target];
+        const qualifying = getQualifyingWeeks(weeks);
+        if (!qualifying.length) return;
+        const week = qualifying[qualifying.length - 1];
+        const grades = weeks[week];
+        Object.keys(grades).forEach(grade => {
+            Object.keys(grades[grade]).forEach(className => {
+                grades[grade][className].forEach(entry => {
+                    if (entry.teacher === code) items.push({ target, week, grade, className, entry });
+                });
+            });
+        });
+    });
+    return items;
+}
+
+function renderQeClassList(items) {
+    const listEl = document.getElementById('qeClassList');
+    document.getElementById('qeFormArea').innerHTML = '';
+    if (!items.length) {
+        listEl.innerHTML = `<div class="terran-panel p-5 text-center text-slate-400 font-mono-tech text-sm">해당 코드로 최신 주차에 배정된 수업을 찾지 못했습니다.</div>`;
+        return;
+    }
+    listEl.innerHTML = items.map((item, idx) => `
+        <button type="button" class="qe-class-btn" data-idx="${idx}">
+            <span class="qe-class-tag">${item.target === 'mid' ? '중등' : '고등'}</span>
+            ${escapeHtml(item.grade)} · ${escapeHtml(item.className)} · ${escapeHtml(item.entry.subject)}
+        </button>
+    `).join('');
+    listEl.querySelectorAll('.qe-class-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            listEl.querySelectorAll('.qe-class-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderQeForm(items[parseInt(btn.dataset.idx, 10)]);
+        });
+    });
+}
+
+function syncQeTextarea(item) {
+    const ta = document.getElementById('qeTextarea');
+    if (!ta) return;
+    ta.value = (item.entry.data[qeSelectedRowType] && item.entry.data[qeSelectedRowType][qeSelectedDay]) || '';
+}
+
+function renderQeForm(item) {
+    const rowTypes = ['진도', '과제', 'eps'].filter(t => item.entry.data[t]);
+    Object.keys(item.entry.data).forEach(t => { if (!rowTypes.includes(t)) rowTypes.push(t); });
+    qeSelectedRowType = rowTypes[0] || '진도';
+    qeSelectedDay = DAY_NAMES[0];
+
+    const area = document.getElementById('qeFormArea');
+    area.innerHTML = `
+        <div class="terran-panel p-5 space-y-4 fade-in">
+            <div class="font-mono-tech text-sm font-bold text-slate-700">
+                ${item.target === 'mid' ? '중등' : '고등'} · ${escapeHtml(item.week)} 주 · ${escapeHtml(item.grade)} · ${escapeHtml(item.className)} · ${escapeHtml(item.entry.subject)}
+            </div>
+            <div>
+                <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">구분</p>
+                <div id="qeRowTypeBtns" class="flex flex-wrap gap-2"></div>
+            </div>
+            <div>
+                <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">요일</p>
+                <div id="qeDayBtns" class="flex flex-wrap gap-2"></div>
+            </div>
+            <textarea id="qeTextarea" class="qe-textarea" placeholder="내용을 입력하세요..."></textarea>
+            <div class="flex items-center gap-3">
+                <button id="qeSaveBtn" type="button" class="qe-save-btn">[ 저장 ]</button>
+                <span id="qeStatus" class="font-mono-tech text-xs"></span>
+            </div>
+        </div>
+    `;
+
+    const rowTypeBtns = document.getElementById('qeRowTypeBtns');
+    rowTypes.forEach(t => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'qe-pill' + (t === qeSelectedRowType ? ' active' : '');
+        btn.textContent = ROW_TYPE_LABEL[t] || t;
+        btn.addEventListener('click', () => {
+            qeSelectedRowType = t;
+            rowTypeBtns.querySelectorAll('.qe-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            syncQeTextarea(item);
+        });
+        rowTypeBtns.appendChild(btn);
+    });
+
+    const dayBtns = document.getElementById('qeDayBtns');
+    DAY_NAMES.forEach(d => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'qe-pill' + (d === qeSelectedDay ? ' active' : '');
+        btn.textContent = d;
+        btn.addEventListener('click', () => {
+            qeSelectedDay = d;
+            dayBtns.querySelectorAll('.qe-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            syncQeTextarea(item);
+        });
+        dayBtns.appendChild(btn);
+    });
+
+    syncQeTextarea(item);
+    document.getElementById('qeSaveBtn').addEventListener('click', () => saveQeEntry(item));
+}
+
+async function saveQeEntry(item) {
+    const statusEl = document.getElementById('qeStatus');
+    const saveBtn = document.getElementById('qeSaveBtn');
+    const text = document.getElementById('qeTextarea').value;
+
+    saveBtn.disabled = true;
+    statusEl.textContent = '저장 중...';
+    statusEl.className = 'font-mono-tech text-xs text-slate-400';
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                target: item.target,
+                week: item.week,
+                grade: item.grade,
+                className: item.className,
+                teacher: item.entry.teacher,
+                subject: item.entry.subject,
+                rowType: qeSelectedRowType,
+                day: qeSelectedDay,
+                text
+            })
+        });
+        const json = await res.json();
+        if (json.ok) {
+            statusEl.textContent = '✅ 저장 완료';
+            statusEl.className = 'font-mono-tech text-xs text-emerald-600 font-bold';
+            if (!item.entry.data[qeSelectedRowType]) item.entry.data[qeSelectedRowType] = {};
+            item.entry.data[qeSelectedRowType][qeSelectedDay] = text;
+        } else {
+            statusEl.textContent = '⚠ ' + json.error;
+            statusEl.className = 'font-mono-tech text-xs text-red-600 font-bold';
+        }
+    } catch (err) {
+        statusEl.textContent = '⚠ 네트워크 오류: ' + err;
+        statusEl.className = 'font-mono-tech text-xs text-red-600 font-bold';
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+function refreshQeClassList() {
+    const code = document.getElementById('qeTeacherInput').value.trim();
+    if (!code) {
+        document.getElementById('qeClassList').innerHTML = '';
+        document.getElementById('qeFormArea').innerHTML = '';
+        return;
+    }
+    renderQeClassList(findTeacherClasses(code));
+}
+
+async function loadQuickEntryTab() {
+    document.getElementById('qeClassList').innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
+    await loadQuickEntryData();
+    const input = document.getElementById('qeTeacherInput');
+    if (TEACHER_CODE && !input.value) input.value = TEACHER_CODE;
+    refreshQeClassList();
+}
+
+document.getElementById('qeTeacherInput').addEventListener('input', refreshQeClassList);
+
 /* ───────────────────────── Search filter (진도표 tabs) ───────────────────────── */
 function filterProgressBoard(input) {
     const target = document.getElementById(input.dataset.target);
@@ -636,7 +869,8 @@ function setupTeacherBanner() {
 const TAB_LOADERS = {
     'prog-mid': () => loadProgressTab('prog-mid'),
     'prog-high': () => loadProgressTab('prog-high'),
-    'missing': loadMissingTab
+    'missing': loadMissingTab,
+    'quickentry': loadQuickEntryTab
 };
 const loadedTabs = new Set();
 
