@@ -501,23 +501,25 @@ async function loadProgressTab(tabKey) {
    대부분 반은 월수금 또는 화목토 고정 요일로 수업하므로, 이 시트에 쌓인 지난 주차들의
    실제 기록 요일을 모아 "평소 수업 요일"을 스스로 추정하고, 최신 주차에서 그 요일이
    통째로 비어있으면 (수업은 있었는데 기록을 안 한 것으로 보고) 잡아낸다. */
-function parseWeekEndDate(label) {
+function parseWeekRange(label) {
     const m = label.match(/(\d+)\s*\/\s*(\d+)\s*[~\-]\s*(\d+)\s*\/\s*(\d+)/);
     if (!m) return null;
-    const startMonth = parseInt(m[1], 10);
+    const startMonth = parseInt(m[1], 10), startDay = parseInt(m[2], 10);
     const endMonth = parseInt(m[3], 10), endDay = parseInt(m[4], 10);
-    let year = new Date().getFullYear();
-    if (endMonth < startMonth) year += 1; // week crosses a year boundary (e.g. 12/29~1/4)
-    const d = new Date(year, endMonth - 1, endDay, 23, 59, 59);
-    return isNaN(d.getTime()) ? null : d;
+    const baseYear = new Date().getFullYear();
+    const endYear = endMonth < startMonth ? baseYear + 1 : baseYear; // crosses a year boundary (e.g. 12/29~1/4)
+    const start = new Date(baseYear, startMonth - 1, startDay, 0, 0, 0);
+    const end = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null;
+    return { start, end };
 }
 
 function getQualifyingWeeks(weeks) {
-    // 아직 끝나지 않은(미래) 주차는 제외하고, 이미 시작된/끝난 주차만 남긴다
+    // 아직 시작하지 않은(미래) 주차는 제외하고, 이미 시작된(진행 중 포함) 주차만 남긴다
     const now = new Date();
     return Object.keys(weeks).filter(w => {
-        const end = parseWeekEndDate(w);
-        return !end || end <= now;
+        const range = parseWeekRange(w);
+        return !range || range.start <= now;
     });
 }
 
@@ -525,6 +527,11 @@ function computeMissing(weeks) {
     const weekLabels = getQualifyingWeeks(weeks);
     if (!weekLabels.length) return { latestWeek: null, results: [] };
     const latestWeek = weekLabels[weekLabels.length - 1];
+    const latestRange = parseWeekRange(latestWeek);
+    const now = new Date();
+    // 이번 주가 아직 진행 중이면, 아직 오지 않은 요일까지 "누락"으로 잡지 않는다
+    const isOngoing = !!(latestRange && now <= latestRange.end);
+    const todayIdx = isOngoing ? (now.getDay() + 6) % 7 : null; // 0=월 ... 6=일
 
     const expectedDays = {}; // "grade|class|teacher|subject" -> Set(요일)
     weekLabels.forEach(week => {
@@ -556,6 +563,9 @@ function computeMissing(weeks) {
                 const expected = expectedDays[key] || new Set();
 
                 if (!usedDays.length) {
+                    if (isOngoing && expected.size && ![...expected].some(d => DAY_NAMES.indexOf(d) <= todayIdx)) {
+                        return; // 평소 수업일이 이번 주에 아직 하나도 안 지남 - 너무 이른 경고 방지
+                    }
                     const hint = expected.size ? ` (평소 수업일: ${[...expected].join(', ')})` : '';
                     results.push({ grade, className, teacher: entry.teacher, subject: entry.subject, severity: 'none',
                         detail: `이번 주 기록이 전혀 없습니다.${hint}` });
@@ -564,6 +574,7 @@ function computeMissing(weeks) {
 
                 const gaps = [];
                 expected.forEach(d => {
+                    if (isOngoing && DAY_NAMES.indexOf(d) > todayIdx) return; // 아직 안 지난 요일은 제외
                     if (!usedDays.includes(d)) gaps.push(`${d}요일 전체 누락 (평소 수업일)`);
                 });
                 usedDays.forEach(d => {
