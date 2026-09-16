@@ -206,21 +206,26 @@
         font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#64748b; cursor:pointer;
     }
     .qe-pill.active { background:#0284c7; border-color:#0284c7; color:#fff; }
-    table.qe-bulk-table { border-collapse:collapse; width:100%; min-width:820px; table-layout:fixed; }
+    table.qe-bulk-table { border-collapse:collapse; width:100%; min-width:1180px; table-layout:fixed; }
     table.qe-bulk-table th {
-        background:#0f172a; color:#e2e8f0; font-family:'Share Tech Mono',monospace; font-size:11px;
-        padding:6px; border:1px solid #1e293b; text-align:center; width:100px;
+        background:#0f172a; color:#e2e8f0; font-family:'Share Tech Mono',monospace; font-size:12px;
+        padding:7px; border:1px solid #1e293b; text-align:center; width:160px;
     }
-    table.qe-bulk-table td { border:1px solid #e2e8f0; padding:0; }
+    table.qe-bulk-table th:first-child { width:64px; }
+    table.qe-bulk-table td { border:1px solid #e2e8f0; padding:0; vertical-align:top; }
     .qe-bulk-rowlabel {
         background:#f8fafc; font-weight:700; font-family:'Share Tech Mono',monospace; font-size:12px;
-        color:#64748b; text-align:center; vertical-align:middle; padding:8px !important; white-space:nowrap;
+        color:#64748b; text-align:center; vertical-align:middle !important; padding:8px !important; white-space:nowrap;
     }
     .qe-bulk-cell {
-        width:100%; min-height:64px; border:none; padding:8px; font-size:12.5px;
+        display:block; width:100%; min-height:120px; border:none; padding:10px; font-size:13.5px; line-height:1.55;
         font-family:'Noto Sans KR',sans-serif; resize:vertical; background:transparent; color:#1e293b;
+        transition:min-height .15s;
     }
-    .qe-bulk-cell:focus { outline:2px solid #0284c7; outline-offset:-2px; background:#fff; }
+    .qe-bulk-cell:focus {
+        outline:2px solid #0284c7; outline-offset:-2px; background:#fff; min-height:240px;
+        position:relative; z-index:2;
+    }
     .qe-cell-saved { background:#ecfdf5 !important; }
     .qe-cell-error { background:#fef2f2 !important; }
     .qe-cell-highlight { background:#fef9c3 !important; box-shadow:inset 0 0 0 2px #f59e0b; }
@@ -690,6 +695,7 @@ async function loadMissingTab() {
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLsn3HpjYLRTqdpSc5RSkI4l788gxpcKYfDnD2HpvuX-oC4lNVLIWpQk5JUm0hiaKz/exec';
 let QE_DATA = null; // { mid: weeks, high: weeks }
 let qeSelectedWeek = null;
+let QE_BATCH_SUPPORTED = null; // null=미확인, false=예전 배포라 칸별로 보내야 함
 
 async function loadQuickEntryData(force) {
     if (QE_DATA && !force) return QE_DATA;
@@ -802,7 +808,7 @@ async function saveQeBulk(item) {
         const orig = (item.entry.data[t] && item.entry.data[t][d]) || '';
         return cell.value !== orig;
     });
-    cells.forEach(c => c.classList.remove('qe-cell-saved', 'qe-cell-error'));
+    cells.forEach(c => c.classList.remove('qe-cell-saved', 'qe-cell-error', 'qe-cell-highlight'));
 
     if (!dirty.length) {
         statusEl.textContent = '변경된 내용이 없습니다.';
@@ -812,37 +818,68 @@ async function saveQeBulk(item) {
 
     saveBtn.disabled = true;
     let done = 0, failed = 0;
-    for (const cell of dirty) {
-        statusEl.textContent = `저장 중... (${done + failed + 1}/${dirty.length})`;
-        statusEl.className = 'font-mono-tech text-xs text-slate-400';
+
+    const payloadFor = (cell) => ({
+        target: item.target, week: item.week, grade: item.grade, className: item.className,
+        teacher: item.entry.teacher, subject: item.entry.subject,
+        rowType: cell.dataset.rowtype, day: cell.dataset.day, text: cell.value
+    });
+    const post = (body) => fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body)
+    }).then(r => r.json());
+
+    const applyResult = (cell, result) => {
         const t = cell.dataset.rowtype, d = cell.dataset.day;
-        try {
-            const res = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    target: item.target, week: item.week, grade: item.grade, className: item.className,
-                    teacher: item.entry.teacher, subject: item.entry.subject,
-                    rowType: t, day: d, text: cell.value
-                })
-            });
-            const json = await res.json();
-            if (json.ok) {
-                if (!item.entry.data[t]) item.entry.data[t] = {};
-                item.entry.data[t][d] = cell.value;
-                cell.classList.add('qe-cell-saved');
-                done++;
-            } else {
-                cell.classList.add('qe-cell-error');
-                cell.title = json.error || '';
-                failed++;
-            }
-        } catch (err) {
+        if (result && result.ok) {
+            if (!item.entry.data[t]) item.entry.data[t] = {};
+            item.entry.data[t][d] = cell.value;
+            cell.classList.add('qe-cell-saved');
+            done++;
+        } else {
             cell.classList.add('qe-cell-error');
-            cell.title = String(err);
+            cell.title = (result && result.error) || '저장 실패';
             failed++;
         }
+    };
+
+    statusEl.textContent = `저장 중... (${dirty.length}칸)`;
+    statusEl.className = 'font-mono-tech text-xs text-slate-400';
+
+    // 칸마다 요청을 보내면 시트를 매번 다시 읽느라 칸 수만큼 느려진다. 한 번에 모아서 보낸다.
+    let batched = false;
+    if (QE_BATCH_SUPPORTED !== false) {
+        try {
+            const json = await post({ writes: dirty.map(payloadFor) });
+            if (json && Array.isArray(json.results)) {
+                batched = true;
+                QE_BATCH_SUPPORTED = true;
+                dirty.forEach((cell, i) => applyResult(cell, json.results[i]));
+            } else {
+                QE_BATCH_SUPPORTED = false; // 예전 배포 - 이번 세션에서는 다시 시도하지 않는다
+            }
+        } catch (err) {
+            // 네트워크 오류면 아래 개별 전송에서 다시 시도한다
+        }
     }
+
+    if (!batched) {
+        // 일괄 저장을 지원하지 않는 예전 Apps Script 배포용 폴백 (동시에 보내 그나마 단축)
+        const CONCURRENCY = 5;
+        const saveOne = async (cell) => {
+            try {
+                applyResult(cell, await post(payloadFor(cell)));
+            } catch (err) {
+                applyResult(cell, { ok: false, error: String(err) });
+            }
+            statusEl.textContent = `저장 중... (${done + failed}/${dirty.length})`;
+        };
+        for (let i = 0; i < dirty.length; i += CONCURRENCY) {
+            await Promise.all(dirty.slice(i, i + CONCURRENCY).map(saveOne));
+        }
+    }
+
     saveBtn.disabled = false;
     statusEl.textContent = failed ? `⚠ ${done}건 저장, ${failed}건 실패 (실패한 칸에 마우스를 올려보세요)` : `✅ ${done}건 모두 저장 완료`;
     statusEl.className = 'font-mono-tech text-xs font-bold ' + (failed ? 'text-red-600' : 'text-emerald-600');
