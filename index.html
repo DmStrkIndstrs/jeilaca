@@ -286,7 +286,7 @@
         <div id="tab-missing" class="tab-panel space-y-6" hidden>
             <div class="terran-panel p-5">
                 <p class="font-mono-tech text-xs text-slate-500 leading-relaxed">
-                    최신 주차 기준, <strong class="text-red-600">🔴 전혀 기록되지 않은 과목</strong>과
+                    이번 주 기준, <strong class="text-red-600">🔴 전혀 기록되지 않은 과목</strong>과
                     <strong class="text-amber-600">🟡 일부 요일만 누락된 과목</strong>을 모아 보여줍니다.
                     (해당 요일에 수업이 없어서 원래 비어있는 칸은 제외)
                 </p>
@@ -554,15 +554,23 @@ function getQualifyingWeeks(weeks) {
     });
 }
 
-function computeMissing(weeks) {
-    const weekLabels = getQualifyingWeeks(weeks);
-    if (!weekLabels.length) return { latestWeek: null, results: [] };
-    const latestWeek = weekLabels[weekLabels.length - 1];
-    const latestRange = parseWeekRange(latestWeek);
+/** 오늘이 포함된 주차. 시트에 이번 주 블록이 아직 없으면 null */
+function findCurrentWeek(weeks) {
     const now = new Date();
-    // 이번 주가 아직 진행 중이면, 아직 오지 않은 요일까지 "누락"으로 잡지 않는다
-    const isOngoing = !!(latestRange && now <= latestRange.end);
-    const todayIdx = isOngoing ? (now.getDay() + 6) % 7 : null; // 0=월 ... 6=일
+    return Object.keys(weeks).find(w => {
+        const r = parseWeekRange(w);
+        return r && r.start <= now && now <= r.end;
+    }) || null;
+}
+
+function computeMissing(weeks) {
+    const currentWeek = findCurrentWeek(weeks);
+    if (!currentWeek) return { week: null, results: [] };
+
+    // 평소 수업 요일 추정에는 지난 주차들도 함께 본다
+    const weekLabels = getQualifyingWeeks(weeks);
+    const now = new Date();
+    const todayIdx = (now.getDay() + 6) % 7; // 0=월 ... 6=일
 
     const expectedDays = {}; // "grade|class|teacher|subject" -> Set(요일)
     weekLabels.forEach(week => {
@@ -583,7 +591,7 @@ function computeMissing(weeks) {
     });
 
     const results = [];
-    const grades = weeks[latestWeek];
+    const grades = weeks[currentWeek];
     Object.keys(grades).forEach(grade => {
         Object.keys(grades[grade]).forEach(className => {
             grades[grade][className].forEach(entry => {
@@ -594,7 +602,7 @@ function computeMissing(weeks) {
                 const expected = expectedDays[key] || new Set();
 
                 if (!usedDays.length) {
-                    if (isOngoing && expected.size && ![...expected].some(d => DAY_NAMES.indexOf(d) <= todayIdx)) {
+                    if (expected.size && ![...expected].some(d => DAY_NAMES.indexOf(d) <= todayIdx)) {
                         return; // 평소 수업일이 이번 주에 아직 하나도 안 지남 - 너무 이른 경고 방지
                     }
                     const hint = expected.size ? ` (평소 수업일: ${[...expected].join(', ')})` : '';
@@ -607,7 +615,7 @@ function computeMissing(weeks) {
                 const gapTexts = [];
                 const cells = [];
                 expected.forEach(d => {
-                    if (isOngoing && DAY_NAMES.indexOf(d) > todayIdx) return; // 아직 안 지난 요일은 제외
+                    if (DAY_NAMES.indexOf(d) > todayIdx) return; // 아직 안 지난 요일은 제외
                     if (!usedDays.includes(d)) { gapTexts.push(`${d}요일 전체 누락 (평소 수업일)`); cells.push({ day: d }); }
                 });
                 usedDays.forEach(d => {
@@ -623,31 +631,31 @@ function computeMissing(weeks) {
         });
     });
 
-    return { latestWeek, results };
+    return { week: currentWeek, results };
 }
 
 let MISSING_RESULTS = [];
 
 function renderMissingList(bodyEl, weeks, target) {
-    const { latestWeek, results } = computeMissing(weeks);
-    if (!latestWeek) {
-        bodyEl.innerHTML = `<div class="missing-empty-ok">아직 시작되지 않은 주차뿐입니다 (데이터 없음)</div>`;
+    const { week, results } = computeMissing(weeks);
+    if (!week) {
+        bodyEl.innerHTML = `<div class="missing-empty-ok" style="color:#94a3b8">이번 주에 해당하는 주차가 시트에 아직 없습니다</div>`;
         return;
     }
     if (!results.length) {
-        bodyEl.innerHTML = `<div class="missing-empty-ok">✅ ${escapeHtml(latestWeek)} 주 — 모든 기록이 완료되었습니다!</div>`;
+        bodyEl.innerHTML = `<div class="missing-empty-ok">✅ ${escapeHtml(week)} 주 — 현재까지 빠진 기록이 없습니다!</div>`;
         return;
     }
     const byTeacher = {};
     results.forEach(r => {
         r.target = target;
-        r.week = latestWeek;
+        r.week = week;
         const key = r.teacher || '(미상)';
         (byTeacher[key] || (byTeacher[key] = [])).push(r);
     });
     const teachers = Object.keys(byTeacher).sort((a, b) => byTeacher[b].length - byTeacher[a].length);
 
-    bodyEl.innerHTML = `<p class="font-mono-tech text-xs text-slate-400 mb-3">${escapeHtml(latestWeek)} 주 기준 · 항목을 클릭하면 바로 입력할 수 있습니다</p>` +
+    bodyEl.innerHTML = `<p class="font-mono-tech text-xs text-slate-400 mb-3">${escapeHtml(week)} 주 기준 · 항목을 클릭하면 바로 입력할 수 있습니다</p>` +
         teachers.map(teacher => {
             const items = byTeacher[teacher];
             return `
