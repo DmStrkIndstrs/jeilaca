@@ -191,6 +191,16 @@
     }
     .teacher-banner a { color:#0284c7; text-decoration:underline; }
 
+    .no-week-notice {
+        border:1px solid #fcd34d; background:#fffbeb; color:#92400e; border-radius:8px;
+        padding:14px 18px; margin-bottom:4px;
+        font-family:'Share Tech Mono',monospace; font-weight:700; font-size:13px;
+        display:flex; flex-direction:column; gap:5px;
+    }
+    .no-week-notice span {
+        font-family:'Noto Sans KR',sans-serif; font-weight:400; font-size:12px; color:#b45309;
+    }
+
     /* Quick entry (빠른 입력) */
     .qe-class-btn {
         display:block; width:100%; text-align:left; padding:10px 16px; margin-bottom:8px;
@@ -336,6 +346,7 @@
                     <div id="qeWeekBtns" class="flex flex-wrap gap-2"></div>
                 </div>
             </div>
+            <div id="qeWeekNotice"></div>
             <div id="qeClassList" class="space-y-2"></div>
             <div id="qeFormArea"></div>
         </div>
@@ -469,6 +480,7 @@ function renderProgressBoard(bodyEl, weeks) {
         bodyEl.innerHTML = `<div class="terran-panel p-6 text-center text-slate-400 font-mono-tech text-sm">NO DATA</div>`;
         return;
     }
+    if (!findCurrentWeek(weeks)) bodyEl.insertAdjacentHTML('beforeend', noCurrentWeekNoticeHtml());
 
     weekLabels.forEach((week, wIdx) => {
         const details = document.createElement('details');
@@ -577,6 +589,14 @@ function getQualifyingWeeks(weeks) {
     });
 }
 
+function noCurrentWeekNoticeHtml() {
+    const d = new Date();
+    return `<div class="no-week-notice">
+        ⚠ 이번 주(오늘 ${d.getMonth() + 1}/${d.getDate()}) 주차가 시트에 아직 없습니다
+        <span>관리자가 시트에 이번 주 주차를 추가하면 자동으로 나타납니다.</span>
+    </div>`;
+}
+
 /** 오늘이 포함된 주차. 시트에 이번 주 블록이 아직 없으면 null */
 function findCurrentWeek(weeks) {
     const now = new Date();
@@ -662,7 +682,7 @@ let MISSING_RESULTS = [];
 function renderMissingList(bodyEl, weeks, target) {
     const { week, results } = computeMissing(weeks);
     if (!week) {
-        bodyEl.innerHTML = `<div class="missing-empty-ok" style="color:#94a3b8">이번 주에 해당하는 주차가 시트에 아직 없습니다</div>`;
+        bodyEl.innerHTML = noCurrentWeekNoticeHtml();
         return;
     }
     if (!results.length) {
@@ -956,6 +976,8 @@ async function loadQuickEntryTab() {
     document.getElementById('qeClassList').innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
     await loadQuickEntryData();
     renderQeWeekBtns();
+    const hasCurrentWeek = !!(findCurrentWeek(QE_DATA.mid) || findCurrentWeek(QE_DATA.high));
+    document.getElementById('qeWeekNotice').innerHTML = hasCurrentWeek ? '' : noCurrentWeekNoticeHtml();
     const input = document.getElementById('qeTeacherInput');
     if (TEACHER_CODE && !input.value) input.value = TEACHER_CODE;
     refreshQeClassList();
