@@ -1038,7 +1038,8 @@ function filterProgressBoard(input) {
     });
 }
 
-document.querySelectorAll('.prog-search').forEach(input => {
+// data-target 이 있는 진도표 검색창에만 건다 (빠른 입력의 코드 입력칸도 같은 클래스를 쓴다)
+document.querySelectorAll('.prog-search[data-target]').forEach(input => {
     input.addEventListener('input', () => filterProgressBoard(input));
 });
 
