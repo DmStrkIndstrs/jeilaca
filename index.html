@@ -201,6 +201,21 @@
         font-family:'Noto Sans KR',sans-serif; font-weight:400; font-size:12px; color:#b45309;
     }
 
+    /* 지난 주차 보관함: 최근 주차만 바로 보이고 나머지는 접어둔다 */
+    details.prog-archive { border:1px dashed var(--border); border-radius:8px; background:rgba(255,255,255,0.6); }
+    details.prog-archive > summary {
+        cursor:pointer; list-style:none; padding:12px 20px; color:#64748b;
+        font-family:'Share Tech Mono',monospace; font-weight:700; letter-spacing:0.05em; font-size:13px;
+        display:flex; align-items:center; justify-content:space-between;
+        transition: color .15s ease;
+    }
+    details.prog-archive > summary::-webkit-details-marker { display:none; }
+    details.prog-archive > summary::after { content:'▾'; transition:transform .2s var(--ease-out); }
+    details.prog-archive[open] > summary::after { transform:rotate(180deg); }
+    @media (hover:hover) and (pointer:fine) { details.prog-archive > summary:hover { color:#0284c7; } }
+    .prog-archive-body { padding:0 12px 12px; display:flex; flex-direction:column; gap:1rem; }
+    .qe-pill.qe-pill-more { border-style:dashed; font-weight:400; }
+
     /* Quick entry (빠른 입력) */
     .qe-class-btn {
         display:block; width:100%; text-align:left; padding:10px 16px; margin-bottom:8px;
@@ -482,6 +497,19 @@ function renderProgressBoard(bodyEl, weeks) {
     }
     if (!findCurrentWeek(weeks)) bodyEl.insertAdjacentHTML('beforeend', noCurrentWeekNoticeHtml());
 
+    const { old: oldWeeks } = splitRecentWeeks(weekLabels);
+    let archiveBody = null;
+    if (oldWeeks.length) {
+        const archive = document.createElement('details');
+        archive.className = 'prog-archive';
+        const span = `${oldWeeks[0].split('~')[0].trim()} ~ ${oldWeeks[oldWeeks.length - 1].split('~').pop().trim()}`;
+        archive.innerHTML = `<summary><span>🗂 지난 주차 ${oldWeeks.length}개 보기 (${escapeHtml(span)})</span></summary>`;
+        archiveBody = document.createElement('div');
+        archiveBody.className = 'prog-archive-body';
+        archive.appendChild(archiveBody);
+        bodyEl.appendChild(archive);
+    }
+
     weekLabels.forEach((week, wIdx) => {
         const details = document.createElement('details');
         details.className = 'prog-week fade-in';
@@ -541,7 +569,7 @@ function renderProgressBoard(bodyEl, weeks) {
         });
 
         details.appendChild(body);
-        bodyEl.appendChild(details);
+        (wIdx < oldWeeks.length ? archiveBody : bodyEl).appendChild(details);
     });
 }
 
@@ -604,6 +632,21 @@ function findCurrentWeek(weeks) {
         const r = parseWeekRange(w);
         return r && r.start <= now && now <= r.end;
     }) || null;
+}
+
+/** 화면에 바로 보여줄 최근 주차 수. 그보다 오래된 주차는 '지난 주차' 안에 접어둔다 */
+const RECENT_WEEK_COUNT = 3;
+
+/** 주차 목록(오래된 순)을 지난 주차 / 최근 주차로 나눈다. 아직 시작 안 한 미래 주차는 최근 쪽에 남긴다 */
+function splitRecentWeeks(labels) {
+    const now = new Date();
+    let anchor = -1;
+    labels.forEach((w, i) => {
+        const r = parseWeekRange(w);
+        if (!r || r.start <= now) anchor = i;
+    });
+    const cut = Math.max(0, anchor - RECENT_WEEK_COUNT + 1);
+    return { old: labels.slice(0, cut), recent: labels.slice(cut) };
 }
 
 function computeMissing(weeks) {
@@ -746,6 +789,7 @@ async function loadMissingTab() {
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywObA9iAQISTSLvz5755iUqGEIn71Dz0S-BN0TR397bNNdWdbZpGlK6kOy0xPw_4qb/exec';
 let QE_DATA = null; // { mid: weeks, high: weeks }
 let qeSelectedWeek = null;
+let qeShowOldWeeks = null; // null이면 고른 주차가 지난 주차일 때만 펼친다
 let QE_BATCH_SUPPORTED = null; // null=미확인, false=예전 배포라 칸별로 보내야 함
 
 async function loadQuickEntryData(force) {
@@ -947,7 +991,25 @@ function renderQeWeekBtns() {
         qeSelectedWeek = qualifying.length ? qualifying[qualifying.length - 1] : weeks[weeks.length - 1];
     }
     container.innerHTML = '';
+    const { old: oldWeeks } = splitRecentWeeks(weeks);
+    // 지난 주차를 고른 상태(미기록에서 넘어온 경우 등)면 처음부터 펼쳐 둔다
+    const showOld = qeShowOldWeeks ?? oldWeeks.includes(qeSelectedWeek);
+    if (oldWeeks.length) {
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'qe-pill qe-pill-more';
+        const hiddenPick = !showOld && oldWeeks.includes(qeSelectedWeek);
+        more.className += hiddenPick ? ' active' : '';
+        more.textContent = showOld ? '지난 주차 접기'
+            : hiddenPick ? `지난 주차: ${qeSelectedWeek} 선택됨` : `지난 주차 ${oldWeeks.length}개`;
+        more.addEventListener('click', () => {
+            qeShowOldWeeks = !showOld;
+            renderQeWeekBtns();
+        });
+        container.appendChild(more);
+    }
     weeks.forEach(w => {
+        if (!showOld && oldWeeks.includes(w)) return;
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'qe-pill' + (w === qeSelectedWeek ? ' active' : '');
@@ -1035,6 +1097,12 @@ function filterProgressBoard(input) {
         const anyVisible = !!week.querySelector('.prog-class-card:not(.filtered-out)');
         week.style.display = (q && !anyVisible) ? 'none' : '';
         if (q && anyVisible) week.open = true;
+    });
+    // 검색하면 지난 주차 안의 결과도 보이도록 펼치고, 결과가 없으면 보관함째 숨긴다
+    target.querySelectorAll('.prog-archive').forEach(archive => {
+        const anyVisible = !!archive.querySelector('.prog-class-card:not(.filtered-out)');
+        archive.style.display = (q && !anyVisible) ? 'none' : '';
+        if (q && anyVisible) archive.open = true;
     });
 }
 
