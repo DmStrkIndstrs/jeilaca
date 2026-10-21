@@ -246,10 +246,8 @@
         font-family:'Share Tech Mono',monospace; font-size:15px; font-weight:700; color:#0369a1; cursor:pointer;
         transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .12s var(--ease-out);
     }
-    .qe-teacher-chip .qe-chip-count { font-size:10px; color:#94a3b8; margin-left:3px; }
     @media (hover:hover) and (pointer:fine) { .qe-teacher-chip:not(.active):hover { border-color:#f59e0b; background:#fffbeb; } }
     .qe-teacher-chip.active { background:#f59e0b; border-color:#f59e0b; color:#fff; }
-    .qe-teacher-chip.active .qe-chip-count { color:#fef3c7; }
     .qe-hint { text-align:center; padding:18px; color:#94a3b8; font-family:'Share Tech Mono',monospace; font-size:13px; }
     .qe-class-btn {
         display:block; width:100%; text-align:left; padding:10px 16px; margin-bottom:8px;
@@ -340,10 +338,10 @@
                 <span id="lastSync" class="font-mono-tech text-[11px] text-slate-400"></span>
             </div>
             <div class="flex flex-wrap justify-center gap-2" role="tablist">
-                <button class="main-tab active" data-tab="prog-mid">[ 1 ] 중등 진도표</button>
-                <button class="main-tab" data-tab="prog-high">[ 2 ] 고등 진도표</button>
-                <button class="main-tab" data-tab="missing">[ 3 ] 미기록 현황</button>
-                <button class="main-tab main-tab-cta" data-tab="quickentry">✏️ [ 4 ] 빠른 입력</button>
+                <button class="main-tab main-tab-cta active" data-tab="quickentry">✏️ [ 1 ] 빠른 입력</button>
+                <button class="main-tab" data-tab="prog-mid">[ 2 ] 중등 진도표</button>
+                <button class="main-tab" data-tab="prog-high">[ 3 ] 고등 진도표</button>
+                <button class="main-tab" data-tab="missing">[ 4 ] 미기록 현황</button>
             </div>
         </div>
     </header>
@@ -353,7 +351,7 @@
     <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20">
 
         <!-- TAB 1: 중등 진도표 -->
-        <div id="tab-prog-mid" class="tab-panel space-y-4">
+        <div id="tab-prog-mid" class="tab-panel space-y-4" hidden>
             <input type="text" class="prog-search" data-target="prog-mid-body" placeholder="🔎 반 / 선생님 / 과목 / 내용으로 검색 (예: 잠, 김연준, 영어)">
             <div id="prog-mid-body" class="space-y-4"></div>
         </div>
@@ -384,7 +382,7 @@
         </div>
 
         <!-- TAB 4: 빠른 입력 -->
-        <div id="tab-quickentry" class="tab-panel space-y-4" hidden>
+        <div id="tab-quickentry" class="tab-panel space-y-4">
             <div class="terran-panel p-5 space-y-4">
                 <h2 class="qe-panel-title">✏️ 빠른 입력</h2>
                 <div>
@@ -396,7 +394,7 @@
                     <input type="text" id="qeTeacherInput" class="prog-search" placeholder="🔎 코드나 과목을 입력하거나 아래에서 누르세요 (예: 환, 영어)">
                 </div>
                 <div>
-                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">과목별 선생님 (숫자 = 이 주차 수업 수)</p>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">과목별 선생님</p>
                     <div id="qeTeacherDir" class="qe-dir"></div>
                 </div>
             </div>
@@ -1120,10 +1118,8 @@ function renderQeDirectory(q, selectedCode) {
                 <button type="button" class="qe-dir-subject" data-pick="${escapeHtml(subject)}" title="${escapeHtml(subject)} 선생님만 보기">${escapeHtml(subject)}</button>
                 <div class="qe-dir-chips">
                     ${codes.map(code => {
-                        const c = dir[subject][code];
-                        const parts = [c.mid && `중등 ${c.mid}`, c.high && `고등 ${c.high}`].filter(Boolean).join(' · ');
                         return `<button type="button" class="qe-teacher-chip${code === selectedCode ? ' active' : ''}" data-pick="${escapeHtml(code)}"
-                            title="${escapeHtml(code)} 선생님 · ${parts}">${escapeHtml(code)}<span class="qe-chip-count">${c.mid + c.high}</span></button>`;
+                            title="${escapeHtml(code)} 선생님">${escapeHtml(code)}</button>`;
                     }).join('')}
                 </div>
             </div>`;
@@ -1297,12 +1293,12 @@ document.querySelectorAll('.main-tab').forEach(btn => {
 
 async function loadAll() {
     if (TEACHER_CODE) {
+        // 진도표는 그 선생님으로 걸러 미리 준비해 두고, 첫 화면은 코드가 채워진 빠른 입력으로 연다
+        const firstLoad = !loadedTabs.size;
         loadedTabs.clear();
-        loadedTabs.add('prog-mid'); loadedTabs.add('prog-high');
-        await Promise.all([loadProgressTab('prog-mid'), loadProgressTab('prog-high')]);
-        const midHasMatch = document.querySelector('#prog-mid-body .prog-class-card:not(.filtered-out)');
-        const highHasMatch = document.querySelector('#prog-high-body .prog-class-card:not(.filtered-out)');
-        activateTab((!midHasMatch && highHasMatch) ? 'prog-high' : 'prog-mid');
+        loadedTabs.add('prog-mid'); loadedTabs.add('prog-high'); loadedTabs.add('quickentry');
+        if (firstLoad) activateTab('quickentry'); // 자동 새로고침 때는 보던 탭을 그대로 둔다
+        await Promise.all([loadProgressTab('prog-mid'), loadProgressTab('prog-high'), loadQuickEntryTab()]);
     } else {
         loadedTabs.clear();
         const activeKey = document.querySelector('.main-tab.active').dataset.tab;
@@ -1316,7 +1312,10 @@ async function loadAll() {
 document.getElementById('refreshBtn').addEventListener('click', loadAll);
 setupTeacherBanner();
 loadAll();
-setInterval(loadAll, 5 * 60 * 1000);
+// 빠른 입력은 입력 중인 칸이 날아가지 않도록 자동 새로고침에서 뺀다
+setInterval(() => {
+    if (document.querySelector('.main-tab.active').dataset.tab !== 'quickentry') loadAll();
+}, 5 * 60 * 1000);
 </script>
 </body>
 </html>
