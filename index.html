@@ -79,6 +79,10 @@
     .main-tab.active { background:#0284c7; border-color:#0284c7; color:#fff; box-shadow:0 2px 6px rgba(2,132,199,.35); }
     @media (hover:hover) and (pointer:fine) { .main-tab:not(.active):hover { color:#0284c7; border-color:#93c5fd; } }
     .tab-panel[hidden] { display:none; }
+    /* 빠른 입력은 선생님들이 가장 자주 쓰는 곳이라 다른 탭과 색을 달리해 눈에 띄게 한다 */
+    .main-tab.main-tab-cta { background:#f59e0b; border-color:#f59e0b; color:#fff; box-shadow:0 2px 8px rgba(245,158,11,.4); }
+    .main-tab.main-tab-cta.active { background:#b45309; border-color:#b45309; box-shadow:0 0 0 3px #fde68a, 0 2px 8px rgba(180,83,9,.4); }
+    @media (hover:hover) and (pointer:fine) { .main-tab.main-tab-cta:not(.active):hover { background:#d97706; border-color:#d97706; color:#fff; } }
 
     /* Progress board (진도표) */
     .prog-search {
@@ -130,6 +134,13 @@
         display:flex; gap:8px; align-items:baseline;
     }
     .prog-subject-header .teacher { color:#0284c7; font-family:'Share Tech Mono',monospace; }
+    .teacher-link {
+        font:inherit; font-family:'Share Tech Mono',monospace; font-weight:700; color:#0284c7; cursor:pointer;
+        background:#e0f2fe; border:1px solid #bae6fd; border-radius:4px; padding:0 6px;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .12s var(--ease-out);
+    }
+    @media (hover:hover) and (pointer:fine) { .teacher-link:hover { background:#f59e0b; border-color:#f59e0b; color:#fff; } }
+    .teacher-link .teacher-link-hint { font-size:10px; margin-left:3px; opacity:.7; }
     table.prog-table { width:100%; border-collapse:collapse; table-layout:fixed; }
     table.prog-table th {
         background:#f1f5f9; color:#475569; font-size:11px; font-family:'Share Tech Mono',monospace;
@@ -217,6 +228,29 @@
     .qe-pill.qe-pill-more { border-style:dashed; font-weight:400; }
 
     /* Quick entry (빠른 입력) */
+    .qe-panel-title {
+        font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:#b45309;
+        display:flex; align-items:center; gap:8px;
+    }
+    .qe-dir { display:flex; flex-direction:column; gap:8px; }
+    .qe-dir-row { display:flex; align-items:flex-start; gap:10px; }
+    .qe-dir-subject {
+        flex-shrink:0; width:56px; padding:5px 0; border:none; background:none; cursor:pointer; text-align:left;
+        font-family:'Noto Sans KR',sans-serif; font-weight:700; font-size:13px; color:#475569;
+        transition: color .15s ease;
+    }
+    @media (hover:hover) and (pointer:fine) { .qe-dir-subject:hover { color:#0284c7; } }
+    .qe-dir-chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .qe-teacher-chip {
+        min-width:44px; padding:4px 10px; border:1px solid var(--border); border-radius:6px; background:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:15px; font-weight:700; color:#0369a1; cursor:pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .12s var(--ease-out);
+    }
+    .qe-teacher-chip .qe-chip-count { font-size:10px; color:#94a3b8; margin-left:3px; }
+    @media (hover:hover) and (pointer:fine) { .qe-teacher-chip:not(.active):hover { border-color:#f59e0b; background:#fffbeb; } }
+    .qe-teacher-chip.active { background:#f59e0b; border-color:#f59e0b; color:#fff; }
+    .qe-teacher-chip.active .qe-chip-count { color:#fef3c7; }
+    .qe-hint { text-align:center; padding:18px; color:#94a3b8; font-family:'Share Tech Mono',monospace; font-size:13px; }
     .qe-class-btn {
         display:block; width:100%; text-align:left; padding:10px 16px; margin-bottom:8px;
         border:1px solid var(--border); border-radius:8px; background:#fff;
@@ -267,18 +301,18 @@
     .qe-save-btn:disabled { opacity:.5; cursor:not-allowed; }
 
     /* Press feedback: the interface heard the tap */
-    .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active,
+    .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active, .qe-teacher-chip:active, .teacher-link:active,
     .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: scale(0.97); }
     #refreshBtn { transition: color .15s ease, background-color .15s ease, transform .12s var(--ease-out); }
 
     /* Visible focus for keyboard users only */
     .main-tab:focus-visible, .missing-item:focus-visible, .qe-class-btn:focus-visible,
-    .qe-pill:focus-visible, .qe-save-btn:focus-visible, #refreshBtn:focus-visible,
+    .qe-pill:focus-visible, .qe-teacher-chip:focus-visible, .qe-dir-subject:focus-visible, .teacher-link:focus-visible, .qe-save-btn:focus-visible, #refreshBtn:focus-visible,
     details > summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
     @media (prefers-reduced-motion: reduce) {
         .fade-in { animation: none; }
-        .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active,
+        .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active, .qe-teacher-chip:active, .teacher-link:active,
         .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: none; }
         .cursor-blink, .animate-pulse { animation: none; }
         .spinner { animation-duration: 1.5s; }
@@ -309,7 +343,7 @@
                 <button class="main-tab active" data-tab="prog-mid">[ 1 ] 중등 진도표</button>
                 <button class="main-tab" data-tab="prog-high">[ 2 ] 고등 진도표</button>
                 <button class="main-tab" data-tab="missing">[ 3 ] 미기록 현황</button>
-                <button class="main-tab" data-tab="quickentry">[ 4 ] 빠른 입력</button>
+                <button class="main-tab main-tab-cta" data-tab="quickentry">✏️ [ 4 ] 빠른 입력</button>
             </div>
         </div>
     </header>
@@ -351,14 +385,19 @@
 
         <!-- TAB 4: 빠른 입력 -->
         <div id="tab-quickentry" class="tab-panel space-y-4" hidden>
-            <div class="terran-panel p-5 space-y-3">
-                <div>
-                    <label class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">선생님 코드</label>
-                    <input type="text" id="qeTeacherInput" class="prog-search" placeholder="예: 환, 표, 최... (시간표 괄호 안 코드)">
-                </div>
+            <div class="terran-panel p-5 space-y-4">
+                <h2 class="qe-panel-title">✏️ 빠른 입력</h2>
                 <div>
                     <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">주차 선택</p>
                     <div id="qeWeekBtns" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                    <label for="qeTeacherInput" class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">선생님 코드 · 과목 검색</label>
+                    <input type="text" id="qeTeacherInput" class="prog-search" placeholder="🔎 코드나 과목을 입력하거나 아래에서 누르세요 (예: 환, 영어)">
+                </div>
+                <div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">과목별 선생님 (숫자 = 이 주차 수업 수)</p>
+                    <div id="qeTeacherDir" class="qe-dir"></div>
                 </div>
             </div>
             <div id="qeWeekNotice"></div>
@@ -547,7 +586,9 @@ function renderProgressBoard(bodyEl, weeks) {
                     return `
                         <div class="prog-subject">
                             <div class="prog-subject-header">
-                                <span class="teacher">${escapeHtml(e.teacher)}</span>
+                                ${e.teacher ? `<button type="button" class="teacher-link" title="${escapeHtml(e.teacher)} 선생님 빠른 입력으로 이동"
+                                    data-week="${escapeHtml(week)}" data-grade="${escapeHtml(grade)}" data-class="${escapeHtml(className)}"
+                                    data-teacher="${escapeHtml(e.teacher)}" data-subject="${escapeHtml(e.subject)}">${escapeHtml(e.teacher)}<span class="teacher-link-hint">✏️</span></button>` : ''}
                                 <span>${escapeHtml(e.subject)}</span>
                             </div>
                             ${tableHtml}
@@ -746,7 +787,8 @@ function renderMissingList(bodyEl, weeks, target) {
             const items = byTeacher[teacher];
             return `
                 <div class="missing-teacher-group">
-                    <h3 class="missing-teacher-title"><span class="teacher">${escapeHtml(teacher)}</span> 선생님 <span class="missing-count">${items.length}건</span></h3>
+                    <h3 class="missing-teacher-title">${teacher === '(미상)' ? `<span class="teacher">${escapeHtml(teacher)}</span>`
+                        : `<button type="button" class="teacher-link" title="${escapeHtml(teacher)} 선생님 빠른 입력으로 이동" data-week="${escapeHtml(week)}" data-teacher="${escapeHtml(teacher)}">${escapeHtml(teacher)}<span class="teacher-link-hint">✏️</span></button>`} 선생님 <span class="missing-count">${items.length}건</span></h3>
                     ${items.map(r => {
                         MISSING_RESULTS.push(r);
                         const idx = MISSING_RESULTS.length - 1;
@@ -1024,14 +1066,96 @@ function renderQeWeekBtns() {
     });
 }
 
+/* 과목별 선생님 목록: 고른 주차에 수업이 있는 선생님 코드를 과목 아래 모아 누를 수 있게 한다 */
+const SUBJECT_ORDER = ['국어', '영어', '수학', '과학', '사회', '역사'];
+
+function buildTeacherDirectory(week) {
+    const dir = {}; // subject -> code -> { mid, high }
+    ['mid', 'high'].forEach(target => {
+        const grades = QE_DATA[target][week];
+        if (!grades) return;
+        Object.values(grades).forEach(classes => Object.values(classes).forEach(entries => entries.forEach(e => {
+            if (!e.teacher) return;
+            const subject = e.subject || '기타';
+            const bySubject = dir[subject] || (dir[subject] = {});
+            const counts = bySubject[e.teacher] || (bySubject[e.teacher] = { mid: 0, high: 0 });
+            counts[target]++;
+        })));
+    });
+    return dir;
+}
+
+function sortSubjects(subjects) {
+    const rank = s => { const i = SUBJECT_ORDER.indexOf(s); return i === -1 ? SUBJECT_ORDER.length : i; };
+    return subjects.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, 'ko'));
+}
+
+function pickQeTeacher(value) {
+    const input = document.getElementById('qeTeacherInput');
+    input.value = value;
+    refreshQeClassList();
+}
+
+/** 목록을 그리고, 검색어로 걸러져 보이는 선생님 코드 수를 돌려준다 */
+function renderQeDirectory(q, selectedCode) {
+    const dirEl = document.getElementById('qeTeacherDir');
+    const dir = buildTeacherDirectory(qeSelectedWeek);
+    const subjects = sortSubjects(Object.keys(dir));
+    if (!subjects.length) {
+        dirEl.innerHTML = `<div class="font-mono-tech text-xs text-slate-400">이 주차에는 배정된 수업이 없습니다.</div>`;
+        return 0;
+    }
+    // 코드를 정확히 골랐을 때는 전체 목록을 그대로 두고 그 칩만 강조한다
+    const filtering = q && !selectedCode;
+    const ql = q.toLowerCase();
+    let shown = 0;
+    const rows = subjects.map(subject => {
+        const subjectMatch = !filtering || subject.toLowerCase().includes(ql);
+        const codes = Object.keys(dir[subject]).sort((a, b) => a.localeCompare(b, 'ko'))
+            .filter(code => subjectMatch || code.toLowerCase().includes(ql));
+        if (!codes.length) return '';
+        shown += codes.length;
+        return `
+            <div class="qe-dir-row">
+                <button type="button" class="qe-dir-subject" data-pick="${escapeHtml(subject)}" title="${escapeHtml(subject)} 선생님만 보기">${escapeHtml(subject)}</button>
+                <div class="qe-dir-chips">
+                    ${codes.map(code => {
+                        const c = dir[subject][code];
+                        const parts = [c.mid && `중등 ${c.mid}`, c.high && `고등 ${c.high}`].filter(Boolean).join(' · ');
+                        return `<button type="button" class="qe-teacher-chip${code === selectedCode ? ' active' : ''}" data-pick="${escapeHtml(code)}"
+                            title="${escapeHtml(code)} 선생님 · ${parts}">${escapeHtml(code)}<span class="qe-chip-count">${c.mid + c.high}</span></button>`;
+                    }).join('')}
+                </div>
+            </div>`;
+    }).join('');
+    dirEl.innerHTML = rows || `<div class="font-mono-tech text-xs text-slate-400">"${escapeHtml(q)}"에 해당하는 선생님이나 과목이 없습니다.</div>`;
+    return shown;
+}
+
+document.getElementById('qeTeacherDir').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-pick]');
+    if (!btn) return;
+    pickQeTeacher(btn.dataset.pick);
+    if (btn.classList.contains('qe-teacher-chip')) {
+        document.getElementById('qeClassList').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+});
+
 function refreshQeClassList() {
-    const code = document.getElementById('qeTeacherInput').value.trim();
-    if (!code || !qeSelectedWeek) {
-        document.getElementById('qeClassList').innerHTML = '';
-        document.getElementById('qeFormArea').innerHTML = '';
+    const q = document.getElementById('qeTeacherInput').value.trim();
+    if (!qeSelectedWeek) return;
+    const items = q ? findTeacherClasses(q, qeSelectedWeek) : [];
+    const shown = renderQeDirectory(q, items.length ? q : null);
+    if (items.length) {
+        renderQeClassList(items);
         return;
     }
-    renderQeClassList(findTeacherClasses(code, qeSelectedWeek));
+    document.getElementById('qeFormArea').innerHTML = '';
+    document.getElementById('qeClassList').innerHTML = !q
+        ? `<div class="qe-hint">👆 위 목록에서 선생님 코드를 누르세요</div>`
+        : shown
+            ? `<div class="qe-hint">👆 검색된 선생님 코드를 누르세요</div>`
+            : `<div class="terran-panel p-5 text-center text-slate-400 font-mono-tech text-sm">해당 코드로 이 주차에 배정된 수업을 찾지 못했습니다.</div>`;
 }
 
 async function loadQuickEntryTab() {
@@ -1061,7 +1185,12 @@ async function jumpToQuickEntry(ref) {
     input.value = ref.teacher;
 
     const items = findTeacherClasses(ref.teacher, ref.week);
+    renderQeDirectory(ref.teacher, items.length ? ref.teacher : null);
     renderQeClassList(items);
+    if (!ref.grade) {
+        document.getElementById('qeClassList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+    }
 
     const idx = items.findIndex(it => it.target === ref.target && it.grade === ref.grade &&
         it.className === ref.className && it.entry.subject === ref.subject);
@@ -1080,6 +1209,16 @@ async function jumpToQuickEntry(ref) {
 
     document.getElementById('qeFormArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+/* 진도표 · 미기록 현황의 선생님 코드를 누르면 그 선생님의 빠른 입력으로 바로 들어간다 */
+[['prog-mid-body', 'mid'], ['prog-high-body', 'high'], ['missing-mid-body', 'mid'], ['missing-high-body', 'high']].forEach(([id, target]) => {
+    document.getElementById(id).addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.teacher-link');
+        if (!btn) return;
+        const d = btn.dataset;
+        jumpToQuickEntry({ target, week: d.week, teacher: d.teacher, grade: d.grade, className: d.class, subject: d.subject });
+    });
+});
 
 /* ───────────────────────── Search filter (진도표 tabs) ───────────────────────── */
 function filterProgressBoard(input) {
