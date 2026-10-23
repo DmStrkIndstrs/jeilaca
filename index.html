@@ -313,6 +313,34 @@
     .qe-toast .qe-toast-fail { color:#fca5a5; font-family:'Noto Sans KR',sans-serif; font-weight:500; }
     .qe-toast button { color:#94a3b8; font-size:12px; flex-shrink:0; }
 
+    /* 업데이트 공지 */
+    .update-notice {
+        max-width:72rem; margin:20px auto 0; padding:0 16px;
+    }
+    .update-notice-box {
+        border:1px solid #bae6fd; background:#f0f9ff; border-radius:8px; padding:14px 18px;
+        display:flex; gap:16px; align-items:flex-start; word-break:keep-all;
+    }
+    .update-notice-box details { flex:1; min-width:0; }
+    .update-notice-box summary {
+        cursor:pointer; list-style:none; color:#0369a1;
+        font-family:'Share Tech Mono',monospace; font-weight:700; font-size:13px; letter-spacing:0.03em;
+    }
+    .update-notice-box summary::-webkit-details-marker { display:none; }
+    .update-notice-box .un-more { font-weight:400; font-size:12px; color:#0284c7; text-decoration:underline; text-underline-offset:3px; margin-left:4px; }
+    .update-notice-box .un-more::after { content:' ▾'; display:inline-block; transition:transform .2s var(--ease-out); }
+    .update-notice-box details[open] .un-more::after { transform:rotate(180deg); }
+    .update-notice-box .un-headline { font-family:'Noto Sans KR',sans-serif; font-weight:500; color:#0c4a6e; font-size:13.5px; margin-top:4px; }
+    .update-notice-box .un-day { margin-top:12px; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px; color:#0284c7; }
+    .update-notice-box ul { margin-top:4px; padding-left:18px; list-style:disc; color:#334155; font-size:13px; line-height:1.7; }
+    .update-notice-close {
+        flex-shrink:0; padding:6px 12px; border:1px solid #7dd3fc; border-radius:6px; background:#fff;
+        color:#0369a1; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px; cursor:pointer;
+        transition: background-color .15s ease, transform .12s var(--ease-out);
+    }
+    @media (hover:hover) and (pointer:fine) { .update-notice-close:hover { background:#e0f2fe; } }
+    .update-notice-close:active { transform:scale(0.97); }
+
     /* Press feedback: the interface heard the tap */
     .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active, .qe-teacher-chip:active, .teacher-link:active,
     .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: scale(0.97); }
@@ -363,6 +391,37 @@
     </header>
 
     <div id="teacherBanner" class="teacher-banner" hidden></div>
+
+    <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
+    <section id="updateNotice" class="update-notice" data-version="2026-10-23" hidden>
+        <div class="update-notice-box">
+            <details>
+                <summary>📢 업데이트 안내 (10/23) <span class="un-more">자세히</span>
+                    <p class="un-headline">저장을 누르면 기다리지 않고 바로 다른 반으로 넘어가도 됩니다.</p>
+                </summary>
+                <div class="un-day">10/23</div>
+                <ul>
+                    <li>[전체 저장]을 누른 뒤 기다리지 않고 계속 입력하거나 다른 반으로 넘어가도 됩니다. 저장 중인 칸은 회색으로 보이고, 결과는 화면 오른쪽 아래에 알려 드립니다.</li>
+                    <li>저장에 실패하면 그 칸이 빨간색으로 남고 입력한 글도 그대로 있습니다. [전체 저장]을 다시 누르면 됩니다.</li>
+                    <li>입력 직후 [전체 저장]이 한 번에 눌리지 않던 문제를 고쳤습니다.</li>
+                </ul>
+                <div class="un-day">10/21</div>
+                <ul>
+                    <li>첫 화면이 빠른 입력으로 바뀌었습니다.</li>
+                    <li>과목별 선생님 코드 목록에서 내 코드를 누르면 바로 내 반이 열립니다. 진도표와 미기록 현황의 선생님 코드를 눌러도 빠른 입력으로 이동합니다.</li>
+                </ul>
+                <div class="un-day">10/20</div>
+                <ul>
+                    <li>진도표와 주차 선택에는 최근 3주만 보이고, 그 전 주차는 '지난 주차' 안에 접혀 있습니다.</li>
+                </ul>
+                <div class="un-day">10/16</div>
+                <ul>
+                    <li>이번 주 주차가 시트에 아직 없으면 안내 문구가 나옵니다.</li>
+                </ul>
+            </details>
+            <button type="button" class="update-notice-close" id="updateNoticeClose">확인했어요</button>
+        </div>
+    </section>
 
     <main class="max-w-6xl mx-auto px-4 mt-8 relative z-20">
 
@@ -1446,6 +1505,22 @@ loadAll();
 setInterval(() => {
     if (document.querySelector('.main-tab.active').dataset.tab !== 'quickentry') loadAll();
 }, 5 * 60 * 1000);
+
+/* ───────────────────────── 업데이트 공지 ───────────────────────── */
+(function initUpdateNotice() {
+    const el = document.getElementById('updateNotice');
+    if (!el) return;
+    const KEY = 'jeilaca-update-notice-seen';
+    const version = el.dataset.version;
+    let seen = null;
+    try { seen = localStorage.getItem(KEY); } catch (e) { /* 저장소를 못 쓰면 매번 보여준다 */ }
+    if (seen === version) return;
+    el.hidden = false;
+    document.getElementById('updateNoticeClose').addEventListener('click', () => {
+        el.hidden = true;
+        try { localStorage.setItem(KEY, version); } catch (e) {}
+    });
+})();
 </script>
 </body>
 </html>
