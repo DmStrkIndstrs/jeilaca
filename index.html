@@ -230,14 +230,6 @@
     .tt-badge-mid { background:#e0f2fe; color:#0369a1; }
     .tt-badge-high { background:#ede9fe; color:#5b21b6; }
     .tt-none { color:#cbd5e1; font-size:11px; text-align:center; padding:10px 0; font-family:'Share Tech Mono',monospace; }
-    .tt-code-btn {
-        padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:#fff;
-        font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#475569; cursor:pointer;
-        transition: background-color .15s ease, border-color .15s ease, color .15s ease;
-    }
-    .tt-code-btn.active { background:#0284c7; border-color:#0284c7; color:#fff; }
-    .tt-code-btn.tt-code-missing { color:#cbd5e1; }
-    @media (hover:hover) and (pointer:fine) { .tt-code-btn:not(.active):hover { border-color:#93c5fd; color:#0284c7; } }
     .tt-summary { font-family:'Share Tech Mono',monospace; font-size:12px; color:#64748b; margin-bottom:10px; }
     .tt-summary strong { color:#0284c7; font-size:15px; }
 
@@ -528,8 +520,8 @@
                     <input type="text" id="ttTeacherInput" class="prog-search" placeholder="🔎 코드를 입력하거나 아래에서 누르세요 (예: 휘)">
                 </div>
                 <div>
-                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">선생님 코드</p>
-                    <div id="ttTeacherDir" class="flex flex-wrap gap-2"></div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">과목별 선생님</p>
+                    <div id="ttTeacherDir" class="qe-dir"></div>
                 </div>
             </div>
             <div id="ttBody"></div>
@@ -1540,26 +1532,61 @@ async function loadTimetableData(force) {
 }
 
 function ttTeacherCodes() {
-    const counts = {};
-    TT_ROWS.forEach(e => { counts[e.teacher] = (counts[e.teacher] || 0) + 1; });
-    return Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ko'));
+    return [...new Set(TT_ROWS.map(e => e.teacher))].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 
-function renderTtDirectory() {
-    const box = document.getElementById('ttTeacherDir');
-    box.innerHTML = ttTeacherCodes().map(c =>
-        `<button type="button" class="tt-code-btn${c === ttSelected ? ' active' : ''}" data-code="${escapeHtml(c)}">${escapeHtml(c)}</button>`
-    ).join('');
-    box.querySelectorAll('.tt-code-btn').forEach(btn => {
-        btn.addEventListener('click', () => selectTtTeacher(btn.dataset.code));
+/** 과목 -> 선생님 코드 목록. 한 선생님이 여러 과목이면 그 과목들에 모두 들어간다 */
+function buildTtDirectory() {
+    const dir = {};
+    TT_ROWS.forEach(e => {
+        const subject = e.subject || '기타';
+        (dir[subject] || (dir[subject] = new Set())).add(e.teacher);
     });
+    return dir;
 }
+
+function renderTtDirectory(q) {
+    const box = document.getElementById('ttTeacherDir');
+    const dir = buildTtDirectory();
+    const subjects = sortSubjects(Object.keys(dir));
+    const filtering = !!q && !ttSelected;
+    const ql = (q || '').toLowerCase();
+
+    const rows = subjects.map(subject => {
+        const subjectMatch = !filtering || subject.toLowerCase().includes(ql);
+        const codes = [...dir[subject]].sort((a, b) => a.localeCompare(b, 'ko'))
+            .filter(code => subjectMatch || code.toLowerCase().includes(ql));
+        if (!codes.length) return '';
+        return `
+            <div class="qe-dir-row">
+                <button type="button" class="qe-dir-subject" data-pick="${escapeHtml(subject)}" title="${escapeHtml(subject)} 선생님만 보기">${escapeHtml(subject)}</button>
+                <div class="qe-dir-chips">
+                    ${codes.map(code => `<button type="button" class="qe-teacher-chip${code === ttSelected ? ' active' : ''}" data-pick="${escapeHtml(code)}" title="${escapeHtml(code)} 선생님 시간표">${escapeHtml(code)}</button>`).join('')}
+                </div>
+            </div>`;
+    }).join('');
+
+    box.innerHTML = rows || `<div class="font-mono-tech text-xs text-slate-400">"${escapeHtml(q || '')}"에 해당하는 선생님이나 과목이 없습니다.</div>`;
+}
+
+document.getElementById('ttTeacherDir').addEventListener('click', ev => {
+    const btn = ev.target.closest('[data-pick]');
+    if (!btn) return;
+    const value = btn.dataset.pick;
+    if (btn.classList.contains('qe-teacher-chip')) selectTtTeacher(value);
+    else { // 과목을 누르면 그 과목 선생님만 추려 보여준다
+        ttSelected = null;
+        document.getElementById('ttTeacherInput').value = value;
+        renderTtDirectory(value);
+        document.getElementById('ttBody').innerHTML = '';
+    }
+});
 
 function selectTtTeacher(code) {
     ttSelected = code;
     const input = document.getElementById('ttTeacherInput');
     if (input.value !== code) input.value = code;
-    renderTtDirectory();
+    renderTtDirectory('');
     renderTimetable(code);
 }
 
@@ -1613,17 +1640,18 @@ async function loadTimetableTab() {
         return;
     }
     body.innerHTML = '';
-    renderTtDirectory();
-    const input = document.getElementById('ttTeacherInput');
+    renderTtDirectory('');
     const preset = ttSelected || (TEACHER_CODE && ttTeacherCodes().includes(TEACHER_CODE) ? TEACHER_CODE : null);
     if (preset) selectTtTeacher(preset);
 }
 
 document.getElementById('ttTeacherInput').addEventListener('input', e => {
+    if (!TT_ROWS) return;
     const v = e.target.value.trim();
-    const codes = TT_ROWS ? ttTeacherCodes() : [];
-    if (codes.includes(v)) selectTtTeacher(v);
-    else { ttSelected = null; renderTtDirectory(); document.getElementById('ttBody').innerHTML = v ? `<div class="terran-panel p-6 text-center font-mono-tech text-sm text-slate-400">${escapeHtml(v)} 코드를 찾지 못했습니다.</div>` : ''; }
+    if (ttTeacherCodes().includes(v)) { selectTtTeacher(v); return; }
+    ttSelected = null;
+    renderTtDirectory(v);
+    document.getElementById('ttBody').innerHTML = '';
 });
 
 /* ───────────────────────── Tab switching ───────────────────────── */
