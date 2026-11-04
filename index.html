@@ -202,6 +202,45 @@
     }
     .teacher-banner a { color:#0284c7; text-decoration:underline; }
 
+    /* 선생님별 시간표 */
+    .tt-day-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+    .tt-day {
+        border:1px solid var(--border); border-radius:8px; background:#fff; overflow:hidden;
+        display:flex; flex-direction:column;
+    }
+    .tt-day.tt-today { border-color:#f59e0b; box-shadow:0 0 0 2px #fde68a; }
+    .tt-day.tt-empty { background:#f8fafc; }
+    .tt-day-head {
+        padding:7px 10px; background:#0f172a; color:#e2e8f0; text-align:center;
+        font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px;
+    }
+    .tt-day.tt-today .tt-day-head { background:#b45309; }
+    .tt-day-body { padding:8px; display:flex; flex-direction:column; gap:6px; flex:1; }
+    .tt-item {
+        border:1px solid #e2e8f0; border-left:3px solid #0284c7; border-radius:5px;
+        padding:6px 8px; font-size:12px; line-height:1.45;
+    }
+    .tt-item.tt-high { border-left-color:#7c3aed; }
+    .tt-item .tt-subject { font-weight:700; color:#1e293b; }
+    .tt-item .tt-class { color:#64748b; font-size:11px; }
+    .tt-badge {
+        display:inline-block; padding:0 5px; border-radius:3px; font-size:9px; font-weight:700;
+        font-family:'Share Tech Mono',monospace; margin-right:4px;
+    }
+    .tt-badge-mid { background:#e0f2fe; color:#0369a1; }
+    .tt-badge-high { background:#ede9fe; color:#5b21b6; }
+    .tt-none { color:#cbd5e1; font-size:11px; text-align:center; padding:10px 0; font-family:'Share Tech Mono',monospace; }
+    .tt-code-btn {
+        padding:5px 12px; border:1px solid var(--border); border-radius:20px; background:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#475569; cursor:pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .tt-code-btn.active { background:#0284c7; border-color:#0284c7; color:#fff; }
+    .tt-code-btn.tt-code-missing { color:#cbd5e1; }
+    @media (hover:hover) and (pointer:fine) { .tt-code-btn:not(.active):hover { border-color:#93c5fd; color:#0284c7; } }
+    .tt-summary { font-family:'Share Tech Mono',monospace; font-size:12px; color:#64748b; margin-bottom:10px; }
+    .tt-summary strong { color:#0284c7; font-size:15px; }
+
     .no-week-notice {
         border:1px solid #fcd34d; background:#fffbeb; color:#92400e; border-radius:8px;
         padding:14px 18px; margin-bottom:4px;
@@ -386,6 +425,7 @@
                 <button class="main-tab" data-tab="prog-mid">[ 2 ] 중등 진도표</button>
                 <button class="main-tab" data-tab="prog-high">[ 3 ] 고등 진도표</button>
                 <button class="main-tab" data-tab="missing">[ 4 ] 미기록 현황</button>
+                <button class="main-tab" data-tab="timetable">[ 5 ] 시간표</button>
             </div>
         </div>
     </header>
@@ -476,6 +516,23 @@
             <div id="qeWeekNotice"></div>
             <div id="qeClassList" class="space-y-2"></div>
             <div id="qeFormArea"></div>
+        </div>
+
+        <!-- TAB 5: 시간표 -->
+        <div id="tab-timetable" class="tab-panel space-y-4" hidden>
+            <div class="terran-panel p-5 space-y-4">
+                <h2 class="qe-panel-title">🗓 선생님별 시간표</h2>
+                <p class="font-mono-tech text-[11px] text-slate-400">중등·고등 시간표를 합쳐서 선생님 한 분 기준으로 보여줍니다.</p>
+                <div>
+                    <label for="ttTeacherInput" class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">선생님 코드 검색</label>
+                    <input type="text" id="ttTeacherInput" class="prog-search" placeholder="🔎 코드를 입력하거나 아래에서 누르세요 (예: 휘)">
+                </div>
+                <div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">선생님 코드</p>
+                    <div id="ttTeacherDir" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+            <div id="ttBody"></div>
         </div>
 
     </main>
@@ -1455,12 +1512,127 @@ function setupTeacherBanner() {
     banner.innerHTML = `🔖 <strong>${escapeHtml(TEACHER_CODE)}</strong> 선생님 전용 보기 · <a href="${location.pathname}">전체보기</a>`;
 }
 
+/* ───────────────────────── TAB 5: 선생님별 시간표 ─────────────────────────
+   각 시트의 "시간표" 탭은 학년|반|담당|과목|월~일(O) 구조다.
+   중등·고등을 합쳐 한 선생님 기준으로 요일별로 묶어 보여준다. */
+const TIMETABLE_SHEETS = {
+    mid:  { sheetId: PROGRESS_SHEETS['prog-mid'].sheetId,  gid: '1595351987', label: '중등' },
+    high: { sheetId: PROGRESS_SHEETS['prog-high'].sheetId, gid: '88231015',  label: '고등' }
+};
+let TT_ROWS = null;      // [{ target, grade, className, teacher, subject, days:[요일] }]
+let ttSelected = null;
+
+async function loadTimetableData(force) {
+    if (TT_ROWS && !force) return TT_ROWS;
+    const results = await Promise.all(Object.entries(TIMETABLE_SHEETS).map(async ([target, cfg]) => {
+        const rows = await fetchCSV(cfg.sheetId, cfg.gid);
+        return rows.slice(1).map(r => ({
+            target,
+            grade: (r[0] || '').trim(),
+            className: (r[1] || '').trim(),
+            teacher: (r[2] || '').trim(),
+            subject: (r[3] || '').trim(),
+            days: DAY_NAMES.filter((d, i) => (r[4 + i] || '').trim())
+        })).filter(e => e.teacher && (e.className || e.subject));
+    }));
+    TT_ROWS = results.flat();
+    return TT_ROWS;
+}
+
+function ttTeacherCodes() {
+    const counts = {};
+    TT_ROWS.forEach(e => { counts[e.teacher] = (counts[e.teacher] || 0) + 1; });
+    return Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ko'));
+}
+
+function renderTtDirectory() {
+    const box = document.getElementById('ttTeacherDir');
+    box.innerHTML = ttTeacherCodes().map(c =>
+        `<button type="button" class="tt-code-btn${c === ttSelected ? ' active' : ''}" data-code="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join('');
+    box.querySelectorAll('.tt-code-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectTtTeacher(btn.dataset.code));
+    });
+}
+
+function selectTtTeacher(code) {
+    ttSelected = code;
+    const input = document.getElementById('ttTeacherInput');
+    if (input.value !== code) input.value = code;
+    renderTtDirectory();
+    renderTimetable(code);
+}
+
+function renderTimetable(code) {
+    const body = document.getElementById('ttBody');
+    if (!code) { body.innerHTML = ''; return; }
+
+    const mine = TT_ROWS.filter(e => e.teacher === code);
+    if (!mine.length) {
+        body.innerHTML = `<div class="terran-panel p-6 text-center font-mono-tech text-sm text-slate-400">
+            ${escapeHtml(code)} 선생님은 시간표 시트에 등록된 수업이 없습니다.
+        </div>`;
+        return;
+    }
+
+    const todayIdx = (new Date().getDay() + 6) % 7;
+    const noDay = mine.filter(e => !e.days.length);
+    const classCount = new Set(mine.map(e => `${e.target}|${e.grade}|${e.className}|${e.subject}`)).size;
+
+    const dayHtml = DAY_NAMES.map((d, i) => {
+        const items = mine.filter(e => e.days.includes(d));
+        return `
+            <div class="tt-day${i === todayIdx ? ' tt-today' : ''}${items.length ? '' : ' tt-empty'}">
+                <div class="tt-day-head">${d}${i === todayIdx ? ' · 오늘' : ''}</div>
+                <div class="tt-day-body">
+                    ${items.length ? items.map(e => `
+                        <div class="tt-item${e.target === 'high' ? ' tt-high' : ''}">
+                            <div class="tt-subject"><span class="tt-badge tt-badge-${e.target === 'high' ? 'high' : 'mid'}">${TIMETABLE_SHEETS[e.target].label}</span>${escapeHtml(e.subject)}</div>
+                            <div class="tt-class">${escapeHtml(e.grade)} · ${escapeHtml(e.className)}</div>
+                        </div>`).join('') : '<div class="tt-none">수업 없음</div>'}
+                </div>
+            </div>`;
+    }).join('');
+
+    body.innerHTML = `
+        <div class="terran-panel p-5 fade-in">
+            <p class="tt-summary"><strong>${escapeHtml(code)}</strong> 선생님 · 수업 ${classCount}개</p>
+            <div class="tt-day-grid">${dayHtml}</div>
+            ${noDay.length ? `<p class="font-mono-tech text-[11px] text-slate-400 mt-3">※ 요일 표시가 없는 수업 ${noDay.length}개: ${
+                noDay.map(e => escapeHtml(`${e.grade} ${e.className} ${e.subject}`)).join(', ')}</p>` : ''}
+        </div>`;
+}
+
+async function loadTimetableTab() {
+    const body = document.getElementById('ttBody');
+    body.innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
+    try {
+        await loadTimetableData();
+    } catch (err) {
+        body.innerHTML = `<div class="terran-panel p-6 text-red-600 font-mono-tech text-xs font-bold">⚠ 시간표를 불러오지 못했습니다: ${err}</div>`;
+        return;
+    }
+    body.innerHTML = '';
+    renderTtDirectory();
+    const input = document.getElementById('ttTeacherInput');
+    const preset = ttSelected || (TEACHER_CODE && ttTeacherCodes().includes(TEACHER_CODE) ? TEACHER_CODE : null);
+    if (preset) selectTtTeacher(preset);
+}
+
+document.getElementById('ttTeacherInput').addEventListener('input', e => {
+    const v = e.target.value.trim();
+    const codes = TT_ROWS ? ttTeacherCodes() : [];
+    if (codes.includes(v)) selectTtTeacher(v);
+    else { ttSelected = null; renderTtDirectory(); document.getElementById('ttBody').innerHTML = v ? `<div class="terran-panel p-6 text-center font-mono-tech text-sm text-slate-400">${escapeHtml(v)} 코드를 찾지 못했습니다.</div>` : ''; }
+});
+
 /* ───────────────────────── Tab switching ───────────────────────── */
 const TAB_LOADERS = {
     'prog-mid': () => loadProgressTab('prog-mid'),
     'prog-high': () => loadProgressTab('prog-high'),
     'missing': loadMissingTab,
-    'quickentry': loadQuickEntryTab
+    'quickentry': loadQuickEntryTab,
+    'timetable': loadTimetableTab
 };
 const loadedTabs = new Set();
 
