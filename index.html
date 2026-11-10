@@ -733,7 +733,7 @@
             <div class="terran-panel p-5 space-y-4">
                 <h2 class="qe-panel-title">🧭 EPS 관리 <span class="eps-trial-tag">시범</span></h2>
                 <p class="eps-intro">
-                    시간표의 E 칸(국어E·영어E·수학E)마다 <b>담당쌤의 미션</b>과 <b>대강쌤의 수행 결과</b>를 한 장의 카드로 모았습니다.
+                    시간표의 E 칸(국어E·영어E·수학E)마다 <b>담당쌤의 미션</b>과 <b>EPS쌤의 수행 결과</b>를 한 장의 카드로 모았습니다.
                     미션은 시트의 eps 줄(빠른 입력)에서 읽어 오기만 하고, 시트는 바꾸지 않습니다.
                     <b>수행 결과는 시범 기간 동안 이 기기에만 저장</b>되니, [결과 복사]로 담당쌤께 보내 주세요.
                 </p>
@@ -2388,7 +2388,7 @@ document.getElementById('ttBody').addEventListener('click', async ev => {
 });
 
 /* ───────────────────────── TAB 6: EPS 관리 (시범) ─────────────────────────
-   EPS = 담당쌤이 미션을 주고, 시간표의 E 칸 선생님(대강쌤)이 그 시간에 수행하는 수업.
+   EPS = 담당쌤이 미션을 주고, 시간표의 E 칸 선생님(EPS쌤)이 그 시간에 수행하는 수업.
    - 카드: 이번 주 시간표의 E 칸 하나 = 카드 하나 (TT_SOURCE 에서 만든다)
    - 미션: 시트 "입력" 탭에서 그 반·과목의 eps 줄, 그 요일 칸을 읽기만 한다 ('x' 는 이번엔 EPS 없음)
    - 결과: 시범 기간에는 이 기기(localStorage)에만 저장한다. 시트는 건드리지 않는다. */
@@ -2484,7 +2484,7 @@ function epsCardHtml(card, results) {
                 <span class="eps-chip">${EPS_STATUS_LABEL[st]}</span>
             </div>
             <div class="eps-what"><span class="tt-badge tt-badge-${card.target === 'high' ? 'high' : 'mid'}">${card.target === 'high' ? '고등' : '중등'}</span>${escapeHtml([card.grade, card.className].filter(Boolean).join(' '))} · ${escapeHtml(card.subject)}</div>
-            <div class="eps-who">담당 <b>${escapeHtml(owner)}</b> → 대강 <b>${escapeHtml(card.epsTeacher)}</b>${card.owners.length === 1 && card.owners[0] === card.epsTeacher ? ' (본인)' : ''}${card.room ? ` · ${escapeHtml(card.room)}호` : ''}</div>
+            <div class="eps-who">담당 <b>${escapeHtml(owner)}</b> → EPS <b>${escapeHtml(card.epsTeacher)}</b>${card.owners.length === 1 && card.owners[0] === card.epsTeacher ? ' (본인)' : ''}${card.room ? ` · ${escapeHtml(card.room)}호` : ''}</div>
             ${missionHtml}
             ${card.skip ? '' : `
             <div class="eps-result" role="group" aria-label="수행 결과">
@@ -2505,7 +2505,7 @@ function renderEpsChips() {
 function epsCopyText(code) {
     const results = epsLoadResults();
     const mine = EPS_CARDS.filter(c => c.epsTeacher === code && !c.skip);
-    const lines = [`[EPS 수행 결과 · 대강 ${code}] ${EPS_WEEK} 주`, ''];
+    const lines = [`[EPS 수행 결과 · EPS쌤 ${code}] ${EPS_WEEK} 주`, ''];
     mine.forEach(c => {
         const r = results[c.key];
         lines.push(`${epsWhen(c)} ${[c.grade, c.className].filter(Boolean).join(' ')} ${c.subject} (담당 ${c.owners.join('/') || '?'})`);
@@ -2541,10 +2541,10 @@ function renderEps() {
         : '';
     if (epsSelected) {
         const doing = visible.filter(c => c.epsTeacher === epsSelected);
-        // 담당과 대강이 같은 선생님인 수업은 '내가 할 대강'에만 둔다
+        // 담당과 EPS쌤이 같은 선생님인 수업은 '내가 할 EPS'에만 둔다
         const giving = visible.filter(c => c.owners.includes(epsSelected) && c.epsTeacher !== epsSelected);
-        sections += doing.length ? `<div class="eps-toolbar"><button type="button" class="tt-save-btn tt-save-primary" data-eps-copy>📋 내 대강 결과 복사</button><span id="epsCopyStatus" class="tt-save-status"></span></div>` : '';
-        sections += group(`🙋 내가 할 대강 (${escapeHtml(epsSelected)})`, doing);
+        sections += doing.length ? `<div class="eps-toolbar"><button type="button" class="tt-save-btn tt-save-primary" data-eps-copy>📋 내 EPS 결과 복사</button><span id="epsCopyStatus" class="tt-save-status"></span></div>` : '';
+        sections += group(`🙋 내가 할 EPS (${escapeHtml(epsSelected)})`, doing);
         sections += group(`📝 내가 낼 미션 (${escapeHtml(epsSelected)})`, giving);
         if (!doing.length && !giving.length) sections = `<div class="eps-empty">이번 주 ${escapeHtml(epsSelected)} 선생님의 EPS가 없습니다.</div>`;
     } else {
@@ -2556,7 +2556,7 @@ function renderEps() {
     body.innerHTML = `<div class="terran-panel p-5 fade-in">
         <p class="tt-summary">기준: <strong>${escapeHtml(EPS_WEEK)}</strong> 주 · ${escapeHtml(TT_TERM)}</p>
         ${summary}${sections}
-        <p class="tt-foot">대강쌤은 시간표의 E 칸 선생님입니다. 바뀌면 관리자에게 알려 주세요.<br>
+        <p class="tt-foot">EPS쌤은 시간표의 E 칸 선생님입니다. 바뀌면 관리자에게 알려 주세요.<br>
         미션 쓰기는 지금처럼 빠른 입력의 EPS 줄에 쓰면 여기에 바로 나옵니다 (새로고침).</p>
     </div>`;
 }
