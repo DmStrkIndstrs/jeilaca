@@ -320,6 +320,21 @@
     .tt-cell .tt-class { color:#64748b; font-size:11px; }
     .tt-cell .tt-room { font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px; color:var(--ink-panel); }
     .tt-cell .tt-sat-time { font-family:'Share Tech Mono',monospace; font-size:10px; color:#b45309; }
+    .tt-save-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .tt-save-btn {
+        padding:8px 14px; border:1px solid var(--accent); border-radius:6px; background:#fff; color:var(--accent-strong);
+        font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12.5px; cursor:pointer;
+        transition: background-color .15s ease, color .15s ease, transform .12s var(--ease-out);
+    }
+    .tt-save-btn.tt-save-primary { background:var(--accent); color:#fff; }
+    @media (hover:hover) and (pointer:fine) {
+        .tt-save-btn:hover { background:var(--accent-tint-2); }
+        .tt-save-btn.tt-save-primary:hover { background:var(--accent-strong); }
+    }
+    .tt-save-btn:active { transform:scale(0.97); }
+    .tt-save-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .tt-save-status { font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#16a34a; }
+    .tt-save-status.is-error { color:#dc2626; }
     .tt-foot { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; margin-top:10px; line-height:1.7; }
 
     .no-week-notice {
@@ -477,6 +492,7 @@
         .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: none; }
         .cursor-blink, .animate-pulse { animation: none; }
         .xmas-snow { display:none; }
+        .tt-save-btn:active { transform:none; }
         .qe-toast.is-hidden { transform:none; }
         .spinner { animation-duration: 1.5s; }
     }
@@ -515,14 +531,17 @@
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-10" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-10b" hidden>
         <div class="update-notice-box">
             <details>
                 <summary>📢 업데이트 안내 (11/10) <span class="un-more">자세히</span>
-                    <p class="un-headline">[ 5 ] 시간표 탭에서 내 한 주 시간표를 교시·시간·강의실까지 볼 수 있습니다.</p>
+                    <p class="un-headline">[ 5 ] 시간표 탭에서 내 한 주 시간표를 보고, 사진이나 텍스트로 저장할 수 있습니다.</p>
                 </summary>
                 <div class="un-day">11/10</div>
                 <ul>
+                    <li>내 시간표를 저장할 수 있습니다. [ 5 ] 시간표에서 내 코드를 누른 뒤 [사진으로 저장], [텍스트로 저장], [텍스트 복사] 중에서 고르세요. 휴대폰에서는 공유 창이 열려 사진첩이나 카톡으로 바로 보낼 수 있습니다.</li>
+                    <li>🎄 크리스마스 테마로 바뀌었습니다. 기능은 그대로이고 색과 장식만 달라졌습니다.</li>
+                    <li>시간표에서 과목 뒤의 E(국어E·영어E·수학E)는 EPS 시간이며 점선 칸으로 표시됩니다.</li>
                     <li>[ 5 ] 시간표 탭에서 선생님 코드를 누르면 기말고사 대비 시간표(11/9~) 기준으로 내 한 주 수업이 교시·시간·강의실과 함께 나옵니다. 오늘 수업은 맨 위에 따로 보여 줍니다.</li>
                 </ul>
                 <div class="un-day">10/23</div>
@@ -1919,6 +1938,18 @@ function ttCellHtml(e) {
         </div>`;
 }
 
+/** 한 요일의 수업을 시간순으로, 연속 교시는 한 줄로 묶어 돌려준다 */
+function ttDayRuns(lessons, day) {
+    const runs = [];
+    lessons.filter(e => e.day === day).sort((a, b) => a.period - b.period).forEach(e => {
+        const last = runs[runs.length - 1];
+        const same = last && last.to === e.period - 1 && last.e.subject === e.subject && last.e.room === e.room
+            && ttClassLabel(last.e) === ttClassLabel(e);
+        if (same) last.to = e.period; else runs.push({ from: e.period, to: e.period, e });
+    });
+    return runs;
+}
+
 function renderTimetable(code) {
     const body = document.getElementById('ttBody');
     if (!code) { body.innerHTML = ''; return; }
@@ -1937,15 +1968,7 @@ function renderTimetable(code) {
     const firstP = Math.min(1, periods[0]), lastP = Math.max(6, periods[periods.length - 1]);
     const hasSat = mine.some(e => e.day === '토');
 
-    // 오늘 수업: 연속 교시는 한 줄로 묶는다
-    const todayLessons = mine.filter(e => e.day === today).sort((a, b) => a.period - b.period);
-    const todayRuns = [];
-    todayLessons.forEach(e => {
-        const last = todayRuns[todayRuns.length - 1];
-        const same = last && last.to === e.period - 1 && last.e.subject === e.subject && last.e.room === e.room
-            && ttClassLabel(last.e) === ttClassLabel(e);
-        if (same) last.to = e.period; else todayRuns.push({ from: e.period, to: e.period, e });
-    });
+    const todayRuns = ttDayRuns(mine, today);
     const todayHtml = todayRuns.length ? `<div class="tt-today-list">${todayRuns.map(run => {
         const start = ttTime(today, run.from).split('~')[0], end = ttTime(today, run.to).split('~')[1];
         return `
@@ -1969,6 +1992,12 @@ function renderTimetable(code) {
     body.innerHTML = `
         <div class="terran-panel p-5 fade-in">
             <p class="tt-summary"><strong>${escapeHtml(code)}</strong> 선생님 · 주 ${lessonCount}교시</p>
+            <div class="tt-save-row">
+                <button type="button" class="tt-save-btn tt-save-primary" data-tt-save="image">🖼 사진으로 저장</button>
+                <button type="button" class="tt-save-btn" data-tt-save="text">📄 텍스트로 저장</button>
+                <button type="button" class="tt-save-btn" data-tt-save="copy">📋 텍스트 복사</button>
+                <span id="ttSaveStatus" class="tt-save-status" role="status"></span>
+            </div>
             <p class="tt-section-title">오늘 (${today}요일)</p>
             ${todayHtml}
             <p class="tt-section-title" style="color:var(--accent-strong)">한 주 시간표</p>
@@ -1985,6 +2014,187 @@ function renderTimetable(code) {
             </p>
         </div>`;
 }
+
+/* ── 시간표 저장: 사진(PNG) / 텍스트(.txt) / 복사 ── */
+function ttText(code) {
+    const mine = TT_LESSONS.filter(e => e.teacher === code);
+    const lines = [`[${code} 선생님 시간표]`, TT_TERM, ''];
+    DAY_NAMES.forEach(day => {
+        const runs = ttDayRuns(mine, day);
+        if (!runs.length) return;
+        lines.push(`■ ${day}요일`);
+        runs.forEach(run => {
+            const start = ttTime(day, run.from).split('~')[0], end = ttTime(day, run.to).split('~')[1];
+            const period = run.from === run.to ? `${run.from}교시` : `${run.from}~${run.to}교시`;
+            const what = [run.e.subject, ttClassLabel(run.e), run.e.room ? `${run.e.room}호` : ''].filter(Boolean).join(' · ');
+            lines.push(`${period} ${start}~${end}  ${what}`);
+        });
+        lines.push('');
+    });
+    if (mine.some(e => TT_EPS_SUBJECTS.includes(e.subject))) lines.push(`※ ${TT_EPS_SUBJECTS.join('·')}는 EPS 시간입니다.`);
+    return lines.join('\n');
+}
+
+/** 화면에 보이는 표와 상관없이, 한 주 시간표를 한 장의 그림으로 그린다 (휴대폰에서도 표 전체가 담긴다) */
+async function ttImageBlob(code) {
+    const mine = TT_LESSONS.filter(e => e.teacher === code);
+    const days = DAY_NAMES.filter(d => d !== '일' || mine.some(e => e.day === '일'));
+    const periods = [...new Set(mine.map(e => e.period))].sort((a, b) => a - b);
+    const firstP = Math.min(1, periods[0]), lastP = Math.max(6, periods[periods.length - 1]);
+    const css = getComputedStyle(document.documentElement);
+    const ink = css.getPropertyValue('--ink-panel').trim() || '#0f172a';
+    const accent = css.getPropertyValue('--accent').trim() || '#0284c7';
+    const SANS = "'Noto Sans KR', sans-serif", MONO = "'Share Tech Mono', 'Noto Sans KR', monospace";
+    try { await Promise.all([document.fonts.load(`700 16px ${SANS}`, '가'), document.fonts.load(`16px ${MONO}`, '1')]); } catch (e) { /* 기본 글꼴로 그린다 */ }
+
+    const PAD = 28, TITLE_H = 86, HEAD_H = 40, PERIOD_W = 104, DAY_W = 178, BLOCK_PAD = 8, LINE = 19, FOOT_H = 44;
+    const W = PAD * 2 + PERIOD_W + DAY_W * days.length;
+    const measure = document.createElement('canvas').getContext('2d');
+    const wrap = (text, font, maxW) => { // 칸 너비에 맞춰 글자 단위로 줄을 나눈다
+        measure.font = font;
+        const out = []; let line = '';
+        [...text].forEach(ch => {
+            if (line && measure.measureText(line + ch).width > maxW) { out.push(line); line = ch.trim() ? ch : ''; }
+            else line += ch;
+        });
+        if (line) out.push(line);
+        return out;
+    };
+    const textW = DAY_W - 12 - BLOCK_PAD * 2 - 4;
+    const blockOf = e => {
+        const rows = [];
+        wrap(e.subject + (e.sharedWith ? ` (${e.sharedWith})` : ''), `700 14px ${SANS}`, textW).forEach(t => rows.push({ t, font: `700 14px ${SANS}`, color: '#1e293b' }));
+        wrap(ttClassLabel(e), `13px ${SANS}`, textW).forEach(t => rows.push({ t, font: `13px ${SANS}`, color: '#64748b' }));
+        if (e.room) rows.push({ t: `${e.room}호`, font: `700 13px ${MONO}`, color: '#0f172a' });
+        if (e.day === '토') rows.push({ t: ttTime('토', e.period), font: `12px ${MONO}`, color: '#b45309' });
+        return { e, rows, h: rows.length * LINE + BLOCK_PAD * 2 - 4 };
+    };
+    const grid = []; // grid[p][dayIdx] = blocks
+    const rowH = [];
+    for (let p = firstP; p <= lastP; p++) {
+        const cells = days.map(d => mine.filter(e => e.day === d && e.period === p).map(blockOf));
+        grid.push(cells);
+        rowH.push(Math.max(70, ...cells.map(blocks => blocks.reduce((sum, b) => sum + b.h + 6, 6))));
+    }
+    const H = PAD + TITLE_H + HEAD_H + rowH.reduce((a, b) => a + b, 0) + FOOT_H + PAD;
+
+    const scale = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = W * scale; canvas.height = H * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+    ctx.textBaseline = 'top';
+
+    // 제목
+    ctx.fillStyle = '#1e293b'; ctx.font = `900 30px ${SANS}`;
+    ctx.fillText(`${code} 선생님 시간표`, PAD, PAD);
+    ctx.fillStyle = '#64748b'; ctx.font = `14px ${SANS}`;
+    ctx.fillText(`행당제일학원 · ${TT_TERM} · 주 ${mine.length}교시`, PAD, PAD + 44);
+
+    // 머리줄
+    const gx = PAD, gy = PAD + TITLE_H;
+    ctx.fillStyle = ink; ctx.fillRect(gx, gy, W - PAD * 2, HEAD_H);
+    ctx.fillStyle = '#e2e8f0'; ctx.font = `700 15px ${SANS}`; ctx.textAlign = 'center';
+    ctx.fillText('교시', gx + PERIOD_W / 2, gy + 11);
+    days.forEach((d, i) => ctx.fillText(d, gx + PERIOD_W + DAY_W * i + DAY_W / 2, gy + 11));
+
+    // 본문
+    let y = gy + HEAD_H;
+    grid.forEach((cells, r) => {
+        const p = firstP + r, h = rowH[r];
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(gx, y, PERIOD_W, h);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#334155'; ctx.font = `700 15px ${SANS}`; ctx.fillText(`${p}교시`, gx + PERIOD_W / 2, y + h / 2 - 20);
+        ctx.fillStyle = '#64748b'; ctx.font = `12px ${MONO}`; ctx.fillText(TT_TIMES.weekday[p] || '', gx + PERIOD_W / 2, y + h / 2 + 4);
+        ctx.textAlign = 'left';
+        cells.forEach((blocks, i) => {
+            const cx = gx + PERIOD_W + DAY_W * i;
+            let by = y + 6;
+            blocks.forEach(b => {
+                const high = b.e.target === 'high', eps = TT_EPS_SUBJECTS.includes(b.e.subject);
+                const bar = high ? '#7c3aed' : accent;
+                ctx.fillStyle = eps ? '#f8fafc' : (high ? '#f5f3ff' : '#f0f9ff');
+                ctx.fillRect(cx + 6, by, DAY_W - 12, b.h);
+                ctx.strokeStyle = bar; ctx.lineWidth = 3;
+                ctx.setLineDash(eps ? [5, 4] : []);
+                ctx.beginPath(); ctx.moveTo(cx + 7.5, by); ctx.lineTo(cx + 7.5, by + b.h); ctx.stroke();
+                ctx.setLineDash([]);
+                b.rows.forEach((row, k) => {
+                    ctx.fillStyle = row.color; ctx.font = row.font;
+                    ctx.fillText(row.t, cx + 6 + BLOCK_PAD + 4, by + BLOCK_PAD - 2 + k * LINE);
+                });
+                by += b.h + 6;
+            });
+        });
+        y += h;
+    });
+
+    // 격자선
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    let ly = gy + HEAD_H;
+    rowH.forEach(h => { ly += h; ctx.moveTo(gx, ly + 0.5); ctx.lineTo(W - PAD, ly + 0.5); });
+    for (let i = 0; i <= days.length; i++) { const lx = gx + PERIOD_W + DAY_W * i + 0.5; ctx.moveTo(lx, gy + HEAD_H); ctx.lineTo(lx, ly); }
+    ctx.moveTo(gx + 0.5, gy + HEAD_H); ctx.lineTo(gx + 0.5, ly);
+    ctx.stroke();
+
+    // 꼬리말
+    ctx.fillStyle = '#94a3b8'; ctx.font = `12px ${SANS}`;
+    ctx.fillText('왼쪽 시간은 평일 기준 · 토요일은 칸 안의 시간 · 점선 칸은 EPS(E) 시간', PAD, ly + 16);
+
+    return new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('이미지를 만들지 못했습니다')), 'image/png'));
+}
+
+/** 휴대폰에서는 공유 창(사진에 저장·카톡 등)을, 그 밖에는 파일 내려받기를 쓴다. 저장 방식을 돌려준다 */
+async function ttDeliverFile(blob, filename) {
+    const file = new File([blob], filename, { type: blob.type });
+    const touch = window.matchMedia('(pointer:coarse)').matches;
+    if (touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: filename }); return 'shared'; }
+        catch (err) { if (err && err.name === 'AbortError') return 'cancelled'; /* 공유가 안 되면 내려받기로 넘어간다 */ }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    return 'downloaded';
+}
+
+async function ttCopyText(text) {
+    try { await navigator.clipboard.writeText(text); return; } catch (e) { /* 아래 예전 방식으로 다시 시도 */ }
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    if (!ok) throw new Error('복사 권한이 없습니다');
+}
+
+document.getElementById('ttBody').addEventListener('click', async ev => {
+    const btn = ev.target.closest('[data-tt-save]');
+    if (!btn || !ttSelected || btn.disabled) return;
+    const code = ttSelected, kind = btn.dataset.ttSave;
+    const status = document.getElementById('ttSaveStatus');
+    const say = (msg, isError) => { status.textContent = msg; status.classList.toggle('is-error', !!isError); };
+    btn.disabled = true;
+    try {
+        if (kind === 'copy') {
+            await ttCopyText(ttText(code));
+            say('✅ 복사했습니다. 메모나 카톡에 붙여넣으세요.');
+        } else {
+            const image = kind === 'image';
+            const blob = image ? await ttImageBlob(code) : new Blob([ttText(code)], { type: 'text/plain;charset=utf-8' });
+            const how = await ttDeliverFile(blob, `시간표_${code}.${image ? 'png' : 'txt'}`);
+            say(how === 'downloaded' ? `✅ 시간표_${code}.${image ? 'png' : 'txt'} 파일로 저장했습니다.` : how === 'shared' ? '✅ 저장했습니다.' : '');
+        }
+    } catch (err) {
+        say(`⚠ 저장하지 못했습니다: ${err.message || err}`, true);
+    } finally {
+        btn.disabled = false;
+    }
+});
 
 function loadTimetableTab() {
     document.getElementById('ttTermLabel').textContent = `기준: ${TT_TERM}`;
