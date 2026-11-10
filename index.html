@@ -356,6 +356,71 @@
     .tt-sheet-foot { display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; border-top:1px solid #e2e8f0; align-items:center; }
     .tt-sheet-foot .tt-sheet-close { margin-left:auto; }
     .tt-sheet-foot a.tt-save-btn { text-decoration:none; display:inline-block; }
+    /* EPS 관리 (시범) */
+    .eps-trial-tag {
+        display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:700; vertical-align:2px;
+        background:#fef3c7; color:#92400e; font-family:'Noto Sans KR',sans-serif; letter-spacing:0;
+    }
+    .main-tab.active .eps-trial-tag { background:rgba(255,255,255,.25); color:#fff; }
+    .eps-intro { font-size:13px; color:#475569; line-height:1.7; word-break:keep-all; }
+    .eps-intro b { color:var(--accent-strong); }
+    .eps-summary { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .eps-stat {
+        padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:12px; color:#475569;
+    }
+    .eps-stat strong { display:block; font-size:18px; color:var(--accent-ink); }
+    .eps-stat.eps-stat-warn strong { color:#b45309; }
+    .eps-section-title {
+        font-family:'Rajdhani',sans-serif; font-weight:800; font-size:18px; color:var(--accent-strong);
+        margin:18px 0 8px; padding-bottom:4px; border-bottom:2px solid var(--accent-line);
+        display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+    }
+    .eps-section-title small { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; font-weight:700; }
+    .eps-section-title.is-today { color:#b45309; border-bottom-color:#fde68a; }
+    .eps-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:10px; }
+    .eps-card {
+        border:1px solid var(--border); border-left:4px solid #cbd5e1; border-radius:8px; background:#fff;
+        padding:12px 14px; display:flex; flex-direction:column; gap:6px; word-break:keep-all;
+    }
+    .eps-card.st-mission { border-left-color:var(--accent); }
+    .eps-card.st-nomission { border-left-color:#f59e0b; }
+    .eps-card.st-skip { border-left-color:#cbd5e1; background:#f8fafc; }
+    .eps-card.st-done { border-left-color:#16a34a; }
+    .eps-card.st-partial { border-left-color:#f59e0b; }
+    .eps-card.st-missed { border-left-color:#dc2626; }
+    .eps-card-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .eps-when { font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px; color:#475569; }
+    .eps-chip { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; white-space:nowrap; background:#f1f5f9; color:#64748b; }
+    .st-mission .eps-chip { background:var(--accent-tint-2); color:var(--accent-strong); }
+    .st-nomission .eps-chip { background:#fef3c7; color:#92400e; }
+    .st-done .eps-chip { background:#dcfce7; color:#166534; }
+    .st-partial .eps-chip { background:#fef3c7; color:#92400e; }
+    .st-missed .eps-chip { background:#fee2e2; color:#991b1b; }
+    .eps-what { font-size:14px; font-weight:700; color:#1e293b; }
+    .eps-who { font-size:12px; color:#64748b; }
+    .eps-who b { color:var(--accent-strong); font-family:'Share Tech Mono',monospace; }
+    .eps-mission { font-size:13px; line-height:1.55; color:#1e293b; background:var(--accent-tint-0); border-radius:6px; padding:8px 10px; white-space:pre-wrap; }
+    .eps-mission.is-empty { background:#fffbeb; color:#92400e; }
+    .eps-mission .eps-link { margin-left:6px; color:var(--accent-strong); text-decoration:underline; text-underline-offset:3px; font-weight:700; cursor:pointer; background:none; border:0; font-size:12px; padding:0; }
+    .eps-result { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:2px; }
+    .eps-result-btn {
+        padding:5px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:12px; font-weight:700; color:#475569; cursor:pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .12s var(--ease-out);
+    }
+    .eps-result-btn:active { transform:scale(0.97); }
+    .eps-result-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .eps-result-btn.is-on[data-v="done"] { background:#16a34a; border-color:#16a34a; color:#fff; }
+    .eps-result-btn.is-on[data-v="partial"] { background:#d97706; border-color:#d97706; color:#fff; }
+    .eps-result-btn.is-on[data-v="missed"] { background:#dc2626; border-color:#dc2626; color:#fff; }
+    .eps-note {
+        width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:6px; font-size:12.5px;
+        font-family:'Noto Sans KR',sans-serif; color:#1e293b; background:#f8fafc;
+    }
+    .eps-note:focus { outline:none; border-color:var(--accent); background:#fff; }
+    .eps-saved { font-family:'Share Tech Mono',monospace; font-size:10.5px; color:#94a3b8; }
+    .eps-empty { padding:24px; text-align:center; color:#94a3b8; font-family:'Share Tech Mono',monospace; font-size:13px; }
+    .eps-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
     .tt-foot { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; margin-top:10px; line-height:1.7; }
 
     .no-week-notice {
@@ -513,6 +578,7 @@
         .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: none; }
         .cursor-blink, .animate-pulse { animation: none; }
         .tt-save-btn:active { transform:none; }
+        .eps-result-btn:active { transform:none; }
         .tt-sheet, .tt-sheet-backdrop.is-hidden .tt-sheet { transform:none; transition:none; }
         .qe-toast.is-hidden { transform:none; }
         .spinner { animation-duration: 1.5s; }
@@ -545,6 +611,7 @@
                 <button class="main-tab" data-tab="prog-high">[ 3 ] 고등 진도표</button>
                 <button class="main-tab" data-tab="missing">[ 4 ] 미기록 현황</button>
                 <button class="main-tab" data-tab="timetable">[ 5 ] 시간표</button>
+                <button class="main-tab" data-tab="eps">[ 6 ] EPS <span class="eps-trial-tag">시범</span></button>
             </div>
         </div>
     </header>
@@ -659,6 +726,23 @@
                 </div>
             </div>
             <div id="ttBody"></div>
+        </div>
+
+        <!-- TAB 6: EPS 관리 (시범) -->
+        <div id="tab-eps" class="tab-panel space-y-4" hidden>
+            <div class="terran-panel p-5 space-y-4">
+                <h2 class="qe-panel-title">🧭 EPS 관리 <span class="eps-trial-tag">시범</span></h2>
+                <p class="eps-intro">
+                    시간표의 E 칸(국어E·영어E·수학E)마다 <b>담당쌤의 미션</b>과 <b>대강쌤의 수행 결과</b>를 한 장의 카드로 모았습니다.
+                    미션은 시트의 eps 줄(빠른 입력)에서 읽어 오기만 하고, 시트는 바꾸지 않습니다.
+                    <b>수행 결과는 시범 기간 동안 이 기기에만 저장</b>되니, [결과 복사]로 담당쌤께 보내 주세요.
+                </p>
+                <div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">선생님 (누르면 내 EPS만 봅니다)</p>
+                    <div id="epsTeacherChips" class="qe-dir-chips"></div>
+                </div>
+            </div>
+            <div id="epsBody"></div>
         </div>
 
     </main>
@@ -2303,6 +2387,241 @@ document.getElementById('ttBody').addEventListener('click', async ev => {
     }
 });
 
+/* ───────────────────────── TAB 6: EPS 관리 (시범) ─────────────────────────
+   EPS = 담당쌤이 미션을 주고, 시간표의 E 칸 선생님(대강쌤)이 그 시간에 수행하는 수업.
+   - 카드: 이번 주 시간표의 E 칸 하나 = 카드 하나 (TT_SOURCE 에서 만든다)
+   - 미션: 시트 "입력" 탭에서 그 반·과목의 eps 줄, 그 요일 칸을 읽기만 한다 ('x' 는 이번엔 EPS 없음)
+   - 결과: 시범 기간에는 이 기기(localStorage)에만 저장한다. 시트는 건드리지 않는다. */
+const EPS_STORE_KEY = 'jeilaca-eps-results-v1';
+let epsSelected = null;
+let EPS_CARDS = [];
+let EPS_WEEK = null;
+
+function epsLoadResults() {
+    try { return JSON.parse(localStorage.getItem(EPS_STORE_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function epsSaveResult(key, value) {
+    const all = epsLoadResults();
+    if (value) all[key] = value; else delete all[key];
+    try { localStorage.setItem(EPS_STORE_KEY, JSON.stringify(all)); return true; } catch (e) { return false; }
+}
+
+const epsNorm = s => (s || '').toLowerCase().replace(/\s+/g, '').replace(/·/g, '/').replace(/여고$/, '')
+    .replace(/^(초6|중[123]|고[123])/, '');
+const epsGrade = g => g === '초등' ? '초6' : g;
+
+/** 시간표의 반 이름(예: '행당·성수')에 해당하는 시트의 반들을 찾는다 */
+function epsSheetEntries(target, week, grade, className, subject) {
+    const grades = (QE_DATA && QE_DATA[target] && QE_DATA[target][week]) || {};
+    const classes = grades[epsGrade(grade)] || {};
+    const wanted = new Set([epsNorm(className), ...className.split('·').map(epsNorm)]);
+    return Object.keys(classes).filter(c => wanted.has(epsNorm(c)))
+        .flatMap(c => classes[c].filter(e => e.subject === subject).map(e => ({ className: c, entry: e })));
+}
+
+function buildEpsCards() {
+    const week = findCurrentWeek(QE_DATA.mid) || findCurrentWeek(QE_DATA.high);
+    EPS_WEEK = week;
+    if (!week) return [];
+    const range = parseWeekRange(week);
+    const cards = [];
+    TT_SOURCE.forEach(([days, target, grade, className, periods, subject, teachers, room]) => {
+        if (!TT_EPS_SUBJECTS.includes(subject)) return;
+        const base = subject.replace(/E$/, '');
+        const matches = epsSheetEntries(target, week, grade, className, base);
+        // 담당쌤: 시트에 적힌 그 반·과목 선생님. 없으면 시간표에서 같은 반·과목 선생님
+        let owners = [...new Set(matches.flatMap(m => m.entry.teacher.split('/')).filter(Boolean))];
+        if (!owners.length) {
+            const parts = new Set(className.split('·'));
+            owners = [...new Set(TT_SOURCE.filter(t => t[1] === target && t[2] === grade && t[5] === base
+                && t[3].split('·').some(p => parts.has(p))).map(t => t[6]))];
+        }
+        [...days].forEach(day => {
+            const dayIdx = DAY_NAMES.indexOf(day);
+            const date = range ? new Date(range.start.getTime() + dayIdx * 86400000) : null;
+            const missionHit = matches.find(m => m.entry.data.eps && m.entry.data.eps[day]);
+            const mission = missionHit ? missionHit.entry.data.eps[day] : '';
+            const [from, to] = periods.split('-').map(Number);
+            cards.push({
+                key: [week, day, target, grade, className, subject, periods].join('|'),
+                week, day, dayIdx, date, target, grade, className, subject, base, room,
+                from, to: to || from, epsTeacher: teachers, owners, mission,
+                skip: /^x$/i.test(mission.trim()),
+                sheetRef: matches[0] || missionHit || null
+            });
+        });
+    });
+    return cards.sort((a, b) => a.dayIdx - b.dayIdx || a.from - b.from || a.target.localeCompare(b.target));
+}
+
+function epsStatus(card, result) {
+    if (result && result.status) return result.status; // done | partial | missed
+    if (card.skip) return 'skip';
+    if (card.mission) return 'mission';
+    return 'nomission';
+}
+const EPS_STATUS_LABEL = { done: '✅ 다 함', partial: '🟡 일부', missed: '❌ 못 함', skip: 'EPS 없음 (x)', mission: '미션 있음', nomission: '미션 없음' };
+
+function epsWhen(card) {
+    const start = ttTime(card.day, card.from).split('~')[0], end = ttTime(card.day, card.to).split('~')[1];
+    const date = card.date ? `${card.date.getMonth() + 1}/${card.date.getDate()}` : '';
+    const period = card.from === card.to ? `${card.from}교시` : `${card.from}~${card.to}교시`;
+    return `${date}(${card.day}) ${period} ${start}~${end}`;
+}
+
+function epsCardHtml(card, results) {
+    const result = results[card.key];
+    const st = epsStatus(card, result);
+    const owner = card.owners.length ? card.owners.join('/') : '?';
+    const missionHtml = card.mission
+        ? `<div class="eps-mission">📌 ${escapeHtml(card.skip ? '이번 시간은 EPS 없음 (시트에 x)' : card.mission)}</div>`
+        : `<div class="eps-mission is-empty">미션이 아직 없습니다.${card.sheetRef
+            ? ` <button type="button" class="eps-link" data-eps-write="${escapeHtml(card.key)}">빠른 입력에서 쓰기 →</button>` : ''}</div>`;
+    return `
+        <div class="eps-card st-${st}" data-key="${escapeHtml(card.key)}">
+            <div class="eps-card-top">
+                <span class="eps-when">${escapeHtml(epsWhen(card))}</span>
+                <span class="eps-chip">${EPS_STATUS_LABEL[st]}</span>
+            </div>
+            <div class="eps-what"><span class="tt-badge tt-badge-${card.target === 'high' ? 'high' : 'mid'}">${card.target === 'high' ? '고등' : '중등'}</span>${escapeHtml([card.grade, card.className].filter(Boolean).join(' '))} · ${escapeHtml(card.subject)}</div>
+            <div class="eps-who">담당 <b>${escapeHtml(owner)}</b> → 대강 <b>${escapeHtml(card.epsTeacher)}</b>${card.owners.length === 1 && card.owners[0] === card.epsTeacher ? ' (본인)' : ''}${card.room ? ` · ${escapeHtml(card.room)}호` : ''}</div>
+            ${missionHtml}
+            ${card.skip ? '' : `
+            <div class="eps-result" role="group" aria-label="수행 결과">
+                ${['done', 'partial', 'missed'].map(v => `<button type="button" class="eps-result-btn${result && result.status === v ? ' is-on' : ''}" data-v="${v}" aria-pressed="${result && result.status === v}">${EPS_STATUS_LABEL[v]}</button>`).join('')}
+            </div>
+            <input type="text" class="eps-note" placeholder="못 한 학생·재시험 대상·특이사항 (예외만 적기)" value="${escapeHtml((result && result.note) || '')}">
+            <span class="eps-saved">${result && result.at ? `이 기기에 저장됨 · ${escapeHtml(result.at)}` : ''}</span>`}
+        </div>`;
+}
+
+function renderEpsChips() {
+    const codes = [...new Set(EPS_CARDS.flatMap(c => [...c.owners, c.epsTeacher]))].sort((a, b) => a.localeCompare(b, 'ko'));
+    document.getElementById('epsTeacherChips').innerHTML =
+        `<button type="button" class="qe-teacher-chip${epsSelected ? '' : ' active'}" data-eps-pick="" style="width:auto;padding:0 12px">전체</button>`
+        + codes.map(code => `<button type="button" class="qe-teacher-chip${code === epsSelected ? ' active' : ''}" data-eps-pick="${escapeHtml(code)}">${escapeHtml(code)}</button>`).join('');
+}
+
+function epsCopyText(code) {
+    const results = epsLoadResults();
+    const mine = EPS_CARDS.filter(c => c.epsTeacher === code && !c.skip);
+    const lines = [`[EPS 수행 결과 · 대강 ${code}] ${EPS_WEEK} 주`, ''];
+    mine.forEach(c => {
+        const r = results[c.key];
+        lines.push(`${epsWhen(c)} ${[c.grade, c.className].filter(Boolean).join(' ')} ${c.subject} (담당 ${c.owners.join('/') || '?'})`);
+        lines.push(`  미션: ${c.mission || '(없음)'}`);
+        lines.push(`  결과: ${r && r.status ? EPS_STATUS_LABEL[r.status] : '기록 없음'}${r && r.note ? ` / ${r.note}` : ''}`);
+    });
+    return lines.join('\n');
+}
+
+function renderEps() {
+    const body = document.getElementById('epsBody');
+    if (!EPS_WEEK) { body.innerHTML = `<div class="terran-panel p-5">${noCurrentWeekNoticeHtml()}</div>`; return; }
+    const results = epsLoadResults();
+    const today = DAY_NAMES[(new Date().getDay() + 6) % 7];
+    renderEpsChips();
+
+    const visible = epsSelected ? EPS_CARDS.filter(c => c.epsTeacher === epsSelected || c.owners.includes(epsSelected)) : EPS_CARDS;
+    const count = st => visible.filter(c => epsStatus(c, results[c.key]) === st).length;
+    const todayIdx = DAY_NAMES.indexOf(today);
+    const overdue = visible.filter(c => !c.mission && c.dayIdx <= todayIdx).length;
+    const recorded = count('done') + count('partial') + count('missed');
+    const summary = `
+        <div class="eps-summary">
+            <div class="eps-stat"><strong>${visible.length}</strong>이번 주 EPS</div>
+            <div class="eps-stat"><strong>${visible.filter(c => c.mission && !c.skip).length}</strong>미션 있음</div>
+            <div class="eps-stat eps-stat-warn"><strong>${overdue}</strong>오늘까지 미션 없음</div>
+            <div class="eps-stat"><strong>${recorded}</strong>결과 기록 (이 기기)</div>
+        </div>`;
+
+    let sections = '';
+    const group = (title, cards, extraClass) => cards.length
+        ? `<h3 class="eps-section-title ${extraClass || ''}">${title} <small>${cards.length}건</small></h3><div class="eps-grid">${cards.map(c => epsCardHtml(c, results)).join('')}</div>`
+        : '';
+    if (epsSelected) {
+        const doing = visible.filter(c => c.epsTeacher === epsSelected);
+        // 담당과 대강이 같은 선생님인 수업은 '내가 할 대강'에만 둔다
+        const giving = visible.filter(c => c.owners.includes(epsSelected) && c.epsTeacher !== epsSelected);
+        sections += doing.length ? `<div class="eps-toolbar"><button type="button" class="tt-save-btn tt-save-primary" data-eps-copy>📋 내 대강 결과 복사</button><span id="epsCopyStatus" class="tt-save-status"></span></div>` : '';
+        sections += group(`🙋 내가 할 대강 (${escapeHtml(epsSelected)})`, doing);
+        sections += group(`📝 내가 낼 미션 (${escapeHtml(epsSelected)})`, giving);
+        if (!doing.length && !giving.length) sections = `<div class="eps-empty">이번 주 ${escapeHtml(epsSelected)} 선생님의 EPS가 없습니다.</div>`;
+    } else {
+        DAY_NAMES.forEach(day => {
+            const cards = visible.filter(c => c.day === day);
+            sections += group(day === today ? `${day}요일 · 오늘` : `${day}요일`, cards, day === today ? 'is-today' : '');
+        });
+    }
+    body.innerHTML = `<div class="terran-panel p-5 fade-in">
+        <p class="tt-summary">기준: <strong>${escapeHtml(EPS_WEEK)}</strong> 주 · ${escapeHtml(TT_TERM)}</p>
+        ${summary}${sections}
+        <p class="tt-foot">대강쌤은 시간표의 E 칸 선생님입니다. 바뀌면 관리자에게 알려 주세요.<br>
+        미션 쓰기는 지금처럼 빠른 입력의 EPS 줄에 쓰면 여기에 바로 나옵니다 (새로고침).</p>
+    </div>`;
+}
+
+document.getElementById('epsTeacherChips').addEventListener('click', ev => {
+    const btn = ev.target.closest('[data-eps-pick]');
+    if (!btn) return;
+    epsSelected = btn.dataset.epsPick || null;
+    renderEps();
+});
+
+document.getElementById('epsBody').addEventListener('click', async ev => {
+    const write = ev.target.closest('[data-eps-write]');
+    if (write) {
+        const card = EPS_CARDS.find(c => c.key === write.dataset.epsWrite);
+        if (!card || !card.sheetRef) return;
+        jumpToQuickEntry({
+            target: card.target, week: card.week, teacher: card.sheetRef.entry.teacher, grade: epsGrade(card.grade),
+            className: card.sheetRef.className, subject: card.base, cells: [{ rowType: 'eps', day: card.day }]
+        });
+        return;
+    }
+    if (ev.target.closest('[data-eps-copy]')) {
+        const status = document.getElementById('epsCopyStatus');
+        try { await ttCopyText(epsCopyText(epsSelected)); status.textContent = '✅ 복사했습니다. 카톡에 붙여넣으세요.'; status.classList.remove('is-error'); }
+        catch (e) { status.textContent = '⚠ 복사하지 못했습니다'; status.classList.add('is-error'); }
+        return;
+    }
+    const btn = ev.target.closest('.eps-result-btn');
+    if (!btn) return;
+    const cardEl = btn.closest('.eps-card');
+    const key = cardEl.dataset.key;
+    const prev = epsLoadResults()[key] || {};
+    const status = prev.status === btn.dataset.v ? null : btn.dataset.v; // 다시 누르면 취소
+    const note = cardEl.querySelector('.eps-note').value.trim();
+    const at = new Date().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    epsSaveResult(key, status || note ? { status, note, at } : null);
+    renderEps();
+});
+
+document.getElementById('epsBody').addEventListener('change', ev => {
+    if (!ev.target.classList.contains('eps-note')) return;
+    const cardEl = ev.target.closest('.eps-card');
+    const key = cardEl.dataset.key;
+    const prev = epsLoadResults()[key] || {};
+    const note = ev.target.value.trim();
+    const at = new Date().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    epsSaveResult(key, prev.status || note ? { status: prev.status || null, note, at } : null);
+    cardEl.querySelector('.eps-saved').textContent = prev.status || note ? `이 기기에 저장됨 · ${at}` : '';
+});
+
+async function loadEpsTab() {
+    const body = document.getElementById('epsBody');
+    body.innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
+    try {
+        await loadQuickEntryData(true); // 방금 쓴 미션이 보이도록 매번 새로 읽는다
+    } catch (err) {
+        body.innerHTML = `<div class="terran-panel p-6 text-red-600 font-mono-tech text-xs font-bold">⚠ 시트를 불러오지 못했습니다: ${escapeHtml(String(err))}</div>`;
+        return;
+    }
+    EPS_CARDS = buildEpsCards();
+    if (epsSelected === null && TEACHER_CODE && EPS_CARDS.some(c => c.epsTeacher === TEACHER_CODE || c.owners.includes(TEACHER_CODE))) epsSelected = TEACHER_CODE;
+    renderEps();
+}
+
 function loadTimetableTab() {
     document.getElementById('ttTermLabel').textContent = `기준: ${TT_TERM}`;
     renderTtDirectory('');
@@ -2326,7 +2645,8 @@ const TAB_LOADERS = {
     'prog-high': () => loadProgressTab('prog-high'),
     'missing': loadMissingTab,
     'quickentry': loadQuickEntryTab,
-    'timetable': loadTimetableTab
+    'timetable': loadTimetableTab,
+    'eps': loadEpsTab
 };
 const loadedTabs = new Set();
 
