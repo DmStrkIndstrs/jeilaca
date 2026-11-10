@@ -331,6 +331,31 @@
     .tt-save-btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
     .tt-save-status { font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; color:#16a34a; }
     .tt-save-status.is-error { color:#dc2626; }
+    /* 카카오톡 등 앱 안 브라우저용 저장 창: 파일 내려받기가 막혀 있어 사진을 길게 눌러 저장하게 한다 */
+    .tt-sheet-backdrop {
+        position:fixed; inset:0; z-index:60; background:rgba(15,23,42,.55);
+        display:flex; align-items:center; justify-content:center; padding:16px;
+        opacity:1; transition:opacity .2s var(--ease-out);
+    }
+    .tt-sheet-backdrop.is-hidden { opacity:0; pointer-events:none; }
+    .tt-sheet {
+        background:#fff; border-radius:10px; width:min(560px, 100%); max-height:calc(100dvh - 32px);
+        display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 50px rgba(15,23,42,.35);
+        transform:none; transition:transform .2s var(--ease-out);
+    }
+    .tt-sheet-backdrop.is-hidden .tt-sheet { transform:scale(0.96); }
+    .tt-sheet-head { padding:14px 16px 10px; border-bottom:1px solid #e2e8f0; word-break:keep-all; }
+    .tt-sheet-head strong { display:block; font-size:15px; color:var(--accent-ink); }
+    .tt-sheet-head p { margin-top:4px; font-size:13px; color:#475569; line-height:1.55; }
+    .tt-sheet-head p b { color:#b45309; }
+    .tt-sheet-body { overflow:auto; padding:12px 16px; background:#f8fafc; flex:1; min-height:0; }
+    .tt-sheet-body img { display:block; width:100%; height:auto; border:1px solid #e2e8f0; border-radius:6px; background:#fff;
+        -webkit-touch-callout:default; user-select:auto; }
+    .tt-sheet-body pre { white-space:pre-wrap; word-break:keep-all; font-family:'Noto Sans KR',sans-serif; font-size:13px; line-height:1.6;
+        color:#1e293b; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:12px; user-select:text; -webkit-user-select:text; }
+    .tt-sheet-foot { display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; border-top:1px solid #e2e8f0; align-items:center; }
+    .tt-sheet-foot .tt-sheet-close { margin-left:auto; }
+    .tt-sheet-foot a.tt-save-btn { text-decoration:none; display:inline-block; }
     .tt-foot { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; margin-top:10px; line-height:1.7; }
 
     .no-week-notice {
@@ -488,6 +513,7 @@
         .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: none; }
         .cursor-blink, .animate-pulse { animation: none; }
         .tt-save-btn:active { transform:none; }
+        .tt-sheet, .tt-sheet-backdrop.is-hidden .tt-sheet { transform:none; transition:none; }
         .qe-toast.is-hidden { transform:none; }
         .spinner { animation-duration: 1.5s; }
     }
@@ -1594,6 +1620,9 @@ document.querySelectorAll('.prog-search[data-target]').forEach(input => {
 
 /* ───────────────────────── Per-teacher bookmark link (?t=코드) ───────────────────────── */
 const TEACHER_CODE = (new URLSearchParams(location.search).get('t') || '').trim();
+// ?tab=timetable&tt=코드 : 그 탭(과 선생님 시간표)으로 바로 연다. 카톡에서 바깥 브라우저로 넘길 때 쓴다
+const START_TAB = (new URLSearchParams(location.search).get('tab') || '').trim();
+const START_TT = (new URLSearchParams(location.search).get('tt') || '').trim();
 
 function applyTeacherFilter(tabKey) {
     if (!TEACHER_CODE) return;
@@ -2157,6 +2186,84 @@ async function ttDeliverFile(blob, filename) {
     return 'downloaded';
 }
 
+/** 카카오톡·네이버·인스타그램 같은 앱 안 브라우저. 파일 내려받기·공유가 막혀 있는 경우가 많다 */
+function ttInAppBrowser() {
+    const ua = navigator.userAgent || '';
+    if (/KAKAOTALK/i.test(ua)) return 'kakao';
+    if (/NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|Whale\/.*inapp/i.test(ua)) return 'other';
+    return null;
+}
+
+/** 지금 보고 있는 선생님 시간표로 바로 열리는 주소 (바깥 브라우저로 넘길 때 쓴다) */
+function ttDeepLink(code) {
+    const url = new URL(location.href);
+    url.searchParams.set('tab', 'timetable');
+    url.searchParams.set('tt', code);
+    url.hash = '';
+    return url.toString();
+}
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = () => reject(fr.error);
+        fr.readAsDataURL(blob);
+    });
+}
+
+/** 앱 안 브라우저에서 사진/텍스트를 화면에 띄워 길게 눌러 저장하거나 복사하게 한다 */
+function ttOpenSheet({ code, imageUrl, text }) {
+    let backdrop = document.getElementById('ttSheet');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'ttSheet';
+        backdrop.className = 'tt-sheet-backdrop is-hidden';
+        backdrop.addEventListener('click', ev => {
+            if (ev.target === backdrop || ev.target.closest('[data-sheet-close]')) ttCloseSheet();
+        });
+        document.addEventListener('keydown', ev => { if (ev.key === 'Escape') ttCloseSheet(); });
+        document.body.appendChild(backdrop);
+    }
+    const inApp = ttInAppBrowser();
+    const externalBtn = inApp === 'kakao'
+        ? `<a class="tt-save-btn" href="kakaotalk://web/openExternal?url=${encodeURIComponent(ttDeepLink(code))}">↗ 다른 브라우저로 열기</a>`
+        : '';
+    const externalTip = inApp === 'kakao'
+        ? '잘 안 되면 [다른 브라우저로 열기]를 눌러 크롬·사파리에서 저장하세요.'
+        : '잘 안 되면 오른쪽 위 메뉴에서 "다른 브라우저로 열기"를 누른 뒤 다시 저장하세요.';
+    backdrop.innerHTML = `
+        <div class="tt-sheet" role="dialog" aria-modal="true" aria-labelledby="ttSheetTitle">
+            <div class="tt-sheet-head">
+                <strong id="ttSheetTitle">${escapeHtml(code)} 선생님 시간표</strong>
+                <p>${imageUrl
+                    ? '이 화면(카카오톡 등 앱 안 브라우저)에서는 파일을 바로 내려받을 수 없습니다. <b>아래 사진을 길게 눌러 "이미지 저장"</b>을 고르세요.'
+                    : '이 화면(카카오톡 등 앱 안 브라우저)에서는 파일을 바로 내려받을 수 없습니다. <b>[텍스트 복사]</b>를 눌러 메모나 카톡에 붙여넣으세요.'}
+                   ${externalTip}</p>
+            </div>
+            <div class="tt-sheet-body">
+                ${imageUrl ? `<img src="${imageUrl}" alt="${escapeHtml(code)} 선생님 시간표">` : `<pre>${escapeHtml(text)}</pre>`}
+            </div>
+            <div class="tt-sheet-foot">
+                ${imageUrl ? '' : '<button type="button" class="tt-save-btn tt-save-primary" data-sheet-copy>📋 텍스트 복사</button>'}
+                ${externalBtn}
+                <button type="button" class="tt-save-btn tt-sheet-close" data-sheet-close>닫기</button>
+            </div>
+        </div>`;
+    const copyBtn = backdrop.querySelector('[data-sheet-copy]');
+    if (copyBtn) copyBtn.addEventListener('click', async () => {
+        try { await ttCopyText(text); copyBtn.textContent = '✅ 복사했습니다'; }
+        catch (e) { copyBtn.textContent = '⚠ 위 글을 길게 눌러 복사하세요'; }
+    });
+    requestAnimationFrame(() => backdrop.classList.remove('is-hidden'));
+    backdrop.querySelector('[data-sheet-close]').focus({ preventScroll: true });
+}
+
+function ttCloseSheet() {
+    const backdrop = document.getElementById('ttSheet');
+    if (backdrop) backdrop.classList.add('is-hidden');
+}
+
 async function ttCopyText(text) {
     try { await navigator.clipboard.writeText(text); return; } catch (e) { /* 아래 예전 방식으로 다시 시도 */ }
     const ta = document.createElement('textarea');
@@ -2178,6 +2285,11 @@ document.getElementById('ttBody').addEventListener('click', async ev => {
         if (kind === 'copy') {
             await ttCopyText(ttText(code));
             say('✅ 복사했습니다. 메모나 카톡에 붙여넣으세요.');
+        } else if (ttInAppBrowser()) {
+            // 앱 안 브라우저는 내려받기를 "지원하지 않는 파일 형식"으로 막는 경우가 있어, 화면에 띄워 저장하게 한다
+            if (kind === 'image') ttOpenSheet({ code, imageUrl: await blobToDataUrl(await ttImageBlob(code)) });
+            else ttOpenSheet({ code, text: ttText(code) });
+            say('');
         } else {
             const image = kind === 'image';
             const blob = image ? await ttImageBlob(code) : new Blob([ttText(code)], { type: 'text/plain;charset=utf-8' });
@@ -2194,7 +2306,9 @@ document.getElementById('ttBody').addEventListener('click', async ev => {
 function loadTimetableTab() {
     document.getElementById('ttTermLabel').textContent = `기준: ${TT_TERM}`;
     renderTtDirectory('');
-    const preset = ttSelected || (TEACHER_CODE && ttTeacherCodes().includes(TEACHER_CODE) ? TEACHER_CODE : null);
+    const codes = ttTeacherCodes();
+    const preset = ttSelected || (START_TT && codes.includes(START_TT) ? START_TT : null)
+        || (TEACHER_CODE && codes.includes(TEACHER_CODE) ? TEACHER_CODE : null);
     if (preset) selectTtTeacher(preset);
 }
 
@@ -2238,8 +2352,10 @@ async function loadAll() {
         const firstLoad = !loadedTabs.size;
         loadedTabs.clear();
         loadedTabs.add('prog-mid'); loadedTabs.add('prog-high'); loadedTabs.add('quickentry');
-        if (firstLoad) activateTab('quickentry'); // 자동 새로고침 때는 보던 탭을 그대로 둔다
-        await Promise.all([loadProgressTab('prog-mid'), loadProgressTab('prog-high'), loadQuickEntryTab()]);
+        const startTab = firstLoad && TAB_LOADERS[START_TAB] ? START_TAB : null;
+        if (firstLoad) activateTab(startTab || 'quickentry'); // 자동 새로고침 때는 보던 탭을 그대로 둔다
+        const extra = startTab && !loadedTabs.has(startTab) ? (loadedTabs.add(startTab), TAB_LOADERS[startTab]()) : null;
+        await Promise.all([loadProgressTab('prog-mid'), loadProgressTab('prog-high'), loadQuickEntryTab(), extra]);
     } else {
         loadedTabs.clear();
         const activeKey = document.querySelector('.main-tab.active').dataset.tab;
@@ -2252,6 +2368,7 @@ async function loadAll() {
 
 document.getElementById('refreshBtn').addEventListener('click', loadAll);
 setupTeacherBanner();
+if (!TEACHER_CODE && TAB_LOADERS[START_TAB]) activateTab(START_TAB);
 loadAll();
 // 빠른 입력은 입력 중인 칸이 날아가지 않도록 자동 새로고침에서 뺀다
 setInterval(() => {
