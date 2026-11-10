@@ -203,35 +203,52 @@
     .teacher-banner a { color:#0284c7; text-decoration:underline; }
 
     /* 선생님별 시간표 */
-    .tt-day-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
-    .tt-day {
-        border:1px solid var(--border); border-radius:8px; background:#fff; overflow:hidden;
-        display:flex; flex-direction:column;
-    }
-    .tt-day.tt-today { border-color:#f59e0b; box-shadow:0 0 0 2px #fde68a; }
-    .tt-day.tt-empty { background:#f8fafc; }
-    .tt-day-head {
-        padding:7px 10px; background:#0f172a; color:#e2e8f0; text-align:center;
-        font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px;
-    }
-    .tt-day.tt-today .tt-day-head { background:#b45309; }
-    .tt-day-body { padding:8px; display:flex; flex-direction:column; gap:6px; flex:1; }
-    .tt-item {
-        border:1px solid #e2e8f0; border-left:3px solid #0284c7; border-radius:5px;
-        padding:6px 8px; font-size:12px; line-height:1.45;
-    }
-    .tt-item.tt-high { border-left-color:#7c3aed; }
-    .tt-item .tt-subject { font-weight:700; color:#1e293b; }
-    .tt-item .tt-class { color:#64748b; font-size:11px; }
+    .tt-summary { font-family:'Share Tech Mono',monospace; font-size:12px; color:#64748b; margin-bottom:12px; }
+    .tt-summary strong { color:#0284c7; font-size:15px; }
     .tt-badge {
         display:inline-block; padding:0 5px; border-radius:3px; font-size:9px; font-weight:700;
-        font-family:'Share Tech Mono',monospace; margin-right:4px;
+        font-family:'Share Tech Mono',monospace; margin-right:4px; vertical-align:1px;
     }
     .tt-badge-mid { background:#e0f2fe; color:#0369a1; }
     .tt-badge-high { background:#ede9fe; color:#5b21b6; }
-    .tt-none { color:#cbd5e1; font-size:11px; text-align:center; padding:10px 0; font-family:'Share Tech Mono',monospace; }
-    .tt-summary { font-family:'Share Tech Mono',monospace; font-size:12px; color:#64748b; margin-bottom:10px; }
-    .tt-summary strong { color:#0284c7; font-size:15px; }
+
+    .tt-section-title { font-family:'Share Tech Mono',monospace; font-weight:700; font-size:12px; color:#b45309; margin-bottom:6px; }
+    .tt-today-list { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+    .tt-today-item {
+        display:flex; gap:12px; align-items:baseline; padding:8px 12px; border:1px solid #fde68a; border-left:3px solid #f59e0b;
+        border-radius:6px; background:#fffbeb; font-size:13px; word-break:keep-all;
+    }
+    .tt-today-item .tt-time { font-family:'Share Tech Mono',monospace; font-weight:700; color:#92400e; white-space:nowrap; font-size:12px; }
+    .tt-today-item .tt-room { margin-left:auto; font-family:'Share Tech Mono',monospace; font-weight:700; color:#0f172a; white-space:nowrap; }
+    .tt-today-none { color:#94a3b8; font-size:12px; font-family:'Share Tech Mono',monospace; margin-bottom:18px; }
+
+    .tt-grid-wrap { overflow-x:auto; }
+    table.tt-grid { border-collapse:collapse; width:100%; min-width:680px; table-layout:fixed; }
+    table.tt-grid th {
+        background:#0f172a; color:#e2e8f0; font-family:'Share Tech Mono',monospace; font-size:12px;
+        padding:7px 4px; border:1px solid #1e293b; text-align:center;
+    }
+    table.tt-grid th.tt-today-col { background:#b45309; }
+    table.tt-grid th:first-child, table.tt-grid td.tt-period { width:74px; }
+    table.tt-grid td { border:1px solid #e2e8f0; padding:5px; vertical-align:top; height:64px; background:#fff; }
+    table.tt-grid td.tt-today-col { background:#fffbeb; }
+    table.tt-grid td.tt-period {
+        background:#f8fafc; text-align:center; vertical-align:middle; font-family:'Share Tech Mono',monospace;
+        font-size:11px; color:#64748b; line-height:1.5; position:sticky; left:0;
+    }
+    table.tt-grid td.tt-period strong { display:block; color:#334155; font-size:12px; }
+    .tt-cell {
+        border-left:3px solid #0284c7; background:#f0f9ff; border-radius:4px; padding:4px 6px;
+        font-size:12px; line-height:1.4; word-break:keep-all;
+    }
+    .tt-cell + .tt-cell { margin-top:4px; }
+    .tt-cell.tt-high { border-left-color:#7c3aed; background:#f5f3ff; }
+    .tt-cell.tt-test { border-left-style:dashed; background:#f8fafc; }
+    .tt-cell .tt-subject { font-weight:700; color:#1e293b; }
+    .tt-cell .tt-class { color:#64748b; font-size:11px; }
+    .tt-cell .tt-room { font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px; color:#0f172a; }
+    .tt-cell .tt-sat-time { font-family:'Share Tech Mono',monospace; font-size:10px; color:#b45309; }
+    .tt-foot { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; margin-top:10px; line-height:1.7; }
 
     .no-week-notice {
         border:1px solid #fcd34d; background:#fffbeb; color:#92400e; border-radius:8px;
@@ -425,12 +442,16 @@
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-10-23" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-10" hidden>
         <div class="update-notice-box">
             <details>
-                <summary>📢 업데이트 안내 (10/23) <span class="un-more">자세히</span>
-                    <p class="un-headline">저장을 누르면 기다리지 않고 바로 다른 반으로 넘어가도 됩니다.</p>
+                <summary>📢 업데이트 안내 (11/10) <span class="un-more">자세히</span>
+                    <p class="un-headline">[ 5 ] 시간표 탭에서 내 한 주 시간표를 교시·시간·강의실까지 볼 수 있습니다.</p>
                 </summary>
+                <div class="un-day">11/10</div>
+                <ul>
+                    <li>[ 5 ] 시간표 탭에서 선생님 코드를 누르면 기말고사 대비 시간표(11/9~) 기준으로 내 한 주 수업이 교시·시간·강의실과 함께 나옵니다. 오늘 수업은 맨 위에 따로 보여 줍니다.</li>
+                </ul>
                 <div class="un-day">10/23</div>
                 <ul>
                     <li>[전체 저장]을 누른 뒤 기다리지 않고 계속 입력하거나 다른 반으로 넘어가도 됩니다. 저장 중인 칸은 회색으로 보이고, 결과는 화면 오른쪽 아래에 알려 드립니다.</li>
@@ -514,7 +535,7 @@
         <div id="tab-timetable" class="tab-panel space-y-4" hidden>
             <div class="terran-panel p-5 space-y-4">
                 <h2 class="qe-panel-title">🗓 선생님별 시간표</h2>
-                <p class="font-mono-tech text-[11px] text-slate-400">중등·고등 시간표를 합쳐서 선생님 한 분 기준으로 보여줍니다.</p>
+                <p class="font-mono-tech text-[11px] text-slate-400">중등·고등 시간표를 합쳐서 선생님 한 분의 한 주를 교시·시간·강의실까지 보여줍니다. <span id="ttTermLabel"></span></p>
                 <div>
                     <label for="ttTeacherInput" class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">선생님 코드 검색</label>
                     <input type="text" id="ttTeacherInput" class="prog-search" placeholder="🔎 코드를 입력하거나 아래에서 누르세요 (예: 휘)">
@@ -1505,43 +1526,263 @@ function setupTeacherBanner() {
 }
 
 /* ───────────────────────── TAB 5: 선생님별 시간표 ─────────────────────────
-   각 시트의 "시간표" 탭은 학년|반|담당|과목|월~일(O) 구조다.
-   중등·고등을 합쳐 한 선생님 기준으로 요일별로 묶어 보여준다. */
-const TIMETABLE_SHEETS = {
-    mid:  { sheetId: PROGRESS_SHEETS['prog-mid'].sheetId,  gid: '1595351987', label: '중등' },
-    high: { sheetId: PROGRESS_SHEETS['prog-high'].sheetId, gid: '88231015',  label: '고등' }
+   교시별 시간표는 구글 시트에 없어서, 학원 시간표(표 이미지)를 아래에 그대로 옮겨 적었다.
+   시간표가 바뀌면 TT_TERM 과 TT_SOURCE 만 고치면 된다.
+   한 줄 = [요일, 구분, 학년, 반, 교시, 과목, 선생님 코드, 강의실]
+   - 요일: 수업하는 요일을 붙여 쓴다 (예: '월수금', '화목', '토')
+   - 교시: '3' 또는 '1-2' (연속 교시)
+   - 선생님이 둘이면 '차/영' 처럼 쓴다 */
+const TT_TERM = '2026 2학기 기말고사 대비 시간표 (11/9~)';
+const TT_TIMES = { // 평일 / 토요일 교시 시간
+    weekday:  { 0: '4:00~5:00', 1: '5:00~5:45', 2: '5:50~6:35', 3: '6:40~7:25', 4: '7:30~8:15', 5: '8:20~9:05', 6: '9:10~10:00' },
+    saturday: { 1: '12:00~12:45', 2: '12:50~1:35', 3: '1:40~2:25', 4: '2:30~3:15', 5: '3:20~4:05', 6: '4:10~5:00' }
 };
-let TT_ROWS = null;      // [{ target, grade, className, teacher, subject, days:[요일] }]
+const TT_SOURCE = [
+    // ── 중등 · 월수금 ──
+    ['월수금','mid','초등','JUMP','1-2','수학','나','305'],
+    ['월수금','mid','초등','JUMP','3','국어','강','305'],
+    ['월수금','mid','중1','동마/행당','1-2','수학','최','401'],
+    ['월수금','mid','중1','동마/행당','3','수학E','서','401'],
+    ['월수금','mid','중1','동마/행당','4','국어','강','401'],
+    ['월수금','mid','중1','동마/행당','5','영어','표','401'],
+    ['월수금','mid','중1','동마/행당','6','영어E','표','401'],
+    ['월수금','mid','중1','마장','1','영어','표','303'],
+    ['월수금','mid','중1','마장','2','국어','이','303'],
+    ['월수금','mid','중1','마장','3','영어','표','303'],
+    ['월수금','mid','중1','마장','4','수학E','성','303'],
+    ['월수금','mid','중1','마장','5-6','수학','정','303'],
+    ['월수금','mid','중1','내신특강 무학·한대','1-2','과학','휘','402'],
+    ['월수금','mid','중1','내신특강 무학','3-4','사회','태','402'],
+    ['월수금','mid','중2','동마','1','영어E','오','301'],
+    ['월수금','mid','중2','동마','2','수학E','정','301'],
+    ['월수금','mid','중2','동마','3-4','수학','범','301'],
+    ['월수금','mid','중2','동마','5','영어','경','301'],
+    ['월수금','mid','중2','동마','6','국어','강','301'],
+    ['월수금','mid','중2','한대','1','영어','경','307'],
+    ['월수금','mid','중2','한대','2','영어E','경','307'],
+    ['월수금','mid','중2','한대','3','수학E','오','307'],
+    ['월수금','mid','중2','한대','4','국어','이','307'],
+    ['월수금','mid','중2','한대','5-6','수학','서','307'],
+    ['월수금','mid','중2','마장','1','영어','성','204'],
+    ['월수금','mid','중2','마장','2','영어E','성','204'],
+    ['월수금','mid','중2','마장','3','국어','이','204'],
+    ['월수금','mid','중2','마장','4','수학E','오','204'],
+    ['월수금','mid','중2','마장','5-6','수학','최','204'],
+    ['월수금','mid','중2','행당·성수','1','국어','이','306'],
+    ['월수금','mid','중2','행당·성수','2','수학E','오','306'],
+    ['월수금','mid','중2','행당·성수','3','영어E','성','306'],
+    ['월수금','mid','중2','행당·성수','4','영어','표','306'],
+    ['월수금','mid','중2','행당·성수','5-6','수학','오','306'],
+    ['월수금','mid','중2','내신특강 무학B/경일','3-4','역사','형','202'],
+    ['월수금','mid','중2','내신특강 무학B/경일','5-6','과학','휘','202'],
+    ['월수금','mid','중2','내신특강 무학A/광희','1-2','역사','윤','406'],
+    ['월수금','mid','중2','내신특강 무학A/광희','3-4','과학','유','406'],
+    // 중3(고1대비반)은 월·수 수업, 금요일은 같은 선생님·강의실로 클리닉
+    ['월수','mid','중3','S','1-2','과학','원','201'],   ['금','mid','중3','S','1-2','클리닉','원','201'],
+    ['월수','mid','중3','S','3-4','영어','지','201'],   ['금','mid','중3','S','3-4','클리닉','지','201'],
+    ['월수','mid','중3','S','5','수학E','나','201'],    ['금','mid','중3','S','5','클리닉','나','201'],
+    ['월수','mid','중3','S','6','영어E','경','201'],    ['금','mid','중3','S','6','클리닉','경','201'],
+    ['월수','mid','중3','H','1-2','영어','지','309'],   ['금','mid','중3','H','1-2','클리닉','지','309'],
+    ['월수','mid','중3','H','3','영어E','차','309'],    ['금','mid','중3','H','3','클리닉','차','309'],
+    ['월수','mid','중3','H','4','수학E','서','309'],    ['금','mid','중3','H','4','클리닉','서','309'],
+    ['월수','mid','중3','H','5-6','과학','원','309'],   ['금','mid','중3','H','5-6','클리닉','원','309'],
+    ['월수','mid','중3','K','1','영어E','태','205'],    ['금','mid','중3','K','1','클리닉','태','205'],
+    ['월수','mid','중3','K','2','수학E','범','205'],    ['금','mid','중3','K','2','클리닉','범','205'],
+    ['월수','mid','중3','K','3-4','과학','원','205'],   ['금','mid','중3','K','3-4','클리닉','원','205'],
+    ['월수','mid','중3','K','5-6','수학','하','205'],   ['금','mid','중3','K','5-6','클리닉','하','205'],
+    ['월수','mid','중3','J','1-2','과학','유','304'],   ['금','mid','중3','J','1-2','클리닉','유','304'],
+    ['월수','mid','중3','J','3-4','수학','최','304'],   ['금','mid','중3','J','3-4','클리닉','최','304'],
+    ['월수','mid','중3','J','5-6','영어','지','304'],   ['금','mid','중3','J','5-6','클리닉','지','304'],
+    ['월수','mid','중3','N','1','수학E','범','203'],    ['금','mid','중3','Y','1','클리닉','범','203'],
+    ['월수','mid','중3','N','2','영어E','표','203'],    ['금','mid','중3','Y','2','클리닉','표','203'],
+    ['월수','mid','중3','N','3-4','수학','나','203'],   ['금','mid','중3','Y','3-4','클리닉','나','203'],
+    ['월수','mid','중3','N','5-6','국어','이','203'],   ['금','mid','중3','Y','5-6','클리닉','이','203'],
+
+    // ── 중등 · 화목토 (초등 JUMP 와 중3은 화·목만) ──
+    // JUMP 는 화·목만: 토요일 3교시 303호는 고2 세포물질B 가 쓴다
+    ['화목','mid','초등','JUMP','1-2','영어','표','303'],
+    ['화목','mid','초등','JUMP','3','영어E','경','303'],
+    ['화목토','mid','중1','무학','1','수학E','하','401'],
+    ['화목토','mid','중1','무학','2','국어','강','401'],
+    ['화목토','mid','중1','무학','3-4','수학','하','401'],
+    ['화목토','mid','중1','무학','5','영어','영','401'],
+    ['화목토','mid','중1','무학','6','영어E','영','401'],
+    ['화목토','mid','중1','한대','1','국어','강','406'],
+    ['화목토','mid','중1','한대','2','수학E','정','406'],
+    ['화목토','mid','중1','한대','3-4','수학','정','406'],
+    ['화목토','mid','중1','한대','5','영어','표','406'],
+    ['화목토','mid','중1','한대','6','영어E','표','406'],
+    ['화목토','mid','중1','내신특강 동마/마장/행당','1-2','사회','태','405'],
+    ['화목토','mid','중1','내신특강 동마/행당·마장','3-4','과학','휘','405'],
+    ['화목토','mid','중2','무학S/경일','1','국어','구','403'],
+    ['화목토','mid','중2','무학S/경일','2','수학E','최','403'],
+    ['화목토','mid','중2','무학S/경일','3','영어','성','403'],
+    ['화목토','mid','중2','무학S/경일','4','영어E','성','403'],
+    ['화목토','mid','중2','무학S/경일','5-6','수학','범','403'],
+    ['화목토','mid','중2','무학H','1','수학E','최','204'],
+    ['화목토','mid','중2','무학H','2','영어','경','204'],
+    ['화목토','mid','중2','무학H','3-4','수학','최','204'],
+    ['화목토','mid','중2','무학H','5','영어E','경','204'],
+    ['화목토','mid','중2','무학H','6','국어','강','204'],
+    ['화목토','mid','중2','광희','1','영어','경','306'],
+    ['화목토','mid','중2','광희','2-3','수학','나','306'],
+    ['화목토','mid','중2','광희','4','수학E','나','306'],
+    ['화목토','mid','중2','광희','5','국어','강','306'],
+    ['화목토','mid','중2','광희','6','영어E','경','306'],
+    ['화목토','mid','중2','내신특강 동마/행당','1-2','역사','윤','301'],
+    ['화목토','mid','중2','내신특강 동마/행당','3-4','과학','원','301'],
+    ['화목토','mid','중2','내신특강 한대/마장','3-4','역사','형','202'],
+    ['화목토','mid','중2','내신특강 한대/마장','5-6','과학','휘','202'],
+    ['화목','mid','중3','S','1-2','수학','범','201'],
+    ['화목','mid','중3','S','3-4','국어','구','201'],
+    ['화목','mid','중3','H','1-2','수학','오','309'],
+    ['화목','mid','중3','H','3-4','국어','웅','309'],
+    ['화목','mid','중3','K','1-2','국어','웅','205'],
+    ['화목','mid','중3','K','3-4','영어','표','205'],
+    ['화목','mid','중3','J','1','영어E','나','304'],
+    ['화목','mid','중3','J','2','수학E','하','304'],
+    ['화목','mid','중3','J','3-4','국어','강','304'],
+    ['화목','mid','중3','N','1-2','과학','원','203'],
+    ['화목','mid','중3','N','3-4','영어','영','203'],
+    ['화목','mid','중3','S·H','5-6','수학 클리닉','최','309'],
+    ['화목','mid','중3','K','5-6','수학 클리닉','하','205'],
+    ['화목','mid','중3','J·N','5-6','수학 클리닉','나','203'],
+
+    // ── 고등 · 월수금 ──
+    ['월수금','high','고1','','1-2','수학 클리닉','재',''],
+    ['월수금','high','고1','','1-2','수학 클리닉','하',''],
+    ['월수금','high','고1','','1-2','수학 클리닉','현',''],
+    ['월수금','high','고1','성동S','3-4','영어','혁','J403'],
+    ['월수금','high','고1','성동S','5','사회','태','J403'],
+    ['월수금','high','고1','성동S','6','역사','윤','J403'],
+    ['월수금','high','고1','성동H/송곡','3-4','수학','하','J402'],
+    ['월수금','high','고1','성동H/송곡','5','사회','형','J402'],
+    ['월수금','high','고1','성동H/송곡','6','국어','웅','J402'],
+    ['월수금','high','고1','성수·금호','3-4','수학','정','J401'],
+    ['월수금','high','고1','성수','5','국어','웅','J401'],
+    ['월수금','high','고1','성수','6','사회','형','J401'],
+    ['월수금','high','고1','금호','5','국어','구','206'],
+    ['월수금','high','고1','금호','6','사회','태','206'],
+    ['월수금','high','고1','도선','3-4','수학','재','J404'],
+    ['월수금','high','고1','도선','5','역사','윤','J404'],
+    ['월수금','high','고1','도선','6','국어','구','J404'],
+    ['월수금','high','고1','경일/자양','3-4','수학','현','J301'],
+    ['월수금','high','고1','경일/자양','5','영어E','강','J301'],
+    ['월수금','high','고1','경일/자양','6','과학','유','J301'],
+    ['월수금','high','고1','무학','3-4','영어','경','J302'],
+    ['월수금','high','고1','무학','5','과학','유','J302'],
+    ['월수금','high','고1','무학','6','역사','차','J302'],
+    ['월금','high','고1','한대부고','1-2','국어','강','302'],
+    ['월수금','high','고2','성동S·성동H','5-6','수학 S, H','재','406'],
+    ['월수금','high','고2','금호','5-6','수학 S, H','현','405'],
+    ['월수금','high','고2','성수·경일','5-6','영어','혁','J303'],
+    ['월수금','high','고2','무학·도선','5-6','영어','성','402'],
+    ['월금','high','고2','도선','1-2','국어','구','405'],
+    ['월금','high','고2','성수','3-4','국어','구','J303'],
+    ['월금','high','고2','성동','1-2','국어','웅','J303'],
+    ['월금','high','고2','금호/무학','3-4','국어','웅','302'],
+    ['수','high','고2','경일','3-4','국어','구','302'],
+    ['월수','high','고2','과탐','1-2','세포물질A','김','404'],
+    ['월수','high','고2','과탐','3-4','생명유전','김','404'],
+    ['월수','high','고2','과탐','3-4','지구과학','휘','405'],
+    ['수','high','고2','과탐','1-2','세포물질B','규','302'],
+    ['월금','high','고2','사탐','1-2','동아사','형','206'],
+    ['월금','high','고2','사탐','3-4','세계사','윤','206'],
+
+    // ── 고등 · 화목토 (한대부고는 화·목만) ──
+    ['화목토','high','고1','성동S','1-2','수학','재','J403'],
+    ['화목토','high','고1','성동S','3','영어E','오','J403'],
+    ['화목토','high','고1','성동S','4','수학E','재','J403'],
+    ['화목토','high','고1','성동S','5','국어','구','J403'],
+    ['화목토','high','고1','성동S','6','과학','규','J403'],
+    ['화목토','high','고1','성동H/송곡','1-2','영어','영','J402'],
+    // 표에는 "(차) / (영)". 영 선생님은 화·목 3교시에 중3 N 수업이 있어 화·목은 차, 토는 영으로 나눴다
+    ['화목','high','고1','성동H/송곡','3','영어E','차','J402'],
+    ['토','high','고1','성동H/송곡','3','영어E','영','J402'],
+    ['화목토','high','고1','성동H/송곡','4','수학E','오','J402'],
+    ['화목토','high','고1','성동H/송곡','5','역사','윤','J402'],
+    ['화목토','high','고1','성동H/송곡','6','과학','원','J402'],
+    ['화목토','high','고1','성수·금호','1','영어E','휘','J401'],
+    ['화목토','high','고1','성수·금호','2','과학','휘','J401'],
+    ['화목토','high','고1','성수·금호','3-4','영어','혁','J401'],
+    ['화목토','high','고1','성수·금호','5','수학E','정','J401'],
+    ['화목토','high','고1','성수·금호','6','역사','윤','J401'],
+    ['화목토','high','고1','도선','1-2','영어','혁','J404'],
+    ['화목토','high','고1','도선','3','수학E','재','J404'],
+    ['화목토','high','고1','도선','4','영어E','경','J404'],
+    ['화목토','high','고1','도선','5','과학','규','J404'],
+    ['화목토','high','고1','도선','6','사회','형','J404'],
+    ['화목토','high','고1','경일/자양','1-2','영어','성','J301'],
+    ['화목토','high','고1','경일/자양','3','역사','윤','J301'],
+    ['화목토','high','고1','경일/자양','4','수학E','현','J301'],
+    ['화목토','high','고1','경일/자양','5','사회','형','J301'],
+    ['화목토','high','고1','경일/자양','6','국어','웅','J301'],
+    ['화목토','high','고1','무학','1-2','수학','현','J302'],
+    ['화목토','high','고1','무학','3','수학E','현','J302'],
+    ['화목토','high','고1','무학','4','영어E','윤','J302'],
+    ['화목토','high','고1','무학','5','국어','웅','J302'],
+    ['화목토','high','고1','무학','6','사회','태','J302'],
+    ['화목','high','고1','한대부고','1-3','영어','지','305'],
+    ['화목','high','고1','한대부고','4','영어E','지','305'],
+    ['화목','high','고1','한대부고','5-6','과학','훈','305'],
+    ['토','high','고2','성수·경일·무학·도선','1-4','기하','범','404'],
+    ['화목토','high','고2','성동S·성동H','5-6','영어','혁','J303'],
+    ['화목토','high','고2','금호','5-6','영어','성','303'],
+    ['화목토','high','고2','성수','5-6','수학 S, H, K','재','405'],
+    ['화목토','high','고2','경일·무학','5-6','수학 S, H, K','오','404'],
+    ['화목토','high','고2','도선','5-6','수학 S, H, K','현','302'],
+    ['토','high','고2','경일','3-4','국어','구','302'],
+    ['화목','high','고2','과탐','1-2','역학E','규','402'],
+    ['화목','high','고2','과탐','3-4','물리(성동)','규','J303'],
+    ['화목','high','고2','과탐','1-2','물질E(A)','훈','J303'],
+    ['화목','high','고2','과탐','3-4','물질E(B)','훈','402'],
+    ['토','high','고2','과탐','3-4','세포물질B','규','303'],
+    ['화목','high','고2','사탐','1-2','정치','형','404'],
+    ['화목','high','고2','사탐','3-4','윤사','태','404']
+];
+
+const TT_TEST_SUBJECTS = ['국어E', '영어E', '수학E'];
+const TT_SUBJECT_CATEGORY = { // 과목별 선생님 목록에서 어느 과목 줄에 넣을지
+    '국어': '국어', '영어': '영어', '수학': '수학', '기하': '수학', '수학 S, H': '수학', '수학 S, H, K': '수학',
+    '과학': '과학', '세포물질A': '과학', '세포물질B': '과학', '생명유전': '과학', '지구과학': '과학',
+    '역학E': '과학', '물리(성동)': '과학', '물질E(A)': '과학', '물질E(B)': '과학',
+    '사회': '사회', '동아사': '사회', '세계사': '사회', '정치': '사회', '윤사': '사회', '역사': '역사'
+};
+
+/** TT_SOURCE 를 (선생님, 요일, 교시) 한 칸짜리 수업 목록으로 펼친다 */
+const TT_LESSONS = TT_SOURCE.flatMap(([days, target, grade, className, periods, subject, teachers, room]) => {
+    const [from, to] = periods.split('-').map(Number);
+    const out = [];
+    teachers.split('/').forEach(teacher => {
+        [...days].forEach(day => {
+            for (let period = from; period <= (to || from); period++) {
+                out.push({ teacher, day, period, target, grade, className, subject, room, sharedWith: teachers.includes('/') ? teachers : '' });
+            }
+        });
+    });
+    return out;
+});
 let ttSelected = null;
 
-async function loadTimetableData(force) {
-    if (TT_ROWS && !force) return TT_ROWS;
-    const results = await Promise.all(Object.entries(TIMETABLE_SHEETS).map(async ([target, cfg]) => {
-        const rows = await fetchCSV(cfg.sheetId, cfg.gid);
-        return rows.slice(1).map(r => ({
-            target,
-            grade: (r[0] || '').trim(),
-            className: (r[1] || '').trim(),
-            teacher: (r[2] || '').trim(),
-            subject: (r[3] || '').trim(),
-            days: DAY_NAMES.filter((d, i) => (r[4 + i] || '').trim())
-        })).filter(e => e.teacher && (e.className || e.subject));
-    }));
-    TT_ROWS = results.flat();
-    return TT_ROWS;
-}
-
 function ttTeacherCodes() {
-    return [...new Set(TT_ROWS.map(e => e.teacher))].sort((a, b) => a.localeCompare(b, 'ko'));
+    return [...new Set(TT_LESSONS.map(e => e.teacher))].sort((a, b) => a.localeCompare(b, 'ko'));
 }
 
-/** 과목 -> 선생님 코드 목록. 한 선생님이 여러 과목이면 그 과목들에 모두 들어간다 */
+function ttTime(day, period) {
+    return (day === '토' ? TT_TIMES.saturday : TT_TIMES.weekday)[period] || '';
+}
+
+/** 과목 -> 선생님 코드 목록. 시험(E)·클리닉만 들어가는 과목은 빼고, 직접 가르치는 과목에만 넣는다 */
 function buildTtDirectory() {
     const dir = {};
-    TT_ROWS.forEach(e => {
-        const subject = e.subject || '기타';
-        (dir[subject] || (dir[subject] = new Set())).add(e.teacher);
+    const placed = new Set();
+    TT_LESSONS.forEach(e => {
+        const category = TT_SUBJECT_CATEGORY[e.subject];
+        if (!category) return;
+        (dir[category] || (dir[category] = new Set())).add(e.teacher);
+        placed.add(e.teacher);
     });
+    ttTeacherCodes().filter(code => !placed.has(code)).forEach(code => (dir['기타'] || (dir['기타'] = new Set())).add(code));
     return dir;
 }
 
@@ -1590,63 +1831,96 @@ function selectTtTeacher(code) {
     renderTimetable(code);
 }
 
+function ttClassLabel(e) {
+    return [e.grade, e.className].filter(Boolean).join(' ');
+}
+
+function ttCellHtml(e) {
+    const isTest = TT_TEST_SUBJECTS.includes(e.subject);
+    return `
+        <div class="tt-cell${e.target === 'high' ? ' tt-high' : ''}${isTest ? ' tt-test' : ''}">
+            <div class="tt-subject">${escapeHtml(e.subject)}${e.sharedWith ? ` <span class="tt-class">(${escapeHtml(e.sharedWith)})</span>` : ''}</div>
+            <div class="tt-class">${escapeHtml(ttClassLabel(e))}</div>
+            ${e.room ? `<div class="tt-room">${escapeHtml(e.room)}호</div>` : ''}
+            ${e.day === '토' ? `<div class="tt-sat-time">${ttTime('토', e.period)}</div>` : ''}
+        </div>`;
+}
+
 function renderTimetable(code) {
     const body = document.getElementById('ttBody');
     if (!code) { body.innerHTML = ''; return; }
 
-    const mine = TT_ROWS.filter(e => e.teacher === code);
+    const mine = TT_LESSONS.filter(e => e.teacher === code);
     if (!mine.length) {
         body.innerHTML = `<div class="terran-panel p-6 text-center font-mono-tech text-sm text-slate-400">
-            ${escapeHtml(code)} 선생님은 시간표 시트에 등록된 수업이 없습니다.
+            ${escapeHtml(code)} 선생님은 시간표에 등록된 수업이 없습니다.
         </div>`;
         return;
     }
 
-    const todayIdx = (new Date().getDay() + 6) % 7;
-    const noDay = mine.filter(e => !e.days.length);
-    const classCount = new Set(mine.map(e => `${e.target}|${e.grade}|${e.className}|${e.subject}`)).size;
+    const today = DAY_NAMES[(new Date().getDay() + 6) % 7];
+    const days = DAY_NAMES.filter(d => d !== '일' || mine.some(e => e.day === '일'));
+    const periods = [...new Set(mine.map(e => e.period))].sort((a, b) => a - b);
+    const firstP = Math.min(1, periods[0]), lastP = Math.max(6, periods[periods.length - 1]);
+    const hasSat = mine.some(e => e.day === '토');
 
-    const dayHtml = DAY_NAMES.map((d, i) => {
-        const items = mine.filter(e => e.days.includes(d));
+    // 오늘 수업: 연속 교시는 한 줄로 묶는다
+    const todayLessons = mine.filter(e => e.day === today).sort((a, b) => a.period - b.period);
+    const todayRuns = [];
+    todayLessons.forEach(e => {
+        const last = todayRuns[todayRuns.length - 1];
+        const same = last && last.to === e.period - 1 && last.e.subject === e.subject && last.e.room === e.room
+            && ttClassLabel(last.e) === ttClassLabel(e);
+        if (same) last.to = e.period; else todayRuns.push({ from: e.period, to: e.period, e });
+    });
+    const todayHtml = todayRuns.length ? `<div class="tt-today-list">${todayRuns.map(run => {
+        const start = ttTime(today, run.from).split('~')[0], end = ttTime(today, run.to).split('~')[1];
         return `
-            <div class="tt-day${i === todayIdx ? ' tt-today' : ''}${items.length ? '' : ' tt-empty'}">
-                <div class="tt-day-head">${d}${i === todayIdx ? ' · 오늘' : ''}</div>
-                <div class="tt-day-body">
-                    ${items.length ? items.map(e => `
-                        <div class="tt-item${e.target === 'high' ? ' tt-high' : ''}">
-                            <div class="tt-subject"><span class="tt-badge tt-badge-${e.target === 'high' ? 'high' : 'mid'}">${TIMETABLE_SHEETS[e.target].label}</span>${escapeHtml(e.subject)}</div>
-                            <div class="tt-class">${escapeHtml(e.grade)} · ${escapeHtml(e.className)}</div>
-                        </div>`).join('') : '<div class="tt-none">수업 없음</div>'}
-                </div>
+            <div class="tt-today-item">
+                <span class="tt-time">${run.from === run.to ? run.from : `${run.from}~${run.to}`}교시 ${start}~${end}</span>
+                <span><span class="tt-badge tt-badge-${run.e.target === 'high' ? 'high' : 'mid'}">${run.e.target === 'high' ? '고등' : '중등'}</span><strong>${escapeHtml(run.e.subject)}</strong> ${escapeHtml(ttClassLabel(run.e))}</span>
+                ${run.e.room ? `<span class="tt-room">${escapeHtml(run.e.room)}호</span>` : ''}
             </div>`;
-    }).join('');
+    }).join('')}</div>` : `<p class="tt-today-none">오늘은 수업이 없습니다.</p>`;
 
+    let rowsHtml = '';
+    for (let p = firstP; p <= lastP; p++) {
+        rowsHtml += `<tr>
+            <td class="tt-period"><strong>${p}교시</strong>${TT_TIMES.weekday[p] || ''}</td>
+            ${days.map(d => `<td class="${d === today ? 'tt-today-col' : ''}">${
+                mine.filter(e => e.day === d && e.period === p).map(ttCellHtml).join('')}</td>`).join('')}
+        </tr>`;
+    }
+
+    const lessonCount = mine.length;
     body.innerHTML = `
         <div class="terran-panel p-5 fade-in">
-            <p class="tt-summary"><strong>${escapeHtml(code)}</strong> 선생님 · 수업 ${classCount}개</p>
-            <div class="tt-day-grid">${dayHtml}</div>
-            ${noDay.length ? `<p class="font-mono-tech text-[11px] text-slate-400 mt-3">※ 요일 표시가 없는 수업 ${noDay.length}개: ${
-                noDay.map(e => escapeHtml(`${e.grade} ${e.className} ${e.subject}`)).join(', ')}</p>` : ''}
+            <p class="tt-summary"><strong>${escapeHtml(code)}</strong> 선생님 · 주 ${lessonCount}교시</p>
+            <p class="tt-section-title">오늘 (${today}요일)</p>
+            ${todayHtml}
+            <p class="tt-section-title" style="color:#0369a1">한 주 시간표</p>
+            <div class="tt-grid-wrap custom-scrollbar">
+                <table class="tt-grid">
+                    <thead><tr><th>교시</th>${days.map(d => `<th class="${d === today ? 'tt-today-col' : ''}">${d}${d === today ? ' · 오늘' : ''}</th>`).join('')}</tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+            <p class="tt-foot">
+                왼쪽 시간은 평일 기준입니다.${hasSat ? ' 토요일은 시간이 달라 칸 안에 따로 적었습니다.' : ''}
+                점선 칸은 시험(E) 시간입니다.<br>
+                기준: ${escapeHtml(TT_TERM)}
+            </p>
         </div>`;
 }
 
-async function loadTimetableTab() {
-    const body = document.getElementById('ttBody');
-    body.innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
-    try {
-        await loadTimetableData();
-    } catch (err) {
-        body.innerHTML = `<div class="terran-panel p-6 text-red-600 font-mono-tech text-xs font-bold">⚠ 시간표를 불러오지 못했습니다: ${err}</div>`;
-        return;
-    }
-    body.innerHTML = '';
+function loadTimetableTab() {
+    document.getElementById('ttTermLabel').textContent = `기준: ${TT_TERM}`;
     renderTtDirectory('');
     const preset = ttSelected || (TEACHER_CODE && ttTeacherCodes().includes(TEACHER_CODE) ? TEACHER_CODE : null);
     if (preset) selectTtTeacher(preset);
 }
 
 document.getElementById('ttTeacherInput').addEventListener('input', e => {
-    if (!TT_ROWS) return;
     const v = e.target.value.trim();
     if (ttTeacherCodes().includes(v)) { selectTtTeacher(v); return; }
     ttSelected = null;
