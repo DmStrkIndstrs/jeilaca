@@ -10,8 +10,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script>
-    // 크리스마스 테마 켜기. 이 한 줄을 지우면 원래 테마로 돌아간다.
-    document.documentElement.classList.add('xmas');
+    // 기말고사 테마 켜기. 이 한 줄을 지우면 원래 테마로 돌아간다.
+    document.documentElement.classList.add('exam');
 </script>
 <style>
     :root {
@@ -38,59 +38,55 @@
         --ink-panel: #0f172a;
     }
 
-    /* ───────── 크리스마스 테마 ─────────
-       <head> 의 한 줄(classList.add('xmas'))이 켠다. 그 줄을 지우면 원래 파란 테마로 돌아간다.
-       빨강은 장식에만 쓴다. 미기록·저장 실패 표시가 빨강이라 버튼이나 강조색으로는 쓰지 않는다. */
-    html.xmas {
-        --bg: #f2f6f3;
-        --grid: rgba(22,101,52,0.055);
-        --accent: #15803d;
-        --accent-strong: #166534;
-        --accent-ink: #14532d;
-        --accent-alt: #166534;
-        --accent-border: #86efac;
-        --accent-border-soft: #86efac;
-        --accent-line: #bbf7d0;
-        --accent-tint-2: #dcfce7;
-        --accent-tint-3: #dcfce7;
-        --accent-tint: #f0fdf4;
-        --accent-tint-0: #f0fdf4;
-        --accent-shadow: rgba(21,128,61,.35);
-        --accent-faint: rgba(21,128,61,.2);
-        --ink-panel: #14402f;
-        --xmas-red: #b91c1c;
-        --xmas-gold: #d97706;
+    /* ───────── 기말고사 테마 ─────────
+       <head> 의 한 줄(classList.add('exam'))이 켠다. 그 줄을 지우면 원래 파란 테마로 돌아간다.
+       남색(엄격·집중) 바탕에 금색 포인트(파이팅). 빨강은 미기록·저장 실패 표시라 쓰지 않는다.
+       움직이는 장식은 넣지 않는다. */
+    html.exam {
+        --bg: #edf0f5;
+        --grid: rgba(30,58,138,0.06);
+        --border: #c3cad8;
+        --accent: #1e3a8a;
+        --accent-strong: #172554;
+        --accent-ink: #0f1a3a;
+        --accent-alt: #1e3a8a;
+        --accent-border: #a5b4fc;
+        --accent-border-soft: #a5b4fc;
+        --accent-line: #c7d2fe;
+        --accent-tint-2: #e0e7ff;
+        --accent-tint-3: #e0e7ff;
+        --accent-tint: #eef2ff;
+        --accent-tint-0: #eef2ff;
+        --accent-shadow: rgba(30,58,138,.35);
+        --accent-faint: rgba(30,58,138,.2);
+        --ink-panel: #111a33;
+        --exam-gold: #ca8a04;
     }
-    /* 머리말: 위는 지팡이 사탕 줄무늬, 아래는 전구 줄 */
-    html.xmas header::before {
-        content:''; position:absolute; left:0; right:0; top:0; height:6px;
-        background:repeating-linear-gradient(135deg, var(--xmas-red) 0 10px, #fff 10px 20px);
+    /* 머리말: 위는 남색 띠 + 금색 선, 아래는 답안지 같은 굵은 선 + 가는 선 */
+    html.exam header { border-bottom:0; box-shadow:none; }
+    html.exam header::before {
+        content:''; position:absolute; left:0; right:0; top:0; height:10px;
+        background:linear-gradient(to bottom, var(--accent-strong) 0 7px, var(--exam-gold) 7px 10px);
     }
-    html.xmas header::after {
-        content:''; position:absolute; left:0; right:0; bottom:-6px; height:12px; pointer-events:none;
-        background:
-            radial-gradient(circle at 9px 6px, #dc2626 4px, transparent 5px) 0 0 / 54px 12px repeat-x,
-            radial-gradient(circle at 9px 6px, #f59e0b 4px, transparent 5px) 18px 0 / 54px 12px repeat-x,
-            radial-gradient(circle at 9px 6px, #16a34a 4px, transparent 5px) 36px 0 / 54px 12px repeat-x;
+    html.exam header::after {
+        content:''; position:absolute; left:0; right:0; bottom:0; height:7px; pointer-events:none;
+        background:linear-gradient(to bottom, var(--accent-strong) 0 4px, #fff 4px 5px, var(--accent-strong) 5px 6px, transparent 6px);
     }
-    @media (min-width:640px) { /* 좁은 화면에서는 제목 줄바꿈이 어색해져 트리를 뺀다 */
-        html.xmas header h1::before { content:'🎄 '; }
-        html.xmas header h1::after { content:' 🎄'; }
+    html.exam header h2.text-blue-600 { color:var(--accent-strong); }
+    html.exam header h1 { color:var(--accent-ink); }
+    html.exam .text-blue-600, html.exam .text-blue-700 { color:var(--accent-strong); }
+    html.exam .bg-blue-500 { background-color:var(--exam-gold); }
+    html.exam .terran-panel::before { border-color:var(--exam-gold); }
+    /* 머리말 아래 다짐 띠 */
+    .exam-motto {
+        background:var(--accent-strong); color:#e0e7ff; position:relative; z-index:20;
+        display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px 18px;
+        padding:10px 16px; text-align:center; word-break:keep-all;
+        font-family:'Noto Sans KR', sans-serif; font-size:13.5px; font-weight:500; letter-spacing:0.02em;
     }
-    html.xmas header h2.text-blue-600 { color:var(--xmas-red); }
-    html.xmas .text-blue-600, html.xmas .text-blue-700 { color:var(--accent-strong); }
-    html.xmas .bg-blue-500 { background-color:var(--xmas-red); }
-    html.xmas .terran-panel::before { border-color:var(--xmas-red); }
-    /* 눈: 내용 뒤에서만 내린다 (패널이 가려서 글 읽는 데 방해되지 않는다) */
-    .xmas-snow { position:fixed; inset:0; z-index:5; pointer-events:none; overflow:hidden; }
-    .xmas-snow span {
-        position:absolute; top:-5vh; color:#8fb0cf; line-height:1; user-select:none;
-        animation:xmas-fall linear infinite; will-change:transform;
-    }
-    @keyframes xmas-fall {
-        from { transform:translate3d(0,0,0) rotate(0deg); }
-        to { transform:translate3d(var(--drift, 20px),112vh,0) rotate(180deg); }
-    }
+    .exam-motto strong { color:#fde68a; font-weight:900; font-size:15px; letter-spacing:0.04em; }
+    .exam-motto .exam-motto-sep { width:1px; height:14px; background:rgba(224,231,255,.35); }
+    @media (max-width:639px) { .exam-motto .exam-motto-sep { display:none; } }
     body {
         font-family: 'Noto Sans KR', sans-serif;
         background-color: var(--bg);
@@ -491,7 +487,6 @@
         .main-tab:active, .missing-item:active, .qe-class-btn:active, .qe-pill:active, .qe-teacher-chip:active, .teacher-link:active,
         .qe-save-btn:not(:disabled):active, #refreshBtn:active { transform: none; }
         .cursor-blink, .animate-pulse { animation: none; }
-        .xmas-snow { display:none; }
         .tt-save-btn:active { transform:none; }
         .qe-toast.is-hidden { transform:none; }
         .spinner { animation-duration: 1.5s; }
@@ -531,7 +526,7 @@
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-10b" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-10c" hidden>
         <div class="update-notice-box">
             <details>
                 <summary>📢 업데이트 안내 (11/10) <span class="un-more">자세히</span>
@@ -540,7 +535,7 @@
                 <div class="un-day">11/10</div>
                 <ul>
                     <li>내 시간표를 저장할 수 있습니다. [ 5 ] 시간표에서 내 코드를 누른 뒤 [사진으로 저장], [텍스트로 저장], [텍스트 복사] 중에서 고르세요. 휴대폰에서는 공유 창이 열려 사진첩이나 카톡으로 바로 보낼 수 있습니다.</li>
-                    <li>🎄 크리스마스 테마로 바뀌었습니다. 기능은 그대로이고 색과 장식만 달라졌습니다.</li>
+                    <li>기말고사 대비 기간에 맞춰 화면 테마를 바꿨습니다. 기능은 그대로이고 색과 장식만 달라졌습니다.</li>
                     <li>시간표에서 과목 뒤의 E(국어E·영어E·수학E)는 EPS 시간이며 점선 칸으로 표시됩니다.</li>
                     <li>[ 5 ] 시간표 탭에서 선생님 코드를 누르면 기말고사 대비 시간표(11/9~) 기준으로 내 한 주 수업이 교시·시간·강의실과 함께 나옵니다. 오늘 수업은 맨 위에 따로 보여 줍니다.</li>
                 </ul>
@@ -2279,28 +2274,19 @@ setInterval(() => {
     });
 })();
 
-/* ───────────────────────── 크리스마스 테마 장식 ───────────────────────── */
-(function initXmasTheme() {
-    if (!document.documentElement.classList.contains('xmas')) return;
+/* ───────────────────────── 기말고사 테마 장식 ───────────────────────── */
+(function initExamTheme() {
+    if (!document.documentElement.classList.contains('exam')) return;
     const tagline = document.querySelector('header h2');
-    if (tagline) tagline.textContent = '[ 🎄 MERRY CHRISTMAS 🎄 ]';
+    if (tagline) tagline.textContent = '[ FINAL EXAM // 기말고사 대비 ]';
 
-    const snow = document.createElement('div');
-    snow.className = 'xmas-snow';
-    snow.setAttribute('aria-hidden', 'true');
-    const count = window.innerWidth < 640 ? 14 : 26;
-    for (let i = 0; i < count; i++) {
-        const flake = document.createElement('span');
-        flake.textContent = i % 3 ? '❄' : '•';
-        flake.style.left = (Math.random() * 100).toFixed(2) + '%';
-        flake.style.fontSize = (10 + Math.random() * 12).toFixed(0) + 'px';
-        flake.style.opacity = (0.55 + Math.random() * 0.4).toFixed(2);
-        flake.style.setProperty('--drift', (Math.random() * 80 - 40).toFixed(0) + 'px');
-        flake.style.animationDuration = (11 + Math.random() * 12).toFixed(1) + 's';
-        flake.style.animationDelay = (-Math.random() * 20).toFixed(1) + 's';
-        snow.appendChild(flake);
-    }
-    document.body.insertBefore(snow, document.body.firstChild);
+    const motto = document.createElement('div');
+    motto.className = 'exam-motto';
+    motto.innerHTML = '<span>기말고사 대비 기간입니다. 진도와 과제 기록, 하루도 빠짐없이.</span>'
+        + '<span class="exam-motto-sep" aria-hidden="true"></span>'
+        + '<strong>끝까지 집중, 파이팅!</strong>';
+    const header = document.querySelector('header');
+    if (header) header.after(motto);
 })();
 </script>
 </body>
