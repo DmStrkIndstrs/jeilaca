@@ -139,13 +139,68 @@
 
 
     /* Top-level tabs */
-    .main-tab {
+    .main-tab, .nav-more-btn {
         padding: 10px 20px; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:13px;
         letter-spacing:0.05em; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#64748b;
         transition: color .15s ease, background-color .15s ease, border-color .15s ease, transform .12s var(--ease-out);
     }
-    .main-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 6px var(--accent-shadow); }
-    @media (hover:hover) and (pointer:fine) { .main-tab:not(.active):hover { color:var(--accent); border-color:var(--accent-border); } }
+    .main-tab.active, .nav-more-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 6px var(--accent-shadow); }
+    @media (hover:hover) and (pointer:fine) {
+        .main-tab:not(.active):hover, .nav-more-btn:not(.active):hover { color:var(--accent); border-color:var(--accent-border); }
+    }
+
+    /* 메뉴 위치: 폰·태블릿은 위쪽에 한 줄로 고정하고, 넓은 화면(1024px~)은 왼쪽에 세로로 고정한다.
+       폰에서는 자주 안 쓰는 탭(시간표·EPS·회의록)을 [더보기] 안에 접어 둔다. */
+    html { scroll-padding-top: 68px; }
+    .main-nav {
+        position:sticky; top:0; z-index:40;
+        background:rgba(255,255,255,.97); border-bottom:1px solid var(--border);
+        box-shadow:0 2px 6px rgba(15,23,42,.07); backdrop-filter:blur(8px);
+    }
+    .main-nav-inner { display:flex; gap:4px; max-width:72rem; margin:0 auto; padding:8px; }
+    .nav-title { display:none; }
+    .main-nav .main-tab, .nav-more-btn {
+        flex:1 1 auto; min-width:0; padding:10px 4px; text-align:center; white-space:nowrap;
+        letter-spacing:0; font-size:clamp(11.5px, 3.4vw, 13.5px); font-family:'Noto Sans KR',sans-serif;
+    }
+    .nav-more { position:relative; flex:1 1 auto; min-width:0; display:flex; }
+    .nav-more-btn { width:100%; }
+    .nav-more-menu {
+        display:none; position:absolute; top:calc(100% + 8px); right:0; min-width:160px;
+        flex-direction:column; gap:6px; padding:8px; background:#fff;
+        border:1px solid var(--border); border-radius:8px; box-shadow:0 10px 24px rgba(15,23,42,.18);
+    }
+    .nav-more.open .nav-more-menu { display:flex; }
+    .nav-more-menu .main-tab { flex:none; padding:11px 14px; text-align:left; font-size:13px; }
+    .nav-more-label, .nav-wide { display:none; }
+    @media (min-width:480px) {
+        .nav-wide { display:inline; }
+        .main-nav-inner { gap:6px; padding:8px 12px; }
+    }
+    @media (min-width:1024px) {
+        html { scroll-padding-top: 16px; }
+        body { padding-left:13rem; }
+        .main-nav {
+            position:fixed; top:0; left:0; bottom:0; width:13rem; overflow-y:auto;
+            border-bottom:0; border-right:1px solid var(--border); box-shadow:2px 0 6px rgba(15,23,42,.05);
+        }
+        .main-nav-inner { flex-direction:column; gap:8px; padding:22px 14px; }
+        .nav-title {
+            display:block; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px;
+            letter-spacing:.25em; color:#94a3b8; padding:0 4px 6px;
+        }
+        .main-nav .main-tab { flex:none; padding:11px 14px; text-align:left; font-size:13px; letter-spacing:.03em; }
+        .nav-more { flex:none; display:block; }
+        .nav-more-btn { display:none; }
+        .nav-more-menu, .nav-more.open .nav-more-menu {
+            display:flex; position:static; gap:8px; padding:0; margin-top:8px;
+            border:0; border-radius:0; box-shadow:none; background:none;
+        }
+        .nav-more-label {
+            display:block; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px;
+            letter-spacing:.1em; color:#94a3b8; padding:12px 4px 0; border-top:1px solid #e2e8f0;
+        }
+    }
     .tab-panel[hidden] { display:none; }
     /* 빠른 입력은 선생님들이 가장 자주 쓰는 곳이라 다른 탭과 색을 달리해 눈에 띄게 한다 */
     .main-tab.main-tab-cta { background:#f59e0b; border-color:#f59e0b; color:#fff; box-shadow:0 2px 8px rgba(245,158,11,.4); }
@@ -634,46 +689,58 @@
                 <span class="w-2 h-2 rounded-full cursor-blink inline-block bg-emerald-500"></span>
                 &gt; live sync from google sheets_
             </p>
-            <div class="flex flex-wrap justify-center items-center gap-3 mb-6">
+            <div class="flex flex-wrap justify-center items-center gap-3">
                 <button id="refreshBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono-tech text-xs tracking-widest hover:bg-emerald-600 hover:text-white rounded font-bold">
                     [ ⟳ REFRESH ]
                 </button>
                 <span id="lastSync" class="font-mono-tech text-[11px] text-slate-400"></span>
             </div>
-            <div class="flex flex-wrap justify-center gap-2" role="tablist">
-                <button class="main-tab main-tab-cta active" data-tab="quickentry">✏️ [ 1 ] 빠른 입력</button>
-                <button class="main-tab" data-tab="prog-mid">[ 2 ] 중등 진도표</button>
-                <button class="main-tab" data-tab="prog-high">[ 3 ] 고등 진도표</button>
-                <button class="main-tab" data-tab="missing">[ 4 ] 미기록 현황</button>
-                <button class="main-tab" data-tab="timetable">[ 5 ] 시간표</button>
-                <button class="main-tab" data-tab="eps">[ 6 ] EPS <span class="eps-trial-tag">시범</span></button>
-                <button class="main-tab" data-tab="meeting">[ 7 ] 회의록</button>
-            </div>
         </div>
     </header>
+
+    <nav id="mainNav" class="main-nav" aria-label="메뉴">
+        <div class="main-nav-inner" role="tablist">
+            <div class="nav-title">MENU</div>
+            <button class="main-tab main-tab-cta active" data-tab="quickentry">✏️ 빠른 입력</button>
+            <button class="main-tab" data-tab="prog-mid">중등 진도<span class="nav-wide">표</span></button>
+            <button class="main-tab" data-tab="prog-high">고등 진도<span class="nav-wide">표</span></button>
+            <button class="main-tab" data-tab="missing">미기록<span class="nav-wide"> 현황</span></button>
+            <div class="nav-more" id="navMore">
+                <button type="button" class="nav-more-btn" id="navMoreBtn" aria-expanded="false" aria-controls="navMoreMenu">더보기 ▾</button>
+                <div class="nav-more-menu" id="navMoreMenu">
+                    <span class="nav-more-label">더보기</span>
+                    <button class="main-tab" data-tab="timetable" data-label="시간표">🗓 시간표</button>
+                    <button class="main-tab" data-tab="eps" data-label="EPS">🧭 EPS <span class="eps-trial-tag">시범</span></button>
+                    <button class="main-tab" data-tab="meeting" data-label="회의록">📋 회의록</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-11b" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-11c" hidden>
         <div class="update-notice-box">
             <details>
                 <summary>📢 업데이트 안내 (11/11) <span class="un-more">자세히</span>
-                    <p class="un-headline">[ 4 ] 미기록 현황에서 내 코드를 누르면 내 미기록만 모아 볼 수 있습니다.</p>
+                    <p class="un-headline">메뉴가 정리됐습니다. 시간표·EPS·회의록은 [더보기] 안에 있습니다.</p>
                 </summary>
                 <div class="un-day">11/11</div>
                 <ul>
-                    <li>[ 7 ] 회의록 탭이 생겼습니다. 기말고사 대비 회의 내용을 날짜별로 볼 수 있습니다.</li>
+                    <li>메뉴가 정리됐습니다. 폰에서는 메뉴가 화면 위쪽에 고정되어 스크롤해도 따라오고, 시간표·EPS·회의록은 [더보기]를 누르면 나옵니다. PC에서는 메뉴가 왼쪽에 있습니다.</li>
+                    <li>회의록 탭이 생겼습니다([더보기] 안). 기말고사 대비 회의 내용을 날짜별로 볼 수 있습니다.</li>
+                    <li>미기록 현황에서 내 코드를 누르면 내 미기록만 모아 볼 수 있습니다.</li>
                     <li>미기록 현황이 중등·고등을 합쳐 선생님별로 보입니다. 위쪽에서 내 코드를 누르거나 검색하면 내 것만 나옵니다.</li>
                     <li>아직 오지 않은 수업과 오늘 수업은 미기록으로 표시하지 않습니다. 시간표 기준으로 어제까지 지난 수업만 확인합니다.</li>
                     <li>빠른 입력의 내 반 목록에도 이번 주 미기록이 표시되고, 그 반을 열면 빠진 칸이 노랗게 보입니다.</li>
                 </ul>
                 <div class="un-day">11/10</div>
                 <ul>
-                    <li>내 시간표를 저장할 수 있습니다. [ 5 ] 시간표에서 내 코드를 누른 뒤 [사진으로 저장], [텍스트로 저장], [텍스트 복사] 중에서 고르세요. 휴대폰에서는 공유 창이 열려 사진첩이나 카톡으로 바로 보낼 수 있습니다.</li>
+                    <li>내 시간표를 저장할 수 있습니다. 시간표에서 내 코드를 누른 뒤 [사진으로 저장], [텍스트로 저장], [텍스트 복사] 중에서 고르세요. 휴대폰에서는 공유 창이 열려 사진첩이나 카톡으로 바로 보낼 수 있습니다.</li>
                     <li>기말고사 대비 기간에 맞춰 화면 테마를 바꿨습니다. 기능은 그대로이고 색과 장식만 달라졌습니다.</li>
                     <li>시간표에서 과목 뒤의 E(국어E·영어E·수학E)는 EPS 시간이며 점선 칸으로 표시됩니다.</li>
-                    <li>[ 5 ] 시간표 탭에서 선생님 코드를 누르면 기말고사 대비 시간표(11/9~) 기준으로 내 한 주 수업이 교시·시간·강의실과 함께 나옵니다. 오늘 수업은 맨 위에 따로 보여 줍니다.</li>
+                    <li>시간표 탭에서 선생님 코드를 누르면 기말고사 대비 시간표(11/9~) 기준으로 내 한 주 수업이 교시·시간·강의실과 함께 나옵니다. 오늘 수업은 맨 위에 따로 보여 줍니다.</li>
                 </ul>
                 <div class="un-day">10/23</div>
                 <ul>
@@ -2974,12 +3041,41 @@ const loadedTabs = new Set();
 function activateTab(key) {
     document.querySelectorAll('.main-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === key));
     document.querySelectorAll('.tab-panel').forEach(p => p.hidden = (p.id !== 'tab-' + key));
+    syncNavMore();
+}
+
+/* 더보기: 폰에서는 시간표·EPS·회의록을 접어 둔다. 그 안의 탭을 보고 있으면 버튼에 그 이름을 보여준다.
+   넓은 화면에서는 왼쪽 메뉴에 전부 펼쳐져 있어 버튼이 보이지 않는다. */
+const navMore = document.getElementById('navMore');
+const navMoreBtn = document.getElementById('navMoreBtn');
+
+function setNavMoreOpen(open) {
+    navMore.classList.toggle('open', open);
+    navMoreBtn.setAttribute('aria-expanded', String(open));
+}
+function syncNavMore() {
+    const current = navMore.querySelector('.main-tab.active');
+    navMoreBtn.classList.toggle('active', !!current);
+    navMoreBtn.textContent = (current ? current.dataset.label : '더보기') + ' ▾';
+    setNavMoreOpen(false);
+}
+navMoreBtn.addEventListener('click', () => setNavMoreOpen(!navMore.classList.contains('open')));
+document.addEventListener('click', (ev) => { if (!navMore.contains(ev.target)) setNavMoreOpen(false); });
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') setNavMoreOpen(false); });
+
+/** 아래로 내려가 있는 상태에서 탭을 바꾸면 새 탭의 맨 위부터 보이게 올려 준다 */
+function scrollToTabTop() {
+    const nav = document.getElementById('mainNav');
+    const navHeight = getComputedStyle(nav).position === 'sticky' ? nav.offsetHeight : 0;
+    const top = document.querySelector('main').getBoundingClientRect().top + window.scrollY - navHeight - 12;
+    if (window.scrollY > top) window.scrollTo(0, top);
 }
 
 document.querySelectorAll('.main-tab').forEach(btn => {
     btn.addEventListener('click', () => {
         const key = btn.dataset.tab;
         activateTab(key);
+        scrollToTabTop();
         if (!loadedTabs.has(key)) {
             loadedTabs.add(key);
             TAB_LOADERS[key]();
