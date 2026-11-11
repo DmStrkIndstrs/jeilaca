@@ -227,10 +227,15 @@
 
     details.prog-class-card.filtered-out { display:none; }
 
-    .missing-section-title {
-        font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:var(--accent-strong);
-        margin: 22px 0 10px; padding-bottom:6px; border-bottom:2px solid var(--accent-line);
+    .missing-summary { font-family:'Share Tech Mono',monospace; font-size:12px; color:#64748b; margin-bottom:14px; }
+    .missing-days-hint { font-size:11px; color:#94a3b8; margin-top:3px; }
+    .miss-chip-count {
+        display:inline-block; margin-left:6px; padding:0 6px; border-radius:9px; font-size:10px; font-weight:700;
+        background:#fee2e2; color:#b91c1c;
     }
+    .qe-teacher-chip.active .miss-chip-count { background:rgba(255,255,255,.28); color:#fff; }
+    .miss-dir-all { cursor:default; }
+    .qe-miss-badge { display:block; margin-top:5px; font-size:11px; font-weight:700; color:#b45309; }
     .missing-teacher-group { margin-bottom:20px; }
     .missing-teacher-title {
         font-family:'Rajdhani',sans-serif; font-weight:800; font-size:17px; color:#334155;
@@ -619,12 +624,18 @@
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-10c" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-11" hidden>
         <div class="update-notice-box">
             <details>
-                <summary>📢 업데이트 안내 (11/10) <span class="un-more">자세히</span>
-                    <p class="un-headline">[ 5 ] 시간표 탭에서 내 한 주 시간표를 보고, 사진이나 텍스트로 저장할 수 있습니다.</p>
+                <summary>📢 업데이트 안내 (11/11) <span class="un-more">자세히</span>
+                    <p class="un-headline">[ 4 ] 미기록 현황에서 내 코드를 누르면 내 미기록만 모아 볼 수 있습니다.</p>
                 </summary>
+                <div class="un-day">11/11</div>
+                <ul>
+                    <li>미기록 현황이 중등·고등을 합쳐 선생님별로 보입니다. 위쪽에서 내 코드를 누르거나 검색하면 내 것만 나옵니다.</li>
+                    <li>아직 오지 않은 수업과 오늘 수업은 미기록으로 표시하지 않습니다. 시간표 기준으로 어제까지 지난 수업만 확인합니다.</li>
+                    <li>빠른 입력의 내 반 목록에도 이번 주 미기록이 표시되고, 그 반을 열면 빠진 칸이 노랗게 보입니다.</li>
+                </ul>
                 <div class="un-day">11/10</div>
                 <ul>
                     <li>내 시간표를 저장할 수 있습니다. [ 5 ] 시간표에서 내 코드를 누른 뒤 [사진으로 저장], [텍스트로 저장], [텍스트 복사] 중에서 고르세요. 휴대폰에서는 공유 창이 열려 사진첩이나 카톡으로 바로 보낼 수 있습니다.</li>
@@ -671,22 +682,24 @@
         </div>
 
         <!-- TAB 3: 미기록 현황 -->
-        <div id="tab-missing" class="tab-panel space-y-6" hidden>
-            <div class="terran-panel p-5">
-                <p class="font-mono-tech text-xs text-slate-500 leading-relaxed">
-                    이번 주 기준, <strong class="text-red-600">🔴 전혀 기록되지 않은 과목</strong>과
-                    <strong class="text-amber-600">🟡 일부 요일만 누락된 과목</strong>을 모아 보여줍니다.
-                    (해당 요일에 수업이 없어서 원래 비어있는 칸은 제외)
+        <div id="tab-missing" class="tab-panel space-y-4" hidden>
+            <div class="terran-panel p-5 space-y-4">
+                <h2 class="qe-panel-title">🔎 미기록 현황</h2>
+                <p class="font-mono-tech text-[11px] text-slate-500 leading-relaxed">
+                    이번 주 수업 가운데 <strong>어제까지 지난 수업</strong>인데 기록이 비어 있는 것만 보여줍니다. 오늘 수업과 아직 오지 않은 수업은 표시하지 않습니다.<br>
+                    <strong class="text-red-600">🔴 이번 주 기록이 전혀 없는 수업</strong> ·
+                    <strong class="text-amber-600">🟡 일부만 빠진 수업</strong> · 항목을 누르면 바로 그 칸을 입력할 수 있습니다.
                 </p>
+                <div>
+                    <label for="missTeacherInput" class="font-mono-tech text-xs text-blue-700 font-bold uppercase tracking-widest block mb-2">내 코드로 찾기</label>
+                    <input type="text" id="missTeacherInput" class="prog-search" placeholder="🔎 코드나 과목을 입력하거나 아래에서 누르세요 (예: 휘, 수학)">
+                </div>
+                <div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 font-bold mb-1.5">미기록이 있는 선생님 (숫자 = 빠진 수업 수)</p>
+                    <div id="missTeacherDir" class="qe-dir"></div>
+                </div>
             </div>
-            <div>
-                <h2 class="missing-section-title">📘 중등</h2>
-                <div id="missing-mid-body" class="space-y-3"></div>
-            </div>
-            <div>
-                <h2 class="missing-section-title">📗 고등</h2>
-                <div id="missing-high-body" class="space-y-3"></div>
-            </div>
+            <div id="missing-body"></div>
         </div>
 
         <!-- TAB 4: 빠른 입력 -->
@@ -973,9 +986,10 @@ async function loadProgressTab(tabKey) {
 }
 
 /* ───────────────────────── TAB 3: 미기록 현황 (missing records) ─────────────────────────
-   대부분 반은 월수금 또는 화목토 고정 요일로 수업하므로, 이 시트에 쌓인 지난 주차들의
-   실제 기록 요일을 모아 "평소 수업 요일"을 스스로 추정하고, 최신 주차에서 그 요일이
-   통째로 비어있으면 (수업은 있었는데 기록을 안 한 것으로 보고) 잡아낸다. */
+   이번 주차에서 "이미 지난 수업일"인데 기록이 비어 있는 칸만 잡아낸다.
+   · 오늘 수업은 아직 끝나지 않았을 수 있으므로 어제까지만 본다.
+   · 수업 요일은 시트의 시간표 탭을 먼저 따르고, 시간표에 없는 반은 최근에 실제로 기록한 요일로 추정한다.
+   · 둘 다 없어 수업 요일을 모르는 반은, 수요일이 지나도록 기록이 하나도 없을 때만 알린다. */
 function parseWeekRange(label) {
     const m = label.match(/(\d+)\s*\/\s*(\d+)\s*[~\-]\s*(\d+)\s*\/\s*(\d+)/);
     if (!m) return null;
@@ -989,19 +1003,11 @@ function parseWeekRange(label) {
     return { start, end };
 }
 
-function getQualifyingWeeks(weeks) {
-    // 아직 시작하지 않은(미래) 주차는 제외하고, 이미 시작된(진행 중 포함) 주차만 남긴다
-    const now = new Date();
-    return Object.keys(weeks).filter(w => {
-        const range = parseWeekRange(w);
-        return !range || range.start <= now;
-    });
-}
-
-function noCurrentWeekNoticeHtml() {
+function noCurrentWeekNoticeHtml(label) {
     const d = new Date();
+    const today = `이번 주(오늘 ${d.getMonth() + 1}/${d.getDate()})`;
     return `<div class="no-week-notice">
-        ⚠ 이번 주(오늘 ${d.getMonth() + 1}/${d.getDate()}) 주차가 시트에 아직 없습니다
+        ⚠ ${label ? `${label} 시트에 ${today} 주차가 아직 없습니다` : `${today} 주차가 시트에 아직 없습니다`}
         <span>관리자가 시트에 이번 주 주차를 추가하면 자동으로 나타납니다.</span>
     </div>`;
 }
@@ -1030,70 +1036,126 @@ function splitRecentWeeks(labels) {
     return { old: labels.slice(0, cut), recent: labels.slice(cut) };
 }
 
-function computeMissing(weeks) {
+const normKey = s => String(s || '').replace(/\s+/g, '').toLowerCase();
+const namesAlike = (a, b) => a === b || a.startsWith(b) || b.startsWith(a); // '무학여고'↔'무학', '성동'↔'성동S'
+
+/** 시트의 반 이름을 시간표와 견줄 조각으로 나눈다.
+    '중1 동마/행당' → [동마, 행당] (앞의 학년은 뗀다), '국어(무학/금호)' → [무학, 금호] (과목명 뒤 괄호 안이 반) */
+function sheetClassTokens(grade, className, subject) {
+    let c = normKey(className);
+    const g = normKey(grade);
+    if (g && c.startsWith(g)) c = c.slice(g.length);
+    const s = normKey(subject);
+    if (s && c.startsWith(s + '(') && c.endsWith(')')) c = c.slice(s.length + 1, -1);
+    return c.split(/[\/·,]/).filter(Boolean);
+}
+
+/** 시간표(TT_LESSONS)에서 이 수업의 요일을 찾는다. 시트와 시간표는 반 이름을 조금씩 다르게 적으므로
+    학년·과목이 같고 반 이름 조각이 서로 맞는 줄을 고른다. 탐구처럼 시트의 반 이름이 곧 시간표의 과목명인
+    경우(세포물질A, 동아사 …)도 받는다. 담당까지 같은 줄을 먼저 찾고, 없으면 담당을 빼고 다시 찾는다.
+    EPS(국어E …)·클리닉 시간은 과목명이 달라 자연히 빠진다. */
+function timetableDays(target, grade, className, entry) {
+    const g = normKey(grade);
+    const subject = normKey(entry.subject);
+    const wholeClass = normKey(className);
+    const want = sheetClassTokens(grade, className, entry.subject);
+
+    const find = (withTeacher) => {
+        const days = new Set();
+        TT_LESSONS.forEach(l => {
+            if (l.target !== target || (withTeacher && l.teacher !== entry.teacher)) return;
+            const lg = normKey(l.grade);
+            if (lg !== g && !(lg.startsWith('초') && g.startsWith('초'))) return;
+            const ls = normKey(l.subject);
+            const have = normKey(l.className).replace('내신특강', '').split(/[\/·,]/).filter(Boolean);
+            const sameClass = ls === subject && want.length > 0 && want.every(w => have.some(h => namesAlike(w, h)));
+            const classIsSubject = ls === wholeClass || ls.startsWith(wholeClass + '('); // '물리' ↔ '물리(성동)'
+            if (sameClass || classIsSubject) days.add(l.day);
+        });
+        return DAY_NAMES.filter(d => days.has(d));
+    };
+
+    const days = (entry.teacher && find(true).length) ? find(true) : find(false);
+    return days.length ? days : null;
+}
+
+const dayHistoryKey = (grade, className, entry) =>
+    [normKey(grade), normKey(className), entry.teacher, normKey(entry.subject)].join('|');
+
+/** 이번 주차보다 앞에 있는 주차들에서, 수업별로 실제 기록이 있던 주의 요일 목록을 모은다 (오래된 순) */
+function buildDayHistory(weeks, currentWeek) {
+    const labels = Object.keys(weeks);
+    const history = {};
+    labels.slice(0, labels.indexOf(currentWeek)).forEach(week => {
+        const grades = weeks[week];
+        Object.keys(grades).forEach(grade => Object.keys(grades[grade]).forEach(className => {
+            grades[grade][className].forEach(entry => {
+                const used = DAY_NAMES.filter(d => Object.values(entry.data).some(row => row[d]));
+                if (!used.length) return; // 기록을 아예 안 한 주는 근거가 못 된다
+                const key = dayHistoryKey(grade, className, entry);
+                (history[key] || (history[key] = [])).push(used);
+            });
+        }));
+    });
+    return history;
+}
+
+/** 최근에 기록한 3주 가운데 2주 이상 나온 요일만 평소 수업일로 본다 (시험·보강으로 한 번 찍힌 요일은 제외) */
+function usualDaysFromHistory(recordedWeeks) {
+    if (!recordedWeeks || !recordedWeeks.length) return null;
+    const recent = recordedWeeks.slice(-3);
+    const need = recent.length >= 2 ? 2 : 1;
+    const days = DAY_NAMES.filter(d => recent.filter(used => used.includes(d)).length >= need);
+    return days.length ? days : null;
+}
+
+/** 수업 요일을 모르는 반은 아직 안 온 수업일 수 있으므로, 토요일까지 다 지난 일요일에만 "기록 없음"을 알린다 */
+const UNKNOWN_DAYS_FLAG_FROM = 6;
+
+function computeMissing(weeks, target) {
     const currentWeek = findCurrentWeek(weeks);
     if (!currentWeek) return { week: null, results: [] };
 
-    // 평소 수업 요일 추정에는 지난 주차들도 함께 본다
-    const weekLabels = getQualifyingWeeks(weeks);
-    const now = new Date();
-    const todayIdx = (now.getDay() + 6) % 7; // 0=월 ... 6=일
-
-    const expectedDays = {}; // "grade|class|teacher|subject" -> Set(요일)
-    weekLabels.forEach(week => {
-        const grades = weeks[week];
-        Object.keys(grades).forEach(grade => {
-            Object.keys(grades[grade]).forEach(className => {
-                grades[grade][className].forEach(entry => {
-                    const key = `${grade}|${className}|${entry.teacher}|${entry.subject}`;
-                    const rowTypes = Object.keys(entry.data);
-                    DAY_NAMES.forEach(d => {
-                        if (rowTypes.some(t => entry.data[t][d])) {
-                            (expectedDays[key] || (expectedDays[key] = new Set())).add(d);
-                        }
-                    });
-                });
-            });
-        });
-    });
+    const todayIdx = (new Date().getDay() + 6) % 7; // 0=월 ... 6=일
+    const isPast = d => DAY_NAMES.indexOf(d) < todayIdx; // 오늘 수업은 아직 안 끝났을 수 있어 내일부터 확인한다
+    const history = buildDayHistory(weeks, currentWeek);
 
     const results = [];
     const grades = weeks[currentWeek];
     Object.keys(grades).forEach(grade => {
         Object.keys(grades[grade]).forEach(className => {
             grades[grade][className].forEach(entry => {
-                const key = `${grade}|${className}|${entry.teacher}|${entry.subject}`;
                 const rowTypes = Object.keys(entry.data);
                 if (!rowTypes.length) return;
                 const usedDays = DAY_NAMES.filter(d => rowTypes.some(t => entry.data[t][d]));
-                const expected = expectedDays[key] || new Set();
 
-                if (!usedDays.length) {
-                    if (expected.size && ![...expected].some(d => DAY_NAMES.indexOf(d) <= todayIdx)) {
-                        return; // 평소 수업일이 이번 주에 아직 하나도 안 지남 - 너무 이른 경고 방지
-                    }
-                    const hint = expected.size ? ` (평소 수업일: ${[...expected].join(', ')})` : '';
-                    const cells = (expected.size ? [...expected] : rowTypes.length ? DAY_NAMES : []).map(d => ({ day: d }));
-                    results.push({ grade, className, teacher: entry.teacher, subject: entry.subject, severity: 'none',
-                        detail: `이번 주 기록이 전혀 없습니다.${hint}`, cells });
-                    return;
-                }
+                const ttDays = timetableDays(target, grade, className, entry);
+                const classDays = ttDays || usualDaysFromHistory(history[dayHistoryKey(grade, className, entry)]);
 
                 const gapTexts = [];
                 const cells = [];
-                expected.forEach(d => {
-                    if (DAY_NAMES.indexOf(d) > todayIdx) return; // 아직 안 지난 요일은 제외
-                    if (!usedDays.includes(d)) { gapTexts.push(`${d}요일 전체 누락 (평소 수업일)`); cells.push({ day: d }); }
-                });
-                usedDays.forEach(d => {
+                const missedDays = (classDays || []).filter(d => isPast(d) && !usedDays.includes(d));
+                if (missedDays.length) {
+                    gapTexts.push(`${missedDays.join('·')}요일 기록 없음`);
+                    missedDays.forEach(d => cells.push({ day: d }));
+                }
+                usedDays.filter(isPast).forEach(d => {
                     rowTypes.forEach(t => {
                         if (!entry.data[t][d]) { gapTexts.push(`${d}요일 ${ROW_TYPE_LABEL[t] || t} 누락`); cells.push({ day: d, rowType: t }); }
                     });
                 });
-
-                if (gapTexts.length) {
-                    results.push({ grade, className, teacher: entry.teacher, subject: entry.subject, severity: 'partial', detail: gapTexts.join(', '), cells });
+                if (!classDays && !usedDays.length && todayIdx >= UNKNOWN_DAYS_FLAG_FROM) {
+                    gapTexts.push('이번 주 기록이 아직 하나도 없습니다');
                 }
+                if (!gapTexts.length) return;
+
+                results.push({
+                    target, week: currentWeek, grade, className, teacher: entry.teacher, subject: entry.subject,
+                    severity: usedDays.length ? 'partial' : 'none',
+                    detail: gapTexts.join(', '),
+                    daysHint: classDays ? `수업일 ${classDays.join('·')} (${ttDays ? '시간표' : '최근 기록'} 기준)` : '수업 요일 정보 없음',
+                    cells
+                });
             });
         });
     });
@@ -1101,70 +1163,146 @@ function computeMissing(weeks) {
     return { week: currentWeek, results };
 }
 
-let MISSING_RESULTS = [];
+let MISSING_RESULTS = [];         // 중등·고등을 합친 이번 주 미기록 목록
+let MISSING_TEACHERS = new Set(); // 이번 주차에 수업이 있는 선생님 코드
+let MISSING_NOTICES = [];         // 주차 없음 · 로드 실패 안내
+let MISSING_WEEK = '';
+let missingPreset = false;
+const NO_TEACHER = '(담당 미정)';
 
-function renderMissingList(bodyEl, weeks, target) {
-    const { week, results } = computeMissing(weeks);
-    if (!week) {
-        bodyEl.innerHTML = noCurrentWeekNoticeHtml();
-        return;
-    }
-    if (!results.length) {
-        bodyEl.innerHTML = `<div class="missing-empty-ok">✅ ${escapeHtml(week)} 주 — 현재까지 빠진 기록이 없습니다!</div>`;
-        return;
-    }
+/** 선생님 코드로 바로 찾을 수 있게, 중등·고등을 합쳐 선생님 한 분씩 묶어 보여준다 */
+function renderMissing() {
+    const q = document.getElementById('missTeacherInput').value.trim();
+    const ql = q.toLowerCase();
+    const dirEl = document.getElementById('missTeacherDir');
+    const bodyEl = document.getElementById('missing-body');
+    const todayIdx = (new Date().getDay() + 6) % 7;
+
     const byTeacher = {};
-    results.forEach(r => {
-        r.target = target;
-        r.week = week;
-        const key = r.teacher || '(미상)';
-        (byTeacher[key] || (byTeacher[key] = [])).push(r);
+    const dir = {}; // 과목 -> Set(미기록이 있는 선생님 코드)
+    MISSING_RESULTS.forEach((r, i) => {
+        r.idx = i;
+        const named = /[\p{L}\p{N}]/u.test(r.teacher || ''); // 시트에 '-' 처럼 자리만 채운 담당은 미정으로 본다
+        const code = named ? r.teacher : NO_TEACHER;
+        (byTeacher[code] || (byTeacher[code] = [])).push(r);
+        if (named) { const s = r.subject || '기타'; (dir[s] || (dir[s] = new Set())).add(r.teacher); }
     });
-    const teachers = Object.keys(byTeacher).sort((a, b) => byTeacher[b].length - byTeacher[a].length);
+    const selected = q && (byTeacher[q] || MISSING_TEACHERS.has(q)) ? q : null;
+    const filtering = q && !selected;
 
-    bodyEl.innerHTML = `<p class="font-mono-tech text-xs text-slate-400 mb-3">${escapeHtml(week)} 주 기준 · 항목을 클릭하면 바로 입력할 수 있습니다</p>` +
-        teachers.map(teacher => {
-            const items = byTeacher[teacher];
-            return `
-                <div class="missing-teacher-group">
-                    <h3 class="missing-teacher-title">${teacher === '(미상)' ? `<span class="teacher">${escapeHtml(teacher)}</span>`
-                        : `<button type="button" class="teacher-link" title="${escapeHtml(teacher)} 선생님 빠른 입력으로 이동" data-week="${escapeHtml(week)}" data-teacher="${escapeHtml(teacher)}">${escapeHtml(teacher)}<span class="teacher-link-hint">✏️</span></button>`} 선생님 <span class="missing-count">${items.length}건</span></h3>
-                    ${items.map(r => {
-                        MISSING_RESULTS.push(r);
-                        const idx = MISSING_RESULTS.length - 1;
-                        return `
-                        <button type="button" class="missing-item sev-${r.severity}" data-ref="${idx}">
-                            <div class="missing-title">
-                                ${r.severity === 'none' ? '🔴' : '🟡'} ${escapeHtml(r.grade)} · ${escapeHtml(r.className)} · ${escapeHtml(r.subject)}
-                                <span class="missing-goto">✎ 입력하기</span>
-                            </div>
-                            <div class="missing-detail">${escapeHtml(r.detail)}</div>
-                        </button>
-                    `; }).join('')}
-                </div>`;
-        }).join('');
+    // 과목별 선생님 목록 (숫자 = 그 선생님의 미기록 수업 수)
+    const chip = (code, label, count, active) =>
+        `<button type="button" class="qe-teacher-chip${active ? ' active' : ''}" data-pick="${escapeHtml(code)}">${escapeHtml(label)}<span class="miss-chip-count">${count}</span></button>`;
+    const visible = new Set();
+    const rows = sortSubjects(Object.keys(dir)).map(subject => {
+        const subjectMatch = !filtering || subject.toLowerCase().includes(ql);
+        const codes = [...dir[subject]].sort((a, b) => a.localeCompare(b, 'ko'))
+            .filter(code => subjectMatch || code.toLowerCase().includes(ql));
+        if (!codes.length) return '';
+        codes.forEach(code => visible.add(code));
+        return `
+            <div class="qe-dir-row">
+                <button type="button" class="qe-dir-subject" data-pick="${escapeHtml(subject)}" title="${escapeHtml(subject)} 선생님만 보기">${escapeHtml(subject)}</button>
+                <div class="qe-dir-chips">${codes.map(code => chip(code, code, byTeacher[code].length, code === selected)).join('')}</div>
+            </div>`;
+    }).join('');
+    dirEl.innerHTML = !MISSING_RESULTS.length ? `<div class="font-mono-tech text-xs text-slate-400">미기록이 있는 선생님이 없습니다.</div>`
+        : `<div class="qe-dir-row">
+                <span class="qe-dir-subject miss-dir-all">전체</span>
+                <div class="qe-dir-chips">${chip('', '전체 보기', MISSING_RESULTS.length, !q)}</div>
+           </div>` + (rows || `<div class="font-mono-tech text-xs text-slate-400">"${escapeHtml(q)}"에 해당하는 선생님이나 과목이 없습니다.</div>`);
 
-    bodyEl.querySelectorAll('.missing-item').forEach(btn => {
-        btn.addEventListener('click', () => jumpToQuickEntry(MISSING_RESULTS[parseInt(btn.dataset.ref, 10)]));
-    });
+    // 본문
+    const basis = todayIdx === 0
+        ? '월요일에는 아직 확인할 수업이 없습니다 · 화요일부터 표시됩니다'
+        : `${DAY_NAMES[todayIdx - 1]}요일(어제)까지의 수업 기준 · 오늘 수업은 내일부터 표시됩니다`;
+    const summary = MISSING_WEEK ? `<p class="missing-summary">${escapeHtml(MISSING_WEEK)} 주 · ${basis}</p>` : '';
+
+    let teachers;
+    if (selected) teachers = byTeacher[selected] ? [selected] : [];
+    else teachers = Object.keys(byTeacher).filter(code => !filtering || visible.has(code))
+        .sort((a, b) => (a === NO_TEACHER) - (b === NO_TEACHER) || a.localeCompare(b, 'ko'));
+
+    let listHtml;
+    if (!MISSING_WEEK) listHtml = '';
+    else if (!MISSING_RESULTS.length) listHtml = `<div class="missing-empty-ok">✅ 어제까지의 수업 중 빠진 기록이 없습니다!</div>`;
+    else if (selected && !teachers.length) listHtml = `<div class="missing-empty-ok">✅ ${escapeHtml(selected)} 선생님은 어제까지의 수업 중 빠진 기록이 없습니다!</div>`;
+    else if (!teachers.length) listHtml = `<div class="qe-hint">"${escapeHtml(q)}" 코드나 과목으로는 미기록 항목이 없습니다.</div>`;
+    else listHtml = teachers.map(teacher => {
+        const items = byTeacher[teacher];
+        return `
+            <div class="missing-teacher-group">
+                <h3 class="missing-teacher-title">${teacher === NO_TEACHER ? `<span class="teacher">${escapeHtml(teacher)}</span>`
+                    : `<button type="button" class="teacher-link" title="${escapeHtml(teacher)} 선생님 빠른 입력으로 이동" data-week="${escapeHtml(items[0].week)}" data-teacher="${escapeHtml(teacher)}">${escapeHtml(teacher)}<span class="teacher-link-hint">✏️</span></button> 선생님`} <span class="missing-count">${items.length}건</span></h3>
+                ${items.map(r => `
+                    <button type="button" class="missing-item sev-${r.severity}" data-ref="${r.idx}">
+                        <div class="missing-title">
+                            <span>${r.severity === 'none' ? '🔴' : '🟡'} <span class="qe-class-tag">${r.target === 'mid' ? '중등' : '고등'}</span>${escapeHtml(r.grade)} · ${escapeHtml(r.className)} · ${escapeHtml(r.subject)}</span>
+                            <span class="missing-goto">✎ 입력하기</span>
+                        </div>
+                        <div class="missing-detail">${escapeHtml(r.detail)}</div>
+                        <div class="missing-days-hint">${escapeHtml(r.daysHint)}</div>
+                    </button>`).join('')}
+            </div>`;
+    }).join('');
+
+    bodyEl.innerHTML = MISSING_NOTICES.join('') + summary + listHtml;
 }
 
+document.getElementById('missTeacherInput').addEventListener('input', renderMissing);
+
+document.getElementById('missTeacherDir').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-pick]');
+    if (!btn) return;
+    document.getElementById('missTeacherInput').value = btn.dataset.pick;
+    renderMissing();
+    if (btn.classList.contains('qe-teacher-chip') && btn.dataset.pick) {
+        document.getElementById('missing-body').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+});
+
+/* 항목을 누르면 빠른 입력의 그 칸으로, 선생님 코드를 누르면 그 선생님의 빠른 입력으로 간다 */
+document.getElementById('missing-body').addEventListener('click', (ev) => {
+    const link = ev.target.closest('.teacher-link');
+    if (link) { jumpToQuickEntry({ week: link.dataset.week, teacher: link.dataset.teacher }); return; }
+    const item = ev.target.closest('.missing-item');
+    if (item) jumpToQuickEntry(MISSING_RESULTS[parseInt(item.dataset.ref, 10)]);
+});
+
 async function loadMissingTab() {
-    const midBody = document.getElementById('missing-mid-body');
-    const highBody = document.getElementById('missing-high-body');
-    midBody.innerHTML = highBody.innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
-    MISSING_RESULTS = [];
+    const bodyEl = document.getElementById('missing-body');
+    bodyEl.innerHTML = `<div class="flex justify-center py-10"><div class="spinner"></div></div>`;
 
-    const [midRows, highRows] = await Promise.allSettled([
-        fetchCSV(PROGRESS_SHEETS['prog-mid'].sheetId, PROGRESS_SHEETS['prog-mid'].gid),
-        fetchCSV(PROGRESS_SHEETS['prog-high'].sheetId, PROGRESS_SHEETS['prog-high'].gid)
-    ]);
+    const targets = [['mid', 'prog-mid', '중등'], ['high', 'prog-high', '고등']];
+    const sheets = await Promise.allSettled(targets.map(([, key]) => fetchCSV(PROGRESS_SHEETS[key].sheetId, PROGRESS_SHEETS[key].gid)));
 
-    if (midRows.status === 'fulfilled') renderMissingList(midBody, parseProgressRows(midRows.value), 'mid');
-    else midBody.innerHTML = `<div class="text-red-600 font-mono-tech text-xs">⚠ 로드 실패: ${midRows.reason}</div>`;
+    const results = [], notices = [], weekLabels = [];
+    const teachers = new Set();
+    targets.forEach(([target, , label], i) => {
+        if (sheets[i].status !== 'fulfilled') {
+            notices.push(`<div class="text-red-600 font-mono-tech text-xs mb-2">⚠ ${label} 로드 실패: ${escapeHtml(String(sheets[i].reason))}</div>`);
+            return;
+        }
+        const weeks = parseProgressRows(sheets[i].value);
+        const found = computeMissing(weeks, target);
+        if (!found.week) { notices.push(noCurrentWeekNoticeHtml(label)); return; }
+        if (!weekLabels.includes(found.week)) weekLabels.push(found.week);
+        Object.values(weeks[found.week]).forEach(classes => Object.values(classes).forEach(entries =>
+            entries.forEach(e => { if (e.teacher) teachers.add(e.teacher); })));
+        results.push(...found.results);
+    });
+    MISSING_RESULTS = results;
+    MISSING_TEACHERS = teachers;
+    MISSING_NOTICES = notices;
+    MISSING_WEEK = weekLabels.join(' / ');
 
-    if (highRows.status === 'fulfilled') renderMissingList(highBody, parseProgressRows(highRows.value), 'high');
-    else highBody.innerHTML = `<div class="text-red-600 font-mono-tech text-xs">⚠ 로드 실패: ${highRows.reason}</div>`;
+    // 개인 링크(?t=코드)로 들어오면 처음 한 번은 그 선생님 것만 보여준다
+    const input = document.getElementById('missTeacherInput');
+    if (!missingPreset) {
+        missingPreset = true;
+        if (TEACHER_CODE && !input.value) input.value = TEACHER_CODE;
+    }
+    renderMissing();
 }
 
 /* ───────────────────────── TAB 4: 빠른 입력 (quick entry → writes to the sheet) ───────────────────────── */
@@ -1218,6 +1356,7 @@ function renderQeClassList(items) {
         listEl.innerHTML = `<div class="terran-panel p-5 text-center text-slate-400 font-mono-tech text-sm">해당 코드로 이 주차에 배정된 수업을 찾지 못했습니다.</div>`;
         return;
     }
+    qeListItems = items;
     listEl.innerHTML = items.map((item, idx) => `
         <button type="button" class="qe-class-btn" data-idx="${idx}">
             <span class="qe-class-tag">${item.target === 'mid' ? '중등' : '고등'}</span>
@@ -1228,8 +1367,41 @@ function renderQeClassList(items) {
         btn.addEventListener('click', () => {
             listEl.querySelectorAll('.qe-class-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            renderQeForm(items[parseInt(btn.dataset.idx, 10)]);
+            const item = items[parseInt(btn.dataset.idx, 10)];
+            renderQeForm(item);
+            const miss = qeMissMap[qeMissKey(item)];
+            if (miss) highlightQeCells(miss.cells);
         });
+    });
+    paintQeMissBadges();
+}
+
+/* 반 목록에 이번 주 미기록을 표시한다. 그 반을 열면 빠진 칸이 노랗게 보인다.
+   저장이 끝나면 다시 계산한다. */
+let qeListItems = [];
+let qeMissMap = {};
+const qeMissKey = (it) => [it.target, it.week, it.grade, it.className, it.entry ? it.entry.teacher : it.teacher, it.entry ? it.entry.subject : it.subject].join('|~|');
+
+function paintQeMissBadges() {
+    if (!QE_DATA) return;
+    qeMissMap = {};
+    ['mid', 'high'].forEach(target => computeMissing(QE_DATA[target], target).results.forEach(r => { qeMissMap[qeMissKey(r)] = r; }));
+    document.querySelectorAll('#qeClassList .qe-class-btn').forEach(btn => {
+        const item = qeListItems[parseInt(btn.dataset.idx, 10)];
+        const miss = item && qeMissMap[qeMissKey(item)];
+        let badge = btn.querySelector('.qe-miss-badge');
+        if (!miss) { if (badge) badge.remove(); return; }
+        if (!badge) { badge = document.createElement('span'); badge.className = 'qe-miss-badge'; btn.appendChild(badge); }
+        badge.textContent = '⚠ 미기록 · ' + miss.detail;
+    });
+}
+
+function highlightQeCells(cells) {
+    (cells || []).forEach(c => {
+        const selector = c.rowType
+            ? `.qe-bulk-cell[data-rowtype="${CSS.escape(c.rowType)}"][data-day="${c.day}"]`
+            : `.qe-bulk-cell[data-day="${c.day}"]`;
+        document.querySelectorAll(selector).forEach(el => el.classList.add('qe-cell-highlight'));
     });
 }
 
@@ -1459,6 +1631,7 @@ function saveQeBulk(item) {
             qeToastOkTimer = setTimeout(() => { qeToastOk = null; renderQeToast(); }, 3000);
         }
         renderQeToast();
+        paintQeMissBadges();
 
         // 저장한 반이 아직 열려 있으면 아래 안내 문구도 갱신한다
         if (qeCurrentItem && qeItemLabel(qeCurrentItem) === label && qeCurrentItem.week === item.week) {
@@ -1652,18 +1825,13 @@ async function jumpToQuickEntry(ref) {
     btns[idx].classList.add('active');
     renderQeForm(items[idx]);
 
-    (ref.cells || []).forEach(c => {
-        const selector = c.rowType
-            ? `.qe-bulk-cell[data-rowtype="${CSS.escape(c.rowType)}"][data-day="${c.day}"]`
-            : `.qe-bulk-cell[data-day="${c.day}"]`;
-        document.querySelectorAll(selector).forEach(el => el.classList.add('qe-cell-highlight'));
-    });
+    highlightQeCells(ref.cells);
 
     document.getElementById('qeFormArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* 진도표 · 미기록 현황의 선생님 코드를 누르면 그 선생님의 빠른 입력으로 바로 들어간다 */
-[['prog-mid-body', 'mid'], ['prog-high-body', 'high'], ['missing-mid-body', 'mid'], ['missing-high-body', 'high']].forEach(([id, target]) => {
+/* 진도표의 선생님 코드를 누르면 그 선생님의 빠른 입력으로 바로 들어간다 */
+[['prog-mid-body', 'mid'], ['prog-high-body', 'high']].forEach(([id, target]) => {
     document.getElementById(id).addEventListener('click', (ev) => {
         const btn = ev.target.closest('.teacher-link');
         if (!btn) return;
