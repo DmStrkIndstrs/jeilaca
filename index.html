@@ -453,6 +453,36 @@
     .prog-archive-body { padding:0 12px 12px; display:flex; flex-direction:column; gap:1rem; }
     .qe-pill.qe-pill-more { border-style:dashed; font-weight:400; }
 
+    /* 회의록 */
+    .mt-meeting { border:1px solid var(--border); border-radius:10px; background:var(--panel); margin-bottom:12px; }
+    .mt-meeting > summary {
+        list-style:none; cursor:pointer; padding:14px 18px; display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 12px;
+    }
+    .mt-meeting > summary::-webkit-details-marker { display:none; }
+    .mt-meeting > summary::before { content:'▸'; color:var(--accent); font-size:13px; }
+    .mt-meeting[open] > summary::before { content:'▾'; }
+    .mt-meeting[open] > summary { border-bottom:1px solid var(--border); }
+    .mt-date { font-family:'Share Tech Mono',monospace; font-weight:700; font-size:15px; color:var(--accent-strong); }
+    .mt-title { font-family:'Rajdhani','Noto Sans KR',sans-serif; font-weight:800; font-size:17px; color:#1e293b; }
+    .mt-count { font-family:'Share Tech Mono',monospace; font-size:11px; color:#94a3b8; margin-left:auto; }
+    .mt-sections { padding:6px 18px 16px; }
+    .mt-section { padding:14px 0; border-bottom:1px dashed #e2e8f0; }
+    .mt-section:last-child { border-bottom:0; padding-bottom:2px; }
+    .mt-section h3 {
+        font-family:'Noto Sans KR',sans-serif; font-weight:700; font-size:15px; color:#0f172a;
+        display:flex; align-items:center; gap:9px; margin-bottom:8px; word-break:keep-all;
+    }
+    .mt-num {
+        flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff;
+        font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700;
+        display:inline-flex; align-items:center; justify-content:center;
+    }
+    .mt-list { list-style:disc; padding-left:22px; margin:0; }
+    .mt-list li { font-size:13.5px; line-height:1.75; color:#334155; word-break:keep-all; margin:2px 0; }
+    .mt-list .mt-list { list-style:circle; padding-left:18px; margin-top:2px; }
+    .mt-list .mt-list li { font-size:13px; color:#475569; }
+    .mt-action { font-weight:700; color:var(--accent-strong); }
+
     /* Quick entry (빠른 입력) */
     .qe-panel-title {
         font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:#b45309;
@@ -617,6 +647,7 @@
                 <button class="main-tab" data-tab="missing">[ 4 ] 미기록 현황</button>
                 <button class="main-tab" data-tab="timetable">[ 5 ] 시간표</button>
                 <button class="main-tab" data-tab="eps">[ 6 ] EPS <span class="eps-trial-tag">시범</span></button>
+                <button class="main-tab" data-tab="meeting">[ 7 ] 회의록</button>
             </div>
         </div>
     </header>
@@ -624,7 +655,7 @@
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-11" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-11b" hidden>
         <div class="update-notice-box">
             <details>
                 <summary>📢 업데이트 안내 (11/11) <span class="un-more">자세히</span>
@@ -632,6 +663,7 @@
                 </summary>
                 <div class="un-day">11/11</div>
                 <ul>
+                    <li>[ 7 ] 회의록 탭이 생겼습니다. 기말고사 대비 회의 내용을 날짜별로 볼 수 있습니다.</li>
                     <li>미기록 현황이 중등·고등을 합쳐 선생님별로 보입니다. 위쪽에서 내 코드를 누르거나 검색하면 내 것만 나옵니다.</li>
                     <li>아직 오지 않은 수업과 오늘 수업은 미기록으로 표시하지 않습니다. 시간표 기준으로 어제까지 지난 수업만 확인합니다.</li>
                     <li>빠른 입력의 내 반 목록에도 이번 주 미기록이 표시되고, 그 반을 열면 빠진 칸이 노랗게 보입니다.</li>
@@ -756,6 +788,15 @@
                 </div>
             </div>
             <div id="epsBody"></div>
+        </div>
+
+        <!-- TAB 7: 회의록 -->
+        <div id="tab-meeting" class="tab-panel space-y-4" hidden>
+            <div class="terran-panel p-5 space-y-2">
+                <h2 class="qe-panel-title">📋 회의록</h2>
+                <p class="eps-intro">기말고사 대비 회의 내용을 날짜별로 정리해 둡니다. 최신 회의가 맨 위에 있고, 지난 회의는 날짜를 누르면 펼쳐집니다.</p>
+            </div>
+            <div id="meetingBody"></div>
         </div>
 
     </main>
@@ -2816,6 +2857,108 @@ document.getElementById('ttTeacherInput').addEventListener('input', e => {
     document.getElementById('ttBody').innerHTML = '';
 });
 
+/* ───────────────────────── TAB 7: 회의록 ─────────────────────────
+   회의가 끝나면 MEETING_NOTES 맨 위에 한 덩어리를 추가한다 (최신이 위).
+   - items 의 한 줄은 글자열, 또는 아래에 딸린 줄이 있으면 { text, sub: [...] }
+   - 이 페이지는 누구나 볼 수 있으므로 학생 이름은 가운데 글자를 가려 적는다 (김○훈) */
+const MEETING_NOTES = [
+    {
+        date: '2026-11-11',
+        title: '기말고사 대비 회의',
+        sections: [
+            { title: '기말고사 일정·진도', items: [
+                '이번엔 중간고사 때보다는 일정이 덜 복잡함(4주)',
+                '무학여고: 시험을 일찍 보는데 범위도 많고 아직 파악 덜 된 학생들 → 더 빡빡하게 진행',
+                '성동고: 뒤쪽 주말까지 안 끌고 가서 다행. 중등도 대부분 같은 시기에 끝남',
+                '학생들은 중간고사 대비 기간(약 6주)에 익숙해져 있어서 시간이 여유롭다고 착각할 수 있음 → 오히려 더 빨리 진도 + 시험대비일정 빠르게 빼야 함'
+            ] },
+            { title: '기록 업로드·하위권 관리', items: [
+                '진도·과제 기록, 출결방, EPS 테스트 결과 계속 올릴 것',
+                '성동 H반 EPS 단어 시험(150개)에서 100개 넘게 틀린 학생 다수: 정○진 -131, 송○후 -120, 이○환 -100 외 1명 → H반 집중 관리',
+                '수학도 마찬가지. 못 따라가는 건 이해하지만 조금이라도 발전이 보이게',
+                '성동 S반 빼면 다른 학교 반들도 상황 비슷 → 과제·테스트 끝까지 추적, 보충 적극 소집'
+            ] },
+            { title: '고등 성적표 이번주 공유 예정', items: [
+                '시험이 늦게 끝나서 취합이 늦어짐 → 이번 주 중 공유',
+                '원점수·등수 보고 등급 상승 여력 판단해서 목표 등급 설정',
+                '목표 점수도 정하되, 고등은 난이도 예측이 안 돼 중학교처럼 달성이 쉽진 않음. 그래도 원점수 목표는 높게 잡는 게 좋음',
+                '무학여고 학생들, 생각보다 가능성 보임'
+            ] },
+            { title: '시험 대비 분위기', items: [
+                '순회해보니 반마다 분위기 차이가 있음 → 통일할 것'
+            ] },
+            { title: '고1 시험 끝난 이후 다음 과정 수강 유도 (단과)', items: [
+                '담임 혼자보다 담당 선생님들이 거들어주는 효과가 큼. 학생들이 담임보다 담당 선생님을 더 따르는 경우도 많음',
+                '2학년 보면 철새·단과 수강생도 있지만, 1학년부터 다닌 학생 대부분은 4~5과목 이상 수강',
+                '수업 중에 "선배들도 다 같이 들었다, 고민할 거 없이 그냥 들으면 돼" 정도로 말해주면 됨',
+                '그러면 담임이 수강 과목 제시 후 학부모·학생과 협의하기 훨씬 수월해짐'
+            ] },
+            { title: '토요일 12시 1교시 지각 관리', items: [
+                '1교시가 EPS(영단어 시험)인데 늦으면 의미 없음',
+                'EPS 선생님도 말하겠지만, 목요일에 해당 과목 담당 선생님이 한 번 더 얘기해줄 것',
+                { text: '상습 지각:', sub: [
+                    '경일고: 대다수. 김○훈만 일찍 오고 나머지는 12:00~12:10 사이에 들어옴',
+                    '무학: 예○·윤○ — 매번 11시에 모닝콜 중',
+                    '성수·금호: 김○현, 송○찬, 김○민',
+                    '성동 H: 송○우 (매번 핑계)',
+                    '도선: 이○율 / 매번 달라 특정 어려움'
+                ] },
+                '금요일에 순회 한 번 더 예정이지만 효과가 크진 않음 → 담당 선생님들이 더 신경 써줄 것'
+            ] },
+            { title: '이번 주 토요일 특이사항', items: [
+                '무학여고·경일고는 본관으로 강의실 배치될 수 있음',
+                '2관 3층에서 1시에 예비 중1 설명회 있음',
+                '타임벨 3시까지 안 울림 — 시간 직접 챙길 것',
+                '위층 학생들(주로 도선 학생) 설명회 중 못 내려오게 막을 것'
+            ] },
+            { title: '성적 관리 집중 대상', items: [
+                '김○음, 이○른, 김○준(과학), 구○진(고2), 고○영(등급 애매), 유○연',
+                '이○영',
+                '장○민, 강○원',
+                '여○준 — 전 과목 3등급, 하나라도 2 나오면 좋겠음',
+                '수업하면서 이 학생들 계속 신경 쓰고, 담임 선생님들은 추가로 떠오르는 학생 있으면 출결방에 과목 명시해서 올려줄 것'
+            ] }
+        ]
+    }
+];
+
+function meetingDateLabel(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return `${d.getMonth() + 1}/${d.getDate()} (${DAY_NAMES[(d.getDay() + 6) % 7]})`;
+}
+
+/** '→' 뒤의 결론(할 일)은 눈에 띄게 한다 */
+function meetingLineHtml(text) {
+    const at = text.indexOf('→');
+    if (at === -1) return escapeHtml(text);
+    return `${escapeHtml(text.slice(0, at))}<span class="mt-action">${escapeHtml(text.slice(at))}</span>`;
+}
+
+function meetingItemsHtml(items) {
+    return `<ul class="mt-list">${items.map(it => typeof it === 'string'
+        ? `<li>${meetingLineHtml(it)}</li>`
+        : `<li>${meetingLineHtml(it.text)}${meetingItemsHtml(it.sub || [])}</li>`).join('')}</ul>`;
+}
+
+function renderMeetingTab() {
+    const notes = [...MEETING_NOTES].sort((a, b) => b.date.localeCompare(a.date));
+    document.getElementById('meetingBody').innerHTML = notes.map((note, i) => `
+        <details class="mt-meeting"${i === 0 ? ' open' : ''}>
+            <summary>
+                <span class="mt-date">${escapeHtml(meetingDateLabel(note.date))}</span>
+                <span class="mt-title">${escapeHtml(note.title)}</span>
+                <span class="mt-count">${note.sections.length}개 안건</span>
+            </summary>
+            <div class="mt-sections">
+                ${note.sections.map((s, n) => `
+                    <section class="mt-section">
+                        <h3><span class="mt-num">${n + 1}</span>${escapeHtml(s.title)}</h3>
+                        ${meetingItemsHtml(s.items)}
+                    </section>`).join('')}
+            </div>
+        </details>`).join('') || `<div class="qe-hint">아직 올라온 회의록이 없습니다.</div>`;
+}
+
 /* ───────────────────────── Tab switching ───────────────────────── */
 const TAB_LOADERS = {
     'prog-mid': () => loadProgressTab('prog-mid'),
@@ -2823,7 +2966,8 @@ const TAB_LOADERS = {
     'missing': loadMissingTab,
     'quickentry': loadQuickEntryTab,
     'timetable': loadTimetableTab,
-    'eps': loadEpsTab
+    'eps': loadEpsTab,
+    'meeting': renderMeetingTab
 };
 const loadedTabs = new Set();
 
