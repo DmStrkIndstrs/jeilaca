@@ -158,7 +158,10 @@
         box-shadow:0 2px 6px rgba(15,23,42,.07); backdrop-filter:blur(8px);
     }
     .main-nav-inner { display:flex; gap:4px; max-width:72rem; margin:0 auto; padding:8px; }
-    .nav-title { display:none; }
+    .nav-head { display:none; }
+    .nav-ico { margin-right:5px; }
+    /* 폰의 한 줄 메뉴는 자리가 좁아 빠른 입력만 아이콘을 보여준다 (더보기 안의 항목은 그대로) */
+    .main-nav-inner > .main-tab:not(.main-tab-cta) .nav-ico { display:none; }
     .main-nav .main-tab, .nav-more-btn {
         flex:1 1 auto; min-width:0; padding:10px 4px; text-align:center; white-space:nowrap;
         letter-spacing:0; font-size:clamp(11.5px, 3.4vw, 13.5px); font-family:'Noto Sans KR',sans-serif;
@@ -185,21 +188,40 @@
             border-bottom:0; border-right:1px solid var(--border); box-shadow:2px 0 6px rgba(15,23,42,.05);
         }
         .main-nav-inner { flex-direction:column; gap:8px; padding:22px 14px; }
+        .nav-head { display:flex; align-items:center; justify-content:space-between; padding:0 2px 6px 4px; }
         .nav-title {
-            display:block; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px;
-            letter-spacing:.25em; color:#94a3b8; padding:0 4px 6px;
+            font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px;
+            letter-spacing:.25em; color:#94a3b8;
         }
+        .nav-collapse-btn {
+            width:28px; height:28px; border:1px solid var(--border); border-radius:6px; background:#fff;
+            color:#64748b; font-size:14px; line-height:1; cursor:pointer;
+            transition: color .15s ease, border-color .15s ease;
+        }
+        .nav-collapse-btn:hover { color:var(--accent); border-color:var(--accent-border); }
+        .main-nav-inner > .main-tab:not(.main-tab-cta) .nav-ico { display:inline; }
+        .nav-ico { margin-right:8px; }
         .main-nav .main-tab { flex:none; padding:11px 14px; text-align:left; font-size:13px; letter-spacing:.03em; }
         .nav-more { flex:none; display:block; }
         .nav-more-btn { display:none; }
         .nav-more-menu, .nav-more.open .nav-more-menu {
-            display:flex; position:static; gap:8px; padding:0; margin-top:8px;
+            display:flex; position:static; gap:8px; padding:0; margin-top:8px; min-width:0;
             border:0; border-radius:0; box-shadow:none; background:none;
         }
         .nav-more-label {
             display:block; font-family:'Share Tech Mono',monospace; font-weight:700; font-size:11px;
             letter-spacing:.1em; color:#94a3b8; padding:12px 4px 0; border-top:1px solid #e2e8f0;
         }
+
+        /* 접은 상태: 아이콘만 남긴 좁은 줄. 이름은 마우스를 올리면 말풍선으로 보인다 */
+        html.nav-collapsed body { padding-left:4rem; }
+        html.nav-collapsed .main-nav { width:4rem; }
+        html.nav-collapsed .main-nav-inner { padding:22px 8px; align-items:stretch; }
+        html.nav-collapsed .nav-head { justify-content:center; padding:0 0 6px; }
+        html.nav-collapsed .nav-title, html.nav-collapsed .nav-text { display:none; }
+        html.nav-collapsed .nav-ico { margin-right:0; font-size:17px; }
+        html.nav-collapsed .main-nav .main-tab { padding:10px 0; text-align:center; }
+        html.nav-collapsed .nav-more-label { font-size:0; padding:0; margin-top:4px; }
     }
     .tab-panel[hidden] { display:none; }
     /* 빠른 입력은 선생님들이 가장 자주 쓰는 곳이라 다른 탭과 색을 달리해 눈에 띄게 한다 */
@@ -700,27 +722,32 @@
 
     <nav id="mainNav" class="main-nav" aria-label="메뉴">
         <div class="main-nav-inner" role="tablist">
-            <div class="nav-title">MENU</div>
-            <button class="main-tab main-tab-cta active" data-tab="quickentry">✏️ 빠른 입력</button>
-            <button class="main-tab" data-tab="prog-mid">중등 진도<span class="nav-wide">표</span></button>
-            <button class="main-tab" data-tab="prog-high">고등 진도<span class="nav-wide">표</span></button>
-            <button class="main-tab" data-tab="missing">미기록<span class="nav-wide"> 현황</span></button>
+            <div class="nav-head">
+                <span class="nav-title">MENU</span>
+                <button type="button" class="nav-collapse-btn" id="navCollapseBtn" aria-controls="mainNav" aria-expanded="true" aria-label="메뉴 접기" title="메뉴 접기">«</button>
+            </div>
+            <button class="main-tab main-tab-cta active" data-tab="quickentry" title="빠른 입력"><span class="nav-ico">✏️</span><span class="nav-text">빠른 입력</span></button>
+            <button class="main-tab" data-tab="prog-mid" title="중등 진도표"><span class="nav-ico">📘</span><span class="nav-text">중등 진도<span class="nav-wide">표</span></span></button>
+            <button class="main-tab" data-tab="prog-high" title="고등 진도표"><span class="nav-ico">📗</span><span class="nav-text">고등 진도<span class="nav-wide">표</span></span></button>
+            <button class="main-tab" data-tab="missing" title="미기록 현황"><span class="nav-ico">🔎</span><span class="nav-text">미기록<span class="nav-wide"> 현황</span></span></button>
             <div class="nav-more" id="navMore">
                 <button type="button" class="nav-more-btn" id="navMoreBtn" aria-expanded="false" aria-controls="navMoreMenu">더보기 ▾</button>
                 <div class="nav-more-menu" id="navMoreMenu">
                     <span class="nav-more-label">더보기</span>
-                    <button class="main-tab" data-tab="timetable" data-label="시간표">🗓 시간표</button>
-                    <button class="main-tab" data-tab="eps" data-label="EPS">🧭 EPS <span class="eps-trial-tag">시범</span></button>
-                    <button class="main-tab" data-tab="meeting" data-label="회의록">📋 회의록</button>
+                    <button class="main-tab" data-tab="timetable" data-label="시간표" title="시간표"><span class="nav-ico">🗓</span><span class="nav-text">시간표</span></button>
+                    <button class="main-tab" data-tab="eps" data-label="EPS" title="EPS (시범)"><span class="nav-ico">🧭</span><span class="nav-text">EPS <span class="eps-trial-tag">시범</span></span></button>
+                    <button class="main-tab" data-tab="meeting" data-label="회의록" title="회의록"><span class="nav-ico">📋</span><span class="nav-text">회의록</span></button>
                 </div>
             </div>
         </div>
     </nav>
+    <!-- 접어 둔 메뉴는 다음에 열 때도 접힌 채로 시작한다. 화면이 그려지기 전에 적용해 깜빡임을 막는다 -->
+    <script>try { if (localStorage.getItem('jeilaca-nav-collapsed') === '1') document.documentElement.classList.add('nav-collapsed'); } catch (e) {}</script>
 
     <div id="teacherBanner" class="teacher-banner" hidden></div>
 
     <!-- 업데이트 공지: 새 업데이트를 올릴 때 data-version 을 바꾸면 '확인했어요'를 눌렀던 사람에게도 다시 보인다 -->
-    <section id="updateNotice" class="update-notice" data-version="2026-11-11c" hidden>
+    <section id="updateNotice" class="update-notice" data-version="2026-11-12" hidden>
         <div class="update-notice-box">
             <details>
                 <summary>📢 업데이트 안내 (11/11) <span class="un-more">자세히</span>
@@ -728,7 +755,7 @@
                 </summary>
                 <div class="un-day">11/11</div>
                 <ul>
-                    <li>메뉴가 정리됐습니다. 폰에서는 메뉴가 화면 위쪽에 고정되어 스크롤해도 따라오고, 시간표·EPS·회의록은 [더보기]를 누르면 나옵니다. PC에서는 메뉴가 왼쪽에 있습니다.</li>
+                    <li>메뉴가 정리됐습니다. 폰에서는 메뉴가 화면 위쪽에 고정되어 스크롤해도 따라오고, 시간표·EPS·회의록은 [더보기]를 누르면 나옵니다. PC에서는 메뉴가 왼쪽에 있고, MENU 옆의 « 버튼으로 접을 수 있습니다.</li>
                     <li>회의록 탭이 생겼습니다([더보기] 안). 기말고사 대비 회의 내용을 날짜별로 볼 수 있습니다.</li>
                     <li>미기록 현황에서 내 코드를 누르면 내 미기록만 모아 볼 수 있습니다.</li>
                     <li>미기록 현황이 중등·고등을 합쳐 선생님별로 보입니다. 위쪽에서 내 코드를 누르거나 검색하면 내 것만 나옵니다.</li>
@@ -3062,6 +3089,23 @@ function syncNavMore() {
 navMoreBtn.addEventListener('click', () => setNavMoreOpen(!navMore.classList.contains('open')));
 document.addEventListener('click', (ev) => { if (!navMore.contains(ev.target)) setNavMoreOpen(false); });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') setNavMoreOpen(false); });
+
+/* 왼쪽 메뉴 접기 (넓은 화면 전용). 접으면 아이콘만 남고, 고른 상태는 이 기기에 기억해 둔다 */
+const navCollapseBtn = document.getElementById('navCollapseBtn');
+function setNavCollapsed(collapsed) {
+    document.documentElement.classList.toggle('nav-collapsed', collapsed);
+    const label = collapsed ? '메뉴 펼치기' : '메뉴 접기';
+    navCollapseBtn.textContent = collapsed ? '»' : '«';
+    navCollapseBtn.title = label;
+    navCollapseBtn.setAttribute('aria-label', label);
+    navCollapseBtn.setAttribute('aria-expanded', String(!collapsed));
+}
+setNavCollapsed(document.documentElement.classList.contains('nav-collapsed'));
+navCollapseBtn.addEventListener('click', () => {
+    const collapsed = !document.documentElement.classList.contains('nav-collapsed');
+    setNavCollapsed(collapsed);
+    try { localStorage.setItem('jeilaca-nav-collapsed', collapsed ? '1' : '0'); } catch (e) { /* 기억만 못 할 뿐 접기는 된다 */ }
+});
 
 /** 아래로 내려가 있는 상태에서 탭을 바꾸면 새 탭의 맨 위부터 보이게 올려 준다 */
 function scrollToTabTop() {
